@@ -1,5 +1,6 @@
 import { View, Text, Button, StyleSheet } from "react-native";
 import React, { useState } from "react";
+import TemplateButton from "../components/TemplateButton";
 
 const Template = () => {
 	// use state hook to set & update a value
@@ -38,8 +39,18 @@ const Template = () => {
 	return (
 		<View style={{ alignItems: "center" }}>
 			<Text style={styles.textContainer}>{count}</Text>
-			<Button title="Increment" onPress={increment} />
-			<Button title="Decrement" onPress={decrement} />
+			{/* use the TemplateButton component and pass the props to it*/}
+			<TemplateButton
+				title="Increment"
+				onPress={increment}
+				style={styles.iBtn}
+			/>
+			<TemplateButton
+				title="Decrement"
+				onPress={decrement}
+				style={styles.dBtn}
+			/>
+			{/* render the tsx component from above */}
 			<UseTsx />
 			<View style={{ margin: 16, alignItems: "center" }}>
 				{/* map over the array and display each letter in a text component */}
@@ -72,5 +83,17 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		color: "green",
 		fontSize: 24,
+	},
+	iBtn: {
+		margin: 16,
+		borderWidth: 3,
+		borderColor: "green",
+		borderRadius: 8,
+	},
+	dBtn: {
+		margin: 16,
+		borderWidth: 3,
+		borderColor: "red",
+		borderRadius: 8,
 	},
 });
