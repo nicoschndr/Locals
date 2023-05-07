@@ -57,17 +57,17 @@ export default function App() {
 					tabBarLabelStyle: {
 						fontSize: 12,
 					},
-					tabBarStyle: {
-						paddingTop: 5,
-					},
-				})}
-				tabBarOptions={{
 					activeTintColor: 'blue',
 					inactiveTintColor: 'gray',
-					tabBarItemStyle: ({ focused }) => ({
-						marginTop: focused ? -5 : 0,
-					}),
-				}}
+					"tabBarStyle": [
+						{
+							"display": "flex",
+							"paddingTop": 5,
+						},
+						null
+					]
+				})}
+
 			>
 				<Tab.Screen name="Home" component={HomeScreen} />
 				<Tab.Screen name="Template" component={Template} />
