@@ -1,12 +1,3 @@
-// // create a function component based on 				<TextInput
-// 					placeholder="Email"
-// 					autoFocus
-// 					inputMode="email"
-// 					value={email}
-// 					onChangeText={(text) => setEmail(text)}
-// 					style={styles.email}
-// 				/>
-
 import {
 	View,
 	Text,

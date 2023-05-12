@@ -31,12 +31,14 @@ const styles = StyleSheet.create({
 	primary: {
 		backgroundColor: "#ec404b",
 		borderRadius: 10,
-		padding: 15,
+		paddingVertical: 5,
+		paddingHorizontal: 10,
 	},
 	secondary: {
 		backgroundColor: "#fff",
 		borderRadius: 10,
-		padding: 15,
+		paddingVertical: 5,
+		paddingHorizontal: 10,
 	},
 });
 

@@ -16,6 +16,7 @@ import LiveMap from "./screens/LiveMap";
 import Settings from "./screens/Settings";
 import NewPost from "./screens/NewPost";
 import Login from "./screens/Auth/Login";
+import Register from "./screens/Auth/Register";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -32,12 +33,12 @@ export default function App() {
 							iconName = focused ? "home" : "home-outline";
 						}
 						//NEW POST ICON
-						if (route.name === "NewPost") {
-							iconName = focused ? "add" : "add-outline";
+						if (route.name === "Register") {
+							iconName = focused ? "create" : "create-outline";
 						}
 						//LIVE MAP ICON
 						if (route.name === "Login") {
-							iconName = focused ? "map" : "map-outline";
+							iconName = focused ? "log-in" : "log-in-outline";
 						}
 						//SETTINGS ICON
 						if (route.name === "Settings") {
@@ -69,7 +70,7 @@ export default function App() {
 				})}
 			>
 				<Tab.Screen name="Home" component={Template} />
-				<Tab.Screen name="NewPost" component={NewPost} />
+				<Tab.Screen name="Register" component={Register} />
 				{/* <Tab.Screen name="LiveMap" component={LiveMap} /> */}
 				<Tab.Screen name="Login" component={Login} />
 				<Tab.Screen name="Settings" component={Settings} />
