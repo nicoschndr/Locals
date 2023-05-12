@@ -1,6 +1,6 @@
 import { View, Text, Button, StyleSheet } from "react-native";
 import React, { useState } from "react";
-import TemplateButton from "../components/TemplateButton";
+import LocalsButton from "../components/LocalsButton";
 
 const Template = () => {
 	// use state hook to set & update a value
@@ -40,15 +40,12 @@ const Template = () => {
 		<View style={{ alignItems: "center" }}>
 			<Text style={styles.textContainer}>{count}</Text>
 			{/* use the TemplateButton component and pass the props to it*/}
-			<TemplateButton
-				title="Increment"
-				onPress={increment}
-				style={styles.iBtn}
-			/>
-			<TemplateButton
+			<LocalsButton title="Increment" onPress={increment} style={styles.iBtn} />
+			<LocalsButton
 				title="Decrement"
 				onPress={decrement}
 				style={styles.dBtn}
+				variant="secondary"
 			/>
 			{/* render the tsx component from above */}
 			<UseTsx />
@@ -86,14 +83,8 @@ const styles = StyleSheet.create({
 	},
 	iBtn: {
 		margin: 16,
-		borderWidth: 3,
-		borderColor: "green",
-		borderRadius: 8,
 	},
 	dBtn: {
 		margin: 16,
-		borderWidth: 3,
-		borderColor: "red",
-		borderRadius: 8,
 	},
 });
