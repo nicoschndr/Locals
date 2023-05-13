@@ -10,7 +10,7 @@ const Template = () => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.titleBar}>
+                <View style={[styles.titleBar, {marginTop: windowHeight * 0.05}]}>
                     <Ionicons style={{marginLeft: windowWidth - 50}} name={"reorder-three-outline"} size={40}> </Ionicons>
                 </View>
 
@@ -26,12 +26,12 @@ const Template = () => {
                     </View>
                 </View>
 
-                <View style={styles.infoContainer}>
+                <View style={[styles.infoContainer, {marginTop: windowHeight*0.01}]}>
                     <Text style={[styles.text, {fontWeight: "200", fontSize: 36}]}>Nico Schneider</Text>
                     <Text style={[styles.text, {fontWeight: "200", fontSize: 14}]}>Locals</Text>
                 </View>
 
-                <View style={styles.statsContainer}>
+                <View style={[styles.statsContainer, {marginTop: windowHeight*0.05}]}>
                     <View style={styles.statsBox}>
                         <Text>Events</Text>
                         <Text>0</Text>
@@ -46,30 +46,31 @@ const Template = () => {
                     </View>
                 </View>
 
-                <View style={{marginTop: 32}}>
-                    <ScrollView horizontal={true} showsVerticalScrollIndicator={false}>
+                <View style={{marginTop: windowHeight*0.05}}>
+                    <ScrollView horizontal={true} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
                         <View style={styles.mediaImageContainer}>
-                            <Image source={require("../assets/Profil_Test.jpg")} style={styles.image} resizeMode="center"></Image>
+                            <Image source={require("../assets/sunrise.jpg")} style={styles.image} resizeMode="center"></Image>
+                            <View style={styles.Test}></View>
+                            <Text style={styles.imageText}>Test: AutoRefresh</Text>
                         </View>
                         <View style={styles.mediaImageContainer}>
-                            <Image source={require("../assets/Profil_Test.jpg")} style={styles.image} resizeMode="center"></Image>
+                            <Image source={require("../assets/building.jpg")} style={styles.image} resizeMode="center"></Image>
+                            <View style={styles.Test}></View>
+                            <Text style={styles.imageText}>Test Geopoint</Text>
                         </View>
                         <View style={styles.mediaImageContainer}>
-                            <Image source={require("../assets/Profil_Test.jpg")} style={styles.image} resizeMode="center"></Image>
+                            <Image source={require("../assets/concert.jpg")} style={styles.image} resizeMode="center"></Image>
+                            <View style={styles.Test}></View>
+                            <Text style={styles.imageText}>Test</Text>
                         </View>
-                        <View style={styles.mediaImageContainer}>
-                            <Image source={require("../assets/Profil_Test.jpg")} style={styles.image} resizeMode="center"></Image>
-                        </View>
-                        <View style={styles.mediaImageContainer}>
-                            <Image source={require("../assets/Profil_Test.jpg")} style={styles.image} resizeMode="center"></Image>
-                        </View>
+
                     </ScrollView>
-                        <Text style={[styles.text, styles.recent]}>
+                        <Text style={[styles.text, styles.recent, {marginLeft: windowWidth*0.15, marginTop: windowHeight*0.05}]}>
                             Recent Activity
                         </Text>
 
 
-                        <View style={styles.recentItem}>
+                        <View style={[styles.recentItem,{marginBottom: windowHeight*0.02, marginLeft: windowWidth*0.15}]}>
                             <View style={styles.recentItemIndicator}></View>
                             <View>
                                 <Text>
@@ -98,13 +99,13 @@ const styles = StyleSheet.create({
     },
     image: {
         flex: 1,
-        width: undefined,
-        height: undefined
+        width: 200,
+        height: 200,
+        borderRadius: 30
     },
     titleBar: {
         flexDirection: "row",
         justifyContent: "flex-end",
-        marginTop: 50,
     },
     profileImage: {
         width: 200,
@@ -132,12 +133,10 @@ const styles = StyleSheet.create({
     infoContainer: {
         alignSelf:"center",
         alignItems:"center",
-        marginTop: 16
     },
     statsContainer: {
         flexDirection: "row",
         alignSelf: "center",
-        marginTop: 32
     },
     statsBox: {
         alignItems: "center",
@@ -146,15 +145,13 @@ const styles = StyleSheet.create({
     mediaImageContainer: {
         width: 200,
         height: 200,
-        borderRadius: 12,
+        borderRadius: 40,
         overflow: "hidden",
         marginHorizontal: 12
     },
     recentItem: {
         flexDirection: "row",
         alignItems: "flex-start",
-        marginBottom: 16,
-        marginLeft: 98
     },
     recentItemIndicator: {
         backgroundColor: "#000000",
@@ -166,9 +163,23 @@ const styles = StyleSheet.create({
         marginRight: 20
     },
     recent:{
-        marginLeft: 98,
-        marginTop: 32,
         marginBottom: 6,
         fontSize: 10
+    },
+    Test:{
+        backgroundColor: "#999999",
+        borderBottomLeftRadius:30,
+        borderBottomRightRadius: 30,
+        marginTop: -50,
+        height: 50,
+        opacity: 0.2
+    },
+    imageText: {
+        color: "#FFFFFF",
+        alignSelf: "center",
+        textAlign: "center",
+        fontSize: 20,
+        marginTop: -53,
+        width: 200,
     }
 });
