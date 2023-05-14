@@ -1,8 +1,8 @@
-import {View, Image, Text, Button, StyleSheet, Dimensions, SafeAreaView, ScrollView} from "react-native";
-import React, { useState } from "react";
+import {View, Image, Text, StyleSheet, Dimensions, SafeAreaView, ScrollView} from "react-native";
+import React from "react";
 import{Ionicons, MaterialIcons} from "@expo/vector-icons";
 
-const Template = () => {
+const Template = ({navigation}) => {
 
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
@@ -22,7 +22,7 @@ const Template = () => {
                         <MaterialIcons name={"chat"} size={20} color={"#FFFFFF"}></MaterialIcons>
                     </View>
                     <View style={styles.add}>
-                        <MaterialIcons name={"add"} size={60} color={"#FFFFFF"}></MaterialIcons>
+                        <MaterialIcons onPress={() => navigation.navigate('NewPost')} name={"add"} size={60} color={"#FFFFFF"}></MaterialIcons>
                     </View>
                 </View>
 
