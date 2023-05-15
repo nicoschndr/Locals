@@ -8,7 +8,7 @@ import {
     Image,
     TextInput,
     Button,
-    Pressable
+    Pressable, TouchableOpacity
 } from "react-native";
 import React, {useState} from "react";
 import {Ionicons} from "@expo/vector-icons";
@@ -31,14 +31,14 @@ const Template = ({navigation}) => {
         setDatePicker(false)
     }
 
-
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={[styles.titleBar, {marginTop: windowHeight * 0.05}]}>
-                    <Ionicons style={{marginRight: windowWidth - 90}} onPress={() => navigation.navigate('Profile')}
-                              name={"arrow-back-circle-outline"} size={40}> </Ionicons>
-                </View>
+                <TouchableOpacity style={[styles.titleBar, {marginTop: windowHeight * 0.05}]} onPress={() => navigation.goBack()}>
+                    <Ionicons style={{marginRight: windowWidth - 90}}
+                              name={"arrow-back-circle-outline"} size={40}
+                    > </Ionicons>
+                </TouchableOpacity>
 
                 <View style={{alignSelf: "center"}}>
                     <View style={styles.postImage}>

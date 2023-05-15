@@ -1,4 +1,4 @@
-import {View, Image, Text, StyleSheet, Dimensions, SafeAreaView, ScrollView} from "react-native";
+import {View, Image, Text, StyleSheet, Dimensions, SafeAreaView, ScrollView, TouchableOpacity} from "react-native";
 import React from "react";
 import{Ionicons, MaterialIcons} from "@expo/vector-icons";
 
@@ -10,20 +10,20 @@ const Template = ({navigation}) => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={[styles.titleBar, {marginTop: windowHeight * 0.05}]}>
+                <TouchableOpacity style={[styles.titleBar, {marginTop: windowHeight * 0.05}]} onPress={navigation.openDrawer}>
                     <Ionicons style={{marginLeft: windowWidth - 50}} name={"reorder-three-outline"} size={40}> </Ionicons>
-                </View>
+                </TouchableOpacity>
 
                 <View style={{alignSelf: "center"}}>
                     <View style={styles.profileImage}>
                         <Image source={require("../assets/Profil_Test.jpg")} style={styles.image} resizeMode="center"></Image>
                     </View>
-                    <View style={styles.chat}>
+                    <TouchableOpacity style={styles.chat}>
                         <MaterialIcons name={"chat"} size={20} color={"#FFFFFF"}></MaterialIcons>
-                    </View>
-                    <View style={styles.add}>
-                        <MaterialIcons onPress={() => navigation.navigate('NewPost')} name={"add"} size={60} color={"#FFFFFF"}></MaterialIcons>
-                    </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.add} onPress={() => navigation.navigate('NewPost')}>
+                        <MaterialIcons name={"add"} size={60} color={"#FFFFFF"}></MaterialIcons>
+                    </TouchableOpacity>
                 </View>
 
                 <View style={[styles.infoContainer, {marginTop: windowHeight*0.01}]}>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     text: {
-        color: "#5257SD"
+        color: "#000000"
     },
     image: {
         flex: 1,
