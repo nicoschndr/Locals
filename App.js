@@ -1,4 +1,4 @@
-import {StyleSheet} from "react-native";
+import {Dimensions, StyleSheet} from "react-native";
 import {createDrawerNavigator} from "@react-navigation/drawer";
 import {NavigationContainer} from "@react-navigation/native";
 import newPost from "./screens/NewPost";
@@ -7,11 +7,12 @@ import Sidebar from "./components/Sidebar";
 import {Feather} from "@expo/vector-icons";
 
 const Drawer = createDrawerNavigator();
+const deviceWidth = Dimensions.get("window").width
 
 export default function App() {
     return (
         <NavigationContainer>
-            <Drawer.Navigator screenOptions={{headerShown: false}} drawerContent={props => <Sidebar {...props}/>}>
+            <Drawer.Navigator screenOptions={{headerShown: false, drawerStyle: {width: deviceWidth*0.8}}} drawerContent={props => <Sidebar {...props}/>}>
                 <Drawer.Screen
                     name="Profile"
                     component={Profile}
