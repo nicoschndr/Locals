@@ -1,15 +1,20 @@
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
-import { Button, Image, View, Platform, StyleSheet, Text } from "react-native";
+import { Image, View, StyleSheet, ViewStyle, StyleProp } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import LocalsButton from "./LocalsButton";
+import { Ionicons } from "@expo/vector-icons";
 
 export interface LocalsImagePickerProps {
 	onImageTaken: (imageUri: string) => void;
+	imageSize?: "small" | "medium" | "large";
+	style?: StyleProp<ViewStyle>;
 }
 
 const LocalsImagePicker: React.FC<LocalsImagePickerProps> = ({
 	onImageTaken,
+	imageSize = "medium",
+	style,
 }) => {
 	const [pickedImage, setPickedImage] = useState("");
 
@@ -36,23 +41,37 @@ const LocalsImagePicker: React.FC<LocalsImagePickerProps> = ({
 		onImageTaken(image.assets[0].uri);
 	};
 
+	// variant small = 100x100, medium = 200x200, large = 300x300
+
 	return (
-		<View style={styles.imagePicker}>
-			{pickedImage && (
-				<Image style={styles.image} source={{ uri: pickedImage }} />
-			)}
-			{!pickedImage ? (
-				<LocalsButton title="Take Image" onPress={takeImageHandler} />
+		<View style={[styles.imagePicker, style]}>
+			{pickedImage ? (
+				<TouchableOpacity
+					onPress={takeImageHandler}
+					style={styles.buttonContainer}
+				>
+					<Image style={styles.image} source={{ uri: pickedImage }} />
+					{/* edit button icon over the image */}
+					<View
+						style={{
+							position: "absolute",
+						}}
+					>
+						<Ionicons name="create-outline" size={24} color="#fff" />
+					</View>
+				</TouchableOpacity>
 			) : (
-				<View style={styles.buttonContainer}>
-					<LocalsButton title="Change Image" onPress={takeImageHandler} />
-					<LocalsButton
-						title="Remove Image"
-						onPress={() => setPickedImage("")}
-						style={{ marginLeft: 10 }}
-						variant="secondary"
+				<TouchableOpacity
+					onPress={takeImageHandler}
+					style={styles.buttonContainer}
+				>
+					<Ionicons
+						name="camera-outline"
+						size={48}
+						color="#fff"
+						style={styles.icon}
 					/>
-				</View>
+				</TouchableOpacity>
 			)}
 		</View>
 	);
@@ -64,15 +83,24 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: "row",
 		marginTop: 10,
+		borderRadius: 100,
+		width: "100%",
+		height: 150,
+		aspectRatio: 1,
+		backgroundColor: "#ccc",
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	imagePicker: {
 		alignItems: "center",
 		marginVertical: 10,
 	},
+	icon: {
+		alignSelf: "center",
+	},
 	image: {
-		marginTop: 10,
-		borderRadius: 10,
+		borderRadius: 100,
 		width: "100%",
-		height: 200,
+		height: 150,
 	},
 });

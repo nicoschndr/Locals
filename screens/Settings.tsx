@@ -1,12 +1,25 @@
 import { View, Text, Button, StyleSheet } from "react-native";
 import React, { useState } from "react";
+import { auth } from "../firebase";
+import LocalsButton from "../components/LocalsButton";
+import { useNavigation } from "@react-navigation/native";
 
 const Template = () => {
+	const navigation = useNavigation();
+	const logout = () => {
+		auth
+			.signOut()
+			.then(() => {
+				alert("Logged out!");
+			})
+			.then(() => {
+				navigation.navigate("Home");
+			});
+	};
 
-	// render related stuff is displayed here after the return statement
 	return (
-		<View>
-			<Text>Settings Screen</Text>
+		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+			<LocalsButton title="Sign Out" onPress={logout} />
 		</View>
 	);
 };
