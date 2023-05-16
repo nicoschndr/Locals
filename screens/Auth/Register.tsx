@@ -10,8 +10,7 @@ import React, { useState } from "react";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsButton from "../../components/LocalsButton";
-import { auth, firestore } from "../../firebase";
-import firebase from "firebase/compat/app";
+import { auth, firestore, firebase } from "../../firebase";
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView } from "react-native-gesture-handler";
 
@@ -32,65 +31,64 @@ const Register = () => {
 
 	// upload image to firebase storage and return the image url
 	const uploadImage = async () => {
-		const uri = imageUri;
-		const response = await fetch(uri);
-		const blob = await response.blob();
-		const filename = uri.substring(uri.lastIndexOf("/") + 1);
-
-		const storageRef = firebase.storage().ref(`images/${filename}`);
-		const task = storageRef.put(blob);
-
-		// set uploading to true
-		setUploading(true);
-
-		// set progress state
-		task.on("state_changed", (snapshot) => {
-			setTransferred(
-				Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 10000
-			);
+		const blob = await new Promise((resolve, reject) => {
+			const xhr = new XMLHttpRequest();
+			xhr.onload = function () {
+				resolve(xhr.response);
+			};
+			xhr.onerror = function () {
+				reject(new TypeError("Network request failed"));
+			};
+			xhr.responseType = "blob";
+			xhr.open("GET", imageUrl, true);
+			xhr.send(null);
 		});
-
-		try {
-			await task;
-
-			const url = await storageRef.getDownloadURL();
-
-			setImageUrl(url);
-			setUploading(false);
-			alert("Image uploaded successfully");
-		} catch (e) {
-			console.log(e);
-			return null;
-		}
+		const ref = firebase.storage().ref().child(`Pictures/Image1`);
+		const snapshot = ref.put(blob);
+		snapshot.on(
+			firebase.storage.TaskEvent.STATE_CHANGED,
+			() => {
+				setUploading(true);
+			},
+			(error) => {
+				setUploading(false);
+				console.log(error);
+				blob.close();
+				return;
+			},
+			() => {
+				snapshot.snapshot.ref.getDownloadURL().then((url) => {
+					setUploading(false);
+					console.log("Download URL: ", url);
+					setImageUrl(url);
+					blob.close();
+					return url;
+				});
+			}
+		);
 	};
 
 	const register = () => {
-		auth
-			.createUserWithEmailAndPassword(email, password)
-			// await uploadImage();
-			.then(() => {
-				uploadImage();
-			})
-			.then(() => {
-				firestore
-					.collection("users")
-					.doc(auth.currentUser?.uid)
-					.set({
-						email: email,
-						firstName: firstName,
-						lastName: lastName,
-						age: age,
-						mobile: mobile,
-						address: address,
-						imageUri: imageUri,
-					})
-					.then(() => {
-						// setEmail("");
-						// setPassword("");
-						alert("Account created successfully");
-						navigation.navigate("Home");
-					});
-			});
+		auth.createUserWithEmailAndPassword(email, password).then(() => {
+			firestore
+				.collection("users")
+				.doc(auth.currentUser?.uid)
+				.set({
+					email: email,
+					firstName: firstName,
+					lastName: lastName,
+					age: age,
+					mobile: mobile,
+					address: address,
+					imageUrl: imageUrl,
+				})
+				.then(() => {
+					// setEmail("");
+					// setPassword("");
+					alert("Account created successfully");
+					navigation.navigate("Home");
+				});
+		});
 	};
 
 	// create a new register function and await uploadImage() before firestore
@@ -179,7 +177,7 @@ const Register = () => {
 				/>
 				<LocalsButton
 					title="Register"
-					onPress={register}
+					onPress={uploadImage}
 					style={styles.loginBtn}
 				/>
 			</View>
