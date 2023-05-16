@@ -1,6 +1,6 @@
 import { View, Text, Button, StyleSheet } from "react-native";
 import React, { useState } from "react";
-import LocalsButton from "../components/LocalsButton";
+import LocalsButton from "../../components/LocalsButton";
 
 const Template = () => {
 	// use state hook to set & update a value
