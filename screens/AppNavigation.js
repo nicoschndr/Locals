@@ -12,6 +12,7 @@ import Settings from "./appScreens/Settings";
 import NewPost from "./appScreens/NewPost";
 import Login from "./Auth/Login";
 import Register from "./Auth/Register";
+import Profile from "../screens/Profile";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -43,6 +44,10 @@ function AppNavigation() {
 						if (route.name === "Register") {
 							iconName = focused ? "person-add" : "person-add-outline";
 						}
+						// PROFILE ICON
+						if (route.name === "Profile") {
+							iconName = focused ? "person" : "person-outline";
+						}
 						// SETTINGS ICON
 						if (route.name === "Settings") {
 							iconName = focused ? "settings" : "settings-outline";
@@ -61,6 +66,7 @@ function AppNavigation() {
 					tabBarLabelStyle: {
 						fontSize: 12,
 					},
+					headerShown: false,
 					activeTintColor: "blue",
 					inactiveTintColor: "gray",
 					tabBarStyle: [
@@ -77,6 +83,7 @@ function AppNavigation() {
 				<Tab.Screen name="LiveMap" component={LiveMap} />
 				<Tab.Screen name="Login" component={Login} />
 				<Tab.Screen name="Register" component={Register} />
+				<Tab.Screen name="Profile" component={Profile} />
 				<Tab.Screen name="Settings" component={Settings} />
 			</Tab.Navigator>
 		</NavigationContainer>
