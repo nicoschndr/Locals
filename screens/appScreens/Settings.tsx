@@ -1,7 +1,7 @@
 import { View, Text, Button, StyleSheet } from "react-native";
 import React, { useState } from "react";
-import { auth } from "../firebase";
-import LocalsButton from "../components/LocalsButton";
+import { auth } from "../../firebase";
+import LocalsButton from "../../components/LocalsButton";
 import { useNavigation } from "@react-navigation/native";
 
 const Template = () => {
