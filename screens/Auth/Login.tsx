@@ -8,11 +8,9 @@ import LocalsButton from "../../components/LocalsButton";
 import { auth } from "../../firebase";
 import { useNavigation } from "@react-navigation/native";
 
-const Login = () => {
+const Login = ({navigation}) => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-
-	const navigation = useNavigation();
 
 	const login = () => {
 		auth

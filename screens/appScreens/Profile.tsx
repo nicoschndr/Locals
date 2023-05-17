@@ -34,7 +34,7 @@ const Template = ({ navigation }) => {
 				<View style={{ alignSelf: "center" }}>
 					<View style={styles.profileImage}>
 						<Image
-							source={require("../assets/Profil_Test.jpg")}
+							source={require("../../assets/Profil_Test.jpg")}
 							style={styles.image}
 							resizeMode="center"
 						></Image>
@@ -103,7 +103,7 @@ const Template = ({ navigation }) => {
 					>
 						<View style={styles.mediaImageContainer}>
 							<Image
-								source={require("../assets/sunrise.jpg")}
+								source={require("../../assets/sunrise.jpg")}
 								style={styles.image}
 								resizeMode="center"
 							></Image>
@@ -112,7 +112,7 @@ const Template = ({ navigation }) => {
 						</View>
 						<View style={styles.mediaImageContainer}>
 							<Image
-								source={require("../assets/building.jpg")}
+								source={require("../../assets/building.jpg")}
 								style={styles.image}
 								resizeMode="center"
 							></Image>
@@ -121,7 +121,7 @@ const Template = ({ navigation }) => {
 						</View>
 						<View style={styles.mediaImageContainer}>
 							<Image
-								source={require("../assets/concert.jpg")}
+								source={require("../../assets/concert.jpg")}
 								style={styles.image}
 								resizeMode="center"
 							></Image>

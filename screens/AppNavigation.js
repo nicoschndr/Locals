@@ -12,7 +12,7 @@ import Settings from "./appScreens/Settings";
 import NewPost from "./appScreens/NewPost";
 import Login from "./Auth/Login";
 import Register from "./Auth/Register";
-import Profile from "../screens/Profile";
+import Profile from "./appScreens/Profile";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();

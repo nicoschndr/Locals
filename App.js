@@ -5,7 +5,7 @@ import Settings from "./screens/appScreens/Settings";
 import NewPost from "./screens/appScreens/NewPost";
 import Login from "./screens/Auth/Login";
 import Register from "./screens/Auth/Register";
-import Profile from "./screens/Profile";
+import Profile from "./screens/appScreens/Profile";
 import {Dimensions, StyleSheet, Text, View} from "react-native";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {Feather, Ionicons} from "@expo/vector-icons";

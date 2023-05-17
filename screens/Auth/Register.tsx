@@ -15,7 +15,7 @@ import firebase from "firebase/compat/app";
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView } from "react-native-gesture-handler";
 
-const Register = () => {
+const Register = ({navigation}) => {
 	const [email, setEmail] = useState("");
 	const [imageUri, setImageUri] = useState("");
 	const [imageUrl, setImageUrl] = useState("");
@@ -28,7 +28,6 @@ const Register = () => {
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
 
-	const navigation = useNavigation();
 
 	// upload image to firebase storage and return the image url
 	const uploadImage = async () => {
