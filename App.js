@@ -92,7 +92,7 @@ const deviceWidth = Dimensions.get('window').width;
 export default function App() {
     return (
         <NavigationContainer>
-            <Drawer.Navigator screenOptions={{headerShown: false, drawerStyle: {width: deviceWidth * 0.8}}}
+            <Drawer.Navigator initialRouteName='Home' screenOptions={{headerShown: false, drawerStyle: {width: deviceWidth * 0.8}, swipeEdgeWidth: 0}}
                               drawerContent={props => <Sidebar {...props}/>}>
                 <Drawer.Screen
                     name="Tab"
