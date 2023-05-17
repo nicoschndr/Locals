@@ -84,6 +84,7 @@ const Register = ({navigation}) => {
 						imageUri: imageUri,
 					})
 					.then(() => {
+						auth.currentUser.updateProfile({displayName: firstName + " " + lastName})
 						// setEmail("");
 						// setPassword("");
 						alert("Account created successfully");
