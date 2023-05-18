@@ -10,9 +10,11 @@ import React, { useState } from "react";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsButton from "../../components/LocalsButton";
-import { auth, firestore, firebase } from "../../firebase";
+import { auth, firestore, storage } from "../../firebase";
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView } from "react-native-gesture-handler";
+import { uploadBytes } from "firebase/storage";
+import { getDownloadURL } from "firebase/storage";
 
 const Register = () => {
 	const [email, setEmail] = useState("");
@@ -30,45 +32,21 @@ const Register = () => {
 	const navigation = useNavigation();
 
 	// upload image to firebase storage and return the image url
-	const uploadImage = async () => {
-		const blob = await new Promise((resolve, reject) => {
-			const xhr = new XMLHttpRequest();
-			xhr.onload = function () {
-				resolve(xhr.response);
-			};
-			xhr.onerror = function () {
-				reject(new TypeError("Network request failed"));
-			};
-			xhr.responseType = "blob";
-			xhr.open("GET", imageUrl, true);
-			xhr.send(null);
-		});
-		const ref = firebase.storage().ref().child(`Pictures/Image1`);
-		const snapshot = ref.put(blob);
-		snapshot.on(
-			firebase.storage.TaskEvent.STATE_CHANGED,
-			() => {
-				setUploading(true);
-			},
-			(error) => {
-				setUploading(false);
-				console.log(error);
-				blob.close();
-				return;
-			},
-			() => {
-				snapshot.snapshot.ref.getDownloadURL().then((url) => {
-					setUploading(false);
-					console.log("Download URL: ", url);
-					setImageUrl(url);
-					blob.close();
-					return url;
-				});
-			}
-		);
-	};
+	const uploadImage = async (uri) => {
+		const response = await fetch(uri);
+		const blob = await response.blob();
 
-	const register = () => {
+		let filename = new Date().getTime().toString();
+		var ref = storage.ref().child("Images/user" + filename);
+		const snapshot = await ref.put(blob);
+
+		// Get the download URL after upload completes
+		const url = await snapshot.ref.getDownloadURL();
+		return url;
+	};
+	const register = async () => {
+		const imageUrl = await uploadImage(imageUri);
+
 		auth.createUserWithEmailAndPassword(email, password).then(() => {
 			firestore
 				.collection("users")
@@ -83,38 +61,11 @@ const Register = () => {
 					imageUrl: imageUrl,
 				})
 				.then(() => {
-					// setEmail("");
-					// setPassword("");
 					alert("Account created successfully");
 					navigation.navigate("Home");
 				});
 		});
 	};
-
-	// create a new register function and await uploadImage() before firestore
-	// const register = async () => {
-	// 	await uploadImage();
-	// 	auth.createUserWithEmailAndPassword(email, password).then(() => {
-	// 		firestore
-	// 			.collection("users")
-	// 			.doc(auth.currentUser?.uid)
-	// 			.set({
-	// 				email: email,
-	// 				firstName: firstName,
-	// 				lastName: lastName,
-	// 				age: age,
-	// 				mobile: mobile,
-	// 				address: address,
-	// 				imageUrl: imageUrl,
-	// 			})
-	// 			.then(() => {
-	// 				// setEmail("");
-	// 				// setPassword("");
-	// 				alert("Account created successfully");
-	// 				// navigation.navigate("Home");
-	// 			});
-	// 	});
-	// };
 
 	return (
 		// <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -177,7 +128,7 @@ const Register = () => {
 				/>
 				<LocalsButton
 					title="Register"
-					onPress={uploadImage}
+					onPress={register}
 					style={styles.loginBtn}
 				/>
 			</View>
