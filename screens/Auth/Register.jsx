@@ -33,11 +33,11 @@ const Register = () => {
 
 	// upload image to firebase storage and return the image url
 	const uploadImage = async (uri) => {
+		setUploading(true);
 		const response = await fetch(uri);
 		const blob = await response.blob();
 
-		// let filename = new Date().getTime().toString();
-		let filename = auth.currentUser?.uid;
+		let filename = new Date().getTime().toString();
 		var ref = storage.ref().child("Images/user/" + filename);
 		const snapshot = await ref.put(blob);
 
@@ -62,6 +62,7 @@ const Register = () => {
 					imageUrl: imageUrl,
 				})
 				.then(() => {
+					setUploading(false);
 					alert("Account created successfully");
 					navigation.navigate("Home");
 				});
@@ -69,8 +70,7 @@ const Register = () => {
 	};
 
 	return (
-		// <KeyboardAvoidingView style={styles.container} behavior="padding">
-		<ScrollView contentContainerStyle={styles.container}>
+		<KeyboardAvoidingView style={styles.container} behavior="padding">
 			<View style={styles.inputContainer}>
 				<LocalsImagePicker
 					onImageTaken={(uri) => setImageUri(uri)}
@@ -127,13 +127,15 @@ const Register = () => {
 					onChangeText={(address) => setAddress(address)}
 					style={styles.password}
 				/>
-				<LocalsButton
-					title="Register"
-					onPress={register}
-					style={styles.loginBtn}
-				/>
+				{!uploading && (
+					<LocalsButton
+						title="Register"
+						onPress={register}
+						style={styles.loginBtn}
+					/>
+				)}
 			</View>
-		</ScrollView>
+		</KeyboardAvoidingView>
 	);
 };
 
