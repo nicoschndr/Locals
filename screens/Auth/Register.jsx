@@ -59,6 +59,7 @@ const Register = () => {
 					mobile: mobile,
 					address: address,
 					imageUrl: imageUrl,
+					userId: auth.currentUser?.uid,
 				})
 				.then(() => {
 					alert("Account created successfully");
@@ -68,8 +69,8 @@ const Register = () => {
 	};
 
 	return (
-		// <KeyboardAvoidingView style={styles.container} behavior="padding">
-		<ScrollView contentContainerStyle={styles.container}>
+		<KeyboardAvoidingView style={styles.container} behavior="padding">
+			{/* <ScrollView contentContainerStyle={styles.container}> */}
 			<View style={styles.inputContainer}>
 				<LocalsImagePicker
 					onImageTaken={(uri) => setImageUri(uri)}
@@ -132,7 +133,7 @@ const Register = () => {
 					style={styles.loginBtn}
 				/>
 			</View>
-		</ScrollView>
+		</KeyboardAvoidingView>
 	);
 };
 
