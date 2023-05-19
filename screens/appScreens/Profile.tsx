@@ -6,16 +6,37 @@ import {
 	Dimensions,
 	SafeAreaView,
 	ScrollView,
-	TouchableOpacity,
+	TouchableOpacity, Button,
 } from "react-native";
 import React from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import LocalsButton from "../../components/LocalsButton";
+
+
 
 const Template = ({ navigation }) => {
+	const goToFriendList = () => {
+		navigation.navigate('FriendList');
+	};
+
+	React.useLayoutEffect(() => {
+		navigation.setOptions({
+			headerRight: () => (
+				<TouchableOpacity onPress={goToFriendList}>
+					<Ionicons
+						name={"people"}
+						size={25}
+						style={{ marginRight: 15 }}
+					/>
+				</TouchableOpacity>			),
+		});
+	}, [navigation]);
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 
 	return (
+
+
 		<SafeAreaView style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<TouchableOpacity
@@ -34,7 +55,7 @@ const Template = ({ navigation }) => {
 				<View style={{ alignSelf: "center" }}>
 					<View style={styles.profileImage}>
 						<Image
-							source={require("../assets/Profil_Test.jpg")}
+							source={require("../../assets/Profil_Test.jpg")}
 							style={styles.image}
 							resizeMode="center"
 						></Image>
@@ -103,7 +124,7 @@ const Template = ({ navigation }) => {
 					>
 						<View style={styles.mediaImageContainer}>
 							<Image
-								source={require("../assets/sunrise.jpg")}
+								source={require("../../assets/sunrise.jpg")}
 								style={styles.image}
 								resizeMode="center"
 							></Image>
@@ -112,7 +133,7 @@ const Template = ({ navigation }) => {
 						</View>
 						<View style={styles.mediaImageContainer}>
 							<Image
-								source={require("../assets/building.jpg")}
+								source={require("../../assets/building.jpg")}
 								style={styles.image}
 								resizeMode="center"
 							></Image>
@@ -121,7 +142,7 @@ const Template = ({ navigation }) => {
 						</View>
 						<View style={styles.mediaImageContainer}>
 							<Image
-								source={require("../assets/concert.jpg")}
+								source={require("../../assets/concert.jpg")}
 								style={styles.image}
 								resizeMode="center"
 							></Image>
