@@ -10,12 +10,13 @@ import React, { useState } from "react";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsButton from "../../components/LocalsButton";
-import { auth, firestore } from "../../firebase";
-import firebase from "firebase/compat/app";
+import { auth, firestore, storage } from "../../firebase";
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView } from "react-native-gesture-handler";
+import { uploadBytes } from "firebase/storage";
+import { getDownloadURL } from "firebase/storage";
 
-const Register = ({navigation}) => {
+const Register = ({ navigation }) => {
 	const [email, setEmail] = useState("");
 	const [imageUri, setImageUri] = useState("");
 	const [imageUrl, setImageUrl] = useState("");
@@ -28,99 +29,46 @@ const Register = ({navigation}) => {
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
 
-
 	// upload image to firebase storage and return the image url
-	const uploadImage = async () => {
-		const uri = imageUri;
+	const uploadImage = async (uri) => {
+		setUploading(true);
 		const response = await fetch(uri);
 		const blob = await response.blob();
-		const filename = uri.substring(uri.lastIndexOf("/") + 1);
 
-		const storageRef = firebase.storage().ref(`images/${filename}`);
-		const task = storageRef.put(blob);
+		let filename = new Date().getTime().toString();
+		var ref = storage.ref().child("Images/user/" + filename);
+		const snapshot = await ref.put(blob);
 
-		// set uploading to true
-		setUploading(true);
+		// Get the download URL after upload completes
+		const url = await snapshot.ref.getDownloadURL();
+		return url;
+	};
+	const register = async () => {
+		const imageUrl = await uploadImage(imageUri);
 
-		// set progress state
-		task.on("state_changed", (snapshot) => {
-			setTransferred(
-				Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 10000
-			);
+		auth.createUserWithEmailAndPassword(email, password).then(() => {
+			firestore
+				.collection("users")
+				.doc(auth.currentUser?.uid)
+				.set({
+					email: email,
+					firstName: firstName,
+					lastName: lastName,
+					age: age,
+					mobile: mobile,
+					address: address,
+					imageUrl: imageUrl,
+				})
+				.then(() => {
+					setUploading(false);
+					alert("Account created successfully");
+					navigation.navigate("Home");
+				});
 		});
-
-		try {
-			await task;
-
-			const url = await storageRef.getDownloadURL();
-
-			setImageUrl(url);
-			setUploading(false);
-			alert("Image uploaded successfully");
-		} catch (e) {
-			console.log(e);
-			return null;
-		}
 	};
-
-	const register = () => {
-		auth
-			.createUserWithEmailAndPassword(email, password)
-			// await uploadImage();
-			.then(() => {
-				uploadImage();
-			})
-			.then(() => {
-				firestore
-					.collection("users")
-					.doc(auth.currentUser?.uid)
-					.set({
-						email: email,
-						firstName: firstName,
-						lastName: lastName,
-						age: age,
-						mobile: mobile,
-						address: address,
-						imageUri: imageUri,
-					})
-					.then(() => {
-						auth.currentUser.updateProfile({displayName: firstName + " " + lastName})
-						// setEmail("");
-						// setPassword("");
-						alert("Account created successfully");
-						navigation.navigate("Home");
-					});
-			});
-	};
-
-	// create a new register function and await uploadImage() before firestore
-	// const register = async () => {
-	// 	await uploadImage();
-	// 	auth.createUserWithEmailAndPassword(email, password).then(() => {
-	// 		firestore
-	// 			.collection("users")
-	// 			.doc(auth.currentUser?.uid)
-	// 			.set({
-	// 				email: email,
-	// 				firstName: firstName,
-	// 				lastName: lastName,
-	// 				age: age,
-	// 				mobile: mobile,
-	// 				address: address,
-	// 				imageUrl: imageUrl,
-	// 			})
-	// 			.then(() => {
-	// 				// setEmail("");
-	// 				// setPassword("");
-	// 				alert("Account created successfully");
-	// 				// navigation.navigate("Home");
-	// 			});
-	// 	});
-	// };
 
 	return (
-		// <KeyboardAvoidingView style={styles.container} behavior="padding">
-		<ScrollView contentContainerStyle={styles.container}>
+		<KeyboardAvoidingView style={styles.container} behavior="padding">
 			<View style={styles.inputContainer}>
 				<LocalsImagePicker
 					onImageTaken={(uri) => setImageUri(uri)}
@@ -177,13 +125,15 @@ const Register = ({navigation}) => {
 					onChangeText={(address) => setAddress(address)}
 					style={styles.password}
 				/>
-				<LocalsButton
-					title="Register"
-					onPress={register}
-					style={styles.loginBtn}
-				/>
+				{!uploading && (
+					<LocalsButton
+						title="Register"
+						onPress={register}
+						style={styles.loginBtn}
+					/>
+				)}
 			</View>
-		</ScrollView>
+		</KeyboardAvoidingView>
 	);
 };
 

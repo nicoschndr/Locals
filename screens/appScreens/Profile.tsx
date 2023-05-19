@@ -7,17 +7,30 @@ import {
 	SafeAreaView,
 	ScrollView,
 	TouchableOpacity,
+	Button,
 } from "react-native";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import {firebase} from "../../firebase";
+import { firebase } from "../../firebase";
 
 const Template = ({ navigation }) => {
+	const goToFriendList = () => {
+		navigation.navigate("FriendList");
+	};
+
+	React.useLayoutEffect(() => {
+		navigation.setOptions({
+			headerRight: () => (
+				<TouchableOpacity onPress={goToFriendList}>
+					<Ionicons name={"people"} size={25} style={{ marginRight: 15 }} />
+				</TouchableOpacity>
+			),
+		});
+	}, [navigation]);
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 
 	const user = firebase.auth().currentUser;
-
 
 	return (
 		<SafeAreaView style={styles.container}>

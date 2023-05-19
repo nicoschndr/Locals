@@ -1,4 +1,4 @@
-import {createDrawerNavigator} from "@react-navigation/drawer";
+/* import {createDrawerNavigator} from "@react-navigation/drawer";
 import {NavigationContainer} from "@react-navigation/native";
 import LiveMap from "./screens/appScreens/LiveMap";
 import Settings from "./screens/appScreens/Settings";
@@ -118,6 +118,17 @@ export default function App() {
             </Drawer.Navigator>
         </NavigationContainer>
     )
+}
+
+const styles = StyleSheet.create({});
+ */
+
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View } from "react-native";
+import AppNavigation from "./screens/AppNavigation";
+
+export default function App() {
+	return <AppNavigation />;
 }
 
 const styles = StyleSheet.create({});
