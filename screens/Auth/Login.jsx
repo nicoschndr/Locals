@@ -1,7 +1,7 @@
 // create a login screen with a form
 
 import { View, Text, KeyboardAvoidingView, StyleSheet } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import LocalsButton from "../../components/LocalsButton";
@@ -17,17 +17,27 @@ const Login = () => {
 	const login = () => {
 		auth
 			.signInWithEmailAndPassword(email, password)
-			.then(() => {})
 			.then(() => {
 				alert("Logged in!");
 				// setEmail("");
 				// setPassword("");
-				navigation.navigate("Home");
 			})
 			.catch((error) => {
 				alert(error.message);
 			});
 	};
+
+	useEffect(() => {
+		const unsubscribe = auth.onAuthStateChanged((user) => {
+			setUser(user);
+			setIsReady(true);
+			if (user) {
+				navigation.navigate("Home");
+			}
+		});
+
+		return () => unsubscribe();
+	}, []);
 
 	return (
 		<KeyboardAvoidingView style={styles.container} behavior="padding">
