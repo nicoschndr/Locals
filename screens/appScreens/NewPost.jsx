@@ -38,40 +38,23 @@ const Template = ({ navigation }) => {
 	const [gender, setGender] = useState("");
 	const [category, setCategory] = useState("");
 
-	const uploadImage = async () => {
-		const uri = imageUri;
+	const uploadImage = async (uri) => {
+		setUploading(true);
 		const response = await fetch(uri);
 		const blob = await response.blob();
-		const filename = uri.substring(uri.lastIndexOf("/") + 1);
 
-		const storageRef = firebase.storage().ref(`images/${filename}`);
-		const task = storageRef.put(blob);
+		let filename = new Date().getTime().toString();
+		var ref = storage.ref().child("Images/posts/" + filename);
+		const snapshot = await ref.put(blob);
 
-		// set uploading to true
-		setUploading(true);
-
-		// set progress state
-		task.on("state_changed", (snapshot) => {
-			setTransferred(
-				Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 10000
-			);
-		});
-
-		try {
-			await task;
-
-			const url = await storageRef.getDownloadURL();
-
-			setImageUrl(url);
-			setUploading(false);
-			alert("Image uploaded successfully");
-		} catch (e) {
-			console.log(e);
-			return null;
-		}
+		// Get the download URL after upload completes
+		const url = await snapshot.ref.getDownloadURL();
+		return url;
 	};
 
-	const uploadPost = () => {
+	const uploadPost = async () => {
+		const imageUrl = await uploadImage(imageUri);
+
 		auth;
 		firestore
 			.collection("posts")
@@ -85,7 +68,7 @@ const Template = ({ navigation }) => {
 				gender: gender,
 				category: category,
 				date: date,
-				imageUri: imageUri,
+				imageUrl: imageUrl,
 			})
 			.then(() => {
 				uploadImage();
