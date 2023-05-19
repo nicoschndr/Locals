@@ -14,7 +14,7 @@ import Login from "./Auth/Login";
 import Register from "./Auth/Register";
 import Profile from "./appScreens/Profile";
 import FriendList from "./appScreens/FriendList";
-import {auth} from "../firebase";
+import { auth } from "../firebase";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -93,8 +93,10 @@ function AppNavigation() {
 						tabBarLabelStyle: {
 							fontSize: 12,
 						},
-						tabBarActiveTintColor:'#ec404b',
+						tabBarActiveTintColor: "#ec404b",
 						tabBarInactiveTintColor: "#734e61",
+						headerShown: false,
+
 						tabBarStyle: [
 							{
 								display: "flex",
@@ -127,13 +129,13 @@ function AuthScreen() {
 	return (
 		<Tab.Navigator
 			screenOptions={({ route }) => ({
-				tabBarIcon: ({ focused, color, size }) => {
-				},
+				tabBarIcon: ({ focused, color, size }) => {},
 				tabBarLabelStyle: {
 					fontSize: 12,
 				},
-				tabBarActiveTintColor:'#ec404b',
+				tabBarActiveTintColor: "#ec404b",
 				inactiveTintColor: "gray",
+				headerShown: false,
 				tabBarStyle: [
 					{
 						display: "flex",

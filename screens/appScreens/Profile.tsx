@@ -6,37 +6,33 @@ import {
 	Dimensions,
 	SafeAreaView,
 	ScrollView,
-	TouchableOpacity, Button,
+	TouchableOpacity,
+	Button,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import LocalsButton from "../../components/LocalsButton";
-
-
+import { firebase } from "../../firebase";
 
 const Template = ({ navigation }) => {
 	const goToFriendList = () => {
-		navigation.navigate('FriendList');
+		navigation.navigate("FriendList");
 	};
 
 	React.useLayoutEffect(() => {
 		navigation.setOptions({
 			headerRight: () => (
 				<TouchableOpacity onPress={goToFriendList}>
-					<Ionicons
-						name={"people"}
-						size={25}
-						style={{ marginRight: 15 }}
-					/>
-				</TouchableOpacity>			),
+					<Ionicons name={"people"} size={25} style={{ marginRight: 15 }} />
+				</TouchableOpacity>
+			),
 		});
 	}, [navigation]);
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 
+	const user = firebase.auth().currentUser;
+
 	return (
-
-
 		<SafeAreaView style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<TouchableOpacity
@@ -83,7 +79,7 @@ const Template = ({ navigation }) => {
 					style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
 				>
 					<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-						Nico Schneider
+						{user.displayName}
 					</Text>
 					<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
 						Locals
