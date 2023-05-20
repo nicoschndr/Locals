@@ -73,7 +73,7 @@ async function rejectFriendRequest(senderUsername, receiverUsername) {
 	}
 }
 
-function FriendList() {
+function FriendList({navigation}) {
 	const [friends, setFriends] = useState([]);
 	const [friendRequests, setFriendRequests] = useState([]);
 	const [searchTerm, setSearchTerm] = useState('');
@@ -107,7 +107,10 @@ function FriendList() {
 
 						if (!friendQuerySnapshot.empty) {
 							const friendDoc = friendQuerySnapshot.docs[0];
-							friendData[friendUsername] = friendDoc.data();
+							friendData[friendUsername] = {
+								...friendDoc.data(),
+								newMessage: false
+							};
 						} else {
 							console.log(`No document found for friend: ${friendUsername}`);
 						}
@@ -140,16 +143,31 @@ function FriendList() {
 	const handleCloseModal = () => {
 		setModalVisible(false);
 	}
+	/*
+    const handleFriendClick = (friendUsername) => {
+      const friendInfo = friendData[friendUsername];
+      Alert.alert(
+        "Erstmal nur objektausgabe vom geklickten User",
+        JSON.stringify(friendInfo),
+        [
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ]
+      );
+    }
+     */
+
 	const handleFriendClick = (friendUsername) => {
-		const friendInfo = friendData[friendUsername];
-		Alert.alert(
-			"Erstmal nur objektausgabe vom geklickten User",
-			JSON.stringify(friendInfo),
-			[
-				{ text: "OK", onPress: () => console.log("OK Pressed") }
-			]
-		);
+		const updatedFriendData = {
+			...friendData,
+			[friendUsername]: {
+				...friendData[friendUsername],
+				newMessage: false
+			}
+		};
+		setFriendData(updatedFriendData);
+		navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
 	}
+
 	return (
 		<View>
 			<TouchableOpacity onPress={handleOpenRequests} style={{ position: 'absolute', top: 10, right: 10, zIndex: 999 }}>
@@ -201,6 +219,9 @@ function FriendList() {
 						/>
 						}
 						<Text style={{ marginLeft: 10 }}>{friendUsername}</Text>
+						{friendData[friendUsername] && friendData[friendUsername].newMessage && (
+							<Text style={{ marginLeft: 5, color: 'red' }}>Neue Nachricht</Text>
+						)}
 						{index !== friends.length - 1 &&
 						<View style={{ borderBottomWidth: 1, borderBottomColor: '#ec404b', marginTop: 5 }} />
 						}
@@ -237,11 +258,6 @@ function FriendList() {
 				</View>
 
 			</Modal>
-
-
-
-
-
 		</View>
 	);
 }

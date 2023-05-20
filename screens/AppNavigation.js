@@ -14,6 +14,7 @@ import Login from "./Auth/Login";
 import Register from "./Auth/Register";
 import Profile from "./appScreens/Profile";
 import FriendList from "./appScreens/FriendList";
+import Chat from "./appScreens/Chat";
 import { auth } from "../firebase";
 
 const Tab = createBottomTabNavigator();
@@ -26,6 +27,7 @@ function ProfileStackScreen() {
 		<ProfileStack.Navigator initialRouteName="Profile">
 			<ProfileStack.Screen name="Profile" component={Profile} />
 			<ProfileStack.Screen name="FriendList" component={FriendList} />
+			<ProfileStack.Screen name="Chat" component={Chat} />
 		</ProfileStack.Navigator>
 	);
 }
