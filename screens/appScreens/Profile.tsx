@@ -11,9 +11,15 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { firebase } from "../../firebase";
+import { firebase, firestore, storage } from "../../firebase";
+import Firestore = firebase.firestore.Firestore;
+import auth = firebase.auth;
+import Auth = firebase.auth.Auth;
 
 const Template = ({ navigation }) => {
+	useEffect(() => {
+		getUserData();
+	}, []);
 	const goToFriendList = () => {
 		navigation.navigate("FriendList");
 	};
@@ -27,10 +33,20 @@ const Template = ({ navigation }) => {
 			),
 		});
 	}, [navigation]);
+
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 
-	const user = firebase.auth().currentUser;
+	const uid = firebase.auth().currentUser.uid;
+	const [user, setUser] = useState({});
+
+	function getUserData() {
+		firestore
+			.collection("users")
+			.doc(uid)
+			.get()
+			.then((snapshot) => setUser(snapshot.data()));
+	}
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -51,7 +67,7 @@ const Template = ({ navigation }) => {
 				<View style={{ alignSelf: "center" }}>
 					<View style={styles.profileImage}>
 						<Image
-							source={require("../../assets/Profil_Test.jpg")}
+							source={{ uri: user.imageUrl }}
 							style={styles.image}
 							resizeMode="center"
 						></Image>
@@ -79,7 +95,7 @@ const Template = ({ navigation }) => {
 					style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
 				>
 					<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-						{user.displayName}
+						{user.firstName} {user.lastName}
 					</Text>
 					<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
 						Locals

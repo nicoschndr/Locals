@@ -15,9 +15,31 @@ import Register from "./Auth/Register";
 import Profile from "./appScreens/Profile";
 import FriendList from "./appScreens/FriendList";
 import { auth } from "../firebase";
+import { Dimensions } from "react-native";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import Sidebar from "../components/Sidebar";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
+const deviceWidth = Dimensions.get("window").width;
+
+function ProfileDrawerScreen() {
+	return (
+		<Drawer.Navigator
+			initialRouteName="Profile"
+			screenOptions={{
+				headerShown: false,
+				drawerStyle: { width: deviceWidth * 0.8 },
+				swipeEdgeWidth: 0,
+			}}
+			drawerContent={(props) => <Sidebar {...props} />}
+		>
+			<Drawer.Screen name="Profile" component={Profile} />
+			<Drawer.Screen name="FriendList" component={FriendList} />
+		</Drawer.Navigator>
+	);
+}
 
 const ProfileStack = createStackNavigator();
 
@@ -109,7 +131,7 @@ function AppNavigation() {
 					<Tab.Screen name="Home" component={HomeScreen} />
 					<Tab.Screen name="LiveMap" component={LiveMap} />
 					<Tab.Screen name="NewPost" component={NewPost} />
-					<Tab.Screen name="Me" component={ProfileStackScreen} />
+					<Tab.Screen name="Me" component={ProfileDrawerScreen} />
 					<Tab.Screen name="Settings" component={Settings} />
 				</Tab.Navigator>
 			) : (
@@ -135,6 +157,7 @@ function AuthScreen() {
 				},
 				tabBarActiveTintColor: "#ec404b",
 				inactiveTintColor: "gray",
+				headerShown: false,
 				tabBarStyle: [
 					{
 						display: "flex",
