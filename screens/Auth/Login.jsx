@@ -1,65 +1,82 @@
-// create a login screen with a form
-
 import { View, Text, KeyboardAvoidingView, StyleSheet } from "react-native";
 import React, { useState, useEffect } from "react";
-import { TextInput } from "react-native-gesture-handler";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import LocalsButton from "../../components/LocalsButton";
-import { auth } from "../../firebase";
+import { auth, firestore } from "../../firebase";
 import { useNavigation } from "@react-navigation/native";
 
 const Login = () => {
-	const [email, setEmail] = useState("");
+	const [emailOrUsername, setEmailOrUsername] = useState("");
 	const [password, setPassword] = useState("");
 
 	const navigation = useNavigation();
 
 	const login = () => {
-		auth
-			.signInWithEmailAndPassword(email, password)
-			.then(() => {
-				alert("Logged in!");
-				// setEmail("");
-				// setPassword("");
-			})
-			.catch((error) => {
-				alert(error.message);
-			});
+		// Überprüfen, ob die Eingabe eine E-Mail-Adresse ist
+		const isEmail = /\S+@\S+\.\S+/.test(emailOrUsername);
+
+		if (isEmail) {
+			// Anmeldung mit E-Mail-Adresse
+			auth
+				.signInWithEmailAndPassword(emailOrUsername, password)
+				.then(() => {
+					alert("Erfolgreich angemeldet!");
+					setEmailOrUsername("");
+					setPassword("");
+				})
+				.catch((error) => {
+					alert(error.message);
+				});
+		} else {
+			// Anmeldung mit Benutzernamen
+			const usersRef = firestore.collection("users");
+			usersRef
+				.where("username", "==", emailOrUsername)
+				.get()
+				.then((querySnapshot) => {
+					if (!querySnapshot.empty) {
+						const user = querySnapshot.docs[0];
+						const email = user.data().email;
+						return auth.signInWithEmailAndPassword(email, password);
+					} else {
+						throw new Error("Ungültiger Benutzername oder E-Mail-Adresse");
+					}
+				})
+				.then(() => {
+					alert("Erfolgreich angemeldet!");
+					setEmailOrUsername("");
+					setPassword("");
+				})
+				.catch((error) => {
+					alert(error.message);
+				});
+		}
 	};
-
-	useEffect(() => {
-		const unsubscribe = auth.onAuthStateChanged((user) => {
-			setUser(user);
-			setIsReady(true);
-			if (user) {
-				navigation.navigate("Home");
-			}
-		});
-
-		return () => unsubscribe();
-	}, []);
 
 	return (
 		<KeyboardAvoidingView style={styles.container} behavior="padding">
 			<Text style={styles.title}>Login</Text>
 			<View style={styles.inputContainer}>
 				<LocalsTextInput
-					placeholder="Email"
+					placeholder="E-Mail oder Benutzername"
 					autoFocus
 					autoCapitalize="none"
-					inputMode="email"
-					value={email}
-					onChangeText={(email) => setEmail(email)}
+					value={emailOrUsername}
+					onChangeText={(text) => setEmailOrUsername(text)}
 					style={styles.email}
 				/>
 				<LocalsTextInput
-					placeholder="Password"
+					placeholder="Passwort"
 					secureTextEntry
 					value={password}
 					onChangeText={(password) => setPassword(password)}
 					style={styles.password}
 				/>
-				<LocalsButton title="Login" onPress={login} style={styles.loginBtn} />
+				<LocalsButton
+					title="Anmelden"
+					onPress={login}
+					style={styles.loginBtn}
+				/>
 			</View>
 		</KeyboardAvoidingView>
 	);

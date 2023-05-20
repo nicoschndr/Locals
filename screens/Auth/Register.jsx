@@ -26,6 +26,7 @@ const Register = ({ navigation }) => {
 	const [age, setAge] = useState("");
 	const [mobile, setMobile] = useState("");
 	const [address, setAddress] = useState("");
+	const [username, setUsername] = useState("");
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
 
@@ -43,8 +44,31 @@ const Register = ({ navigation }) => {
 		const url = await snapshot.ref.getDownloadURL();
 		return url;
 	};
+
+	const checkUsernameAvailability = async () => {
+		const snapshot = await firestore
+			.collection("users")
+			.where("username", "==", username)
+			.get();
+
+		if (snapshot.empty) {
+			// Der Benutzername ist verfügbar
+			return true;
+		} else {
+			// Der Benutzername ist bereits vergeben
+			return false;
+		}
+	};
+
 	const register = async () => {
 		const imageUrl = await uploadImage(imageUri);
+
+		const isUsernameAvailable = await checkUsernameAvailability();
+
+		if (!isUsernameAvailable) {
+			alert("Der Benutzername ist bereits vergeben. Bitte wählen Sie einen anderen.");
+			return;
+		}
 
 		auth.createUserWithEmailAndPassword(email, password).then(() => {
 			firestore
@@ -58,10 +82,13 @@ const Register = ({ navigation }) => {
 					mobile: mobile,
 					address: address,
 					imageUrl: imageUrl,
+					username: username, // Fügen Sie den Benutzernamen zur Dokumentdaten hinzu
+					friends: {},
+					friendRequests: {},
 				})
 				.then(() => {
 					setUploading(false);
-					alert("Account created successfully");
+					alert("Konto erfolgreich erstellt");
 					navigation.navigate("Home");
 				});
 		});
@@ -125,6 +152,12 @@ const Register = ({ navigation }) => {
 					onChangeText={(address) => setAddress(address)}
 					style={styles.password}
 				/>
+				<LocalsTextInput
+					placeholder="Benutzername"
+					value={username}
+					onChangeText={(username) => setUsername(username)}
+					style={styles.username}
+				/>
 				{!uploading && (
 					<LocalsButton
 						title="Register"
@@ -167,5 +200,8 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		fontWeight: "bold",
 		marginBottom: 16,
+	},
+	username: {
+		marginTop: 10,
 	},
 });
