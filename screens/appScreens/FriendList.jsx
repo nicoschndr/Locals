@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, Button, TextInput, Modal, TouchableOpacity} from 'react-native';
+import {View, Text, Button, TextInput, Modal, TouchableOpacity, Alert} from 'react-native';
 import { firebase } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import {Ionicons} from "@expo/vector-icons";
@@ -34,26 +34,20 @@ async function acceptFriendRequest(senderUsername, receiverUsername) {
 		const senderId = senderDoc.id;
 
 		// Update für das Dokument mit der ID durchführen
-		const senderUpdateData = {
-			friends: {
-				[receiverUsername]: true
-			}
-		};
-
-		const receiverUpdateData = {
-			friends: {
-				[senderUsername]: true
-			},
+		await usersRef.doc(senderId).update({
+			[`friends.${receiverUsername}`]: true
+		});
+		await usersRef.doc(receiverId).update({
+			[`friends.${senderUsername}`]: true,
 			[`friendRequests.${senderUsername}`]: firebase.firestore.FieldValue.delete()
-		};
-
-		await usersRef.doc(senderId).update(senderUpdateData);
-		await usersRef.doc(receiverId).update(receiverUpdateData);
+		});
 	} else {
 		// Das Dokument wurde nicht gefunden, handle den Fehler
 		console.error(`No document found with username: ${senderUsername}`);
 	}
 }
+
+
 
 async function rejectFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
@@ -98,23 +92,29 @@ function FriendList() {
 			userDocRef.onSnapshot(doc => {
 				if (doc.exists) {
 					const userData = doc.data();
-					setFriends(Object.keys(userData.friends || {}));
 					setFriendRequests(Object.keys(userData.friendRequests || {}));
 					setCurrentUsername(userData.username);
+
+					const friendIds = Object.keys(userData.friends || {});
+					setFriends(friendIds);
 
 					const friendData = {};
 
 					// Fetch data for each friend
-					Object.keys(userData.friends || {}).forEach(async (friendUsername) => {
-						const friendDocRef = firebase.firestore().collection('users').doc(friendUsername);
-						const friendDocSnapshot = await friendDocRef.get();
+					friendIds.forEach(async (friendUsername) => {
+						const usersRef = firebase.firestore().collection('users');
+						const friendQuerySnapshot = await usersRef.where('username', '==', friendUsername).get();
 
-						if (friendDocSnapshot.exists) {
-							friendData[friendUsername] = friendDocSnapshot.data();
+						if (!friendQuerySnapshot.empty) {
+							const friendDoc = friendQuerySnapshot.docs[0];
+							friendData[friendUsername] = friendDoc.data();
+						} else {
+							console.log(`No document found for friend: ${friendUsername}`);
 						}
 
 						setFriendData(friendData);
 					});
+
 				}
 			});
 		}
@@ -140,7 +140,16 @@ function FriendList() {
 	const handleCloseModal = () => {
 		setModalVisible(false);
 	}
-
+	const handleFriendClick = (friendUsername) => {
+		const friendInfo = friendData[friendUsername];
+		Alert.alert(
+			"Erstmal nur objektausgabe vom geklickten User",
+			JSON.stringify(friendInfo),
+			[
+				{ text: "OK", onPress: () => console.log("OK Pressed") }
+			]
+		);
+	}
 	return (
 		<View>
 			<TouchableOpacity onPress={handleOpenRequests} style={{ position: 'absolute', top: 10, right: 10, zIndex: 999 }}>
@@ -162,30 +171,42 @@ function FriendList() {
 				}}
 				placeholder="Search users..."
 			/>
-
+			{searchTerm.trim() !== '' && (
+				<Text style={{alignSelf: "center"}}>Gefundene User:</Text>
+			)}
 			{searchTerm.trim() !== '' && searchResults.map(user => (
-				<View key={user.id} style={{marginLeft: 30, marginRight: 30}}>
-					<Text style={{fontWeight: 'bold'}}>{user.username}</Text>
-					<TouchableOpacity onPress={() => sendFriendRequest(currentUsername, user.id)} style={{ marginLeft: 'auto' }}>
+				<View key={user.id} style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30, marginRight: 30 }}>
+					{user.imageUrl && (
+						<Image
+							source={{ uri: user.imageUrl }}
+							style={{ width: 50, height: 50, borderRadius: 25 }}
+						/>
+					)}
+					<Text style={{fontWeight: 'bold', marginLeft: 10}}>{user.username}</Text>
+					<TouchableOpacity onPress={() => sendFriendRequest(currentUsername, user.username)} style={{ marginLeft: 'auto' }}>
 						<Ionicons name="person-add-outline" size={24} color="#ec404b" />
 					</TouchableOpacity>
 				</View>
 			))}
 
+
 			<Text>Friends:</Text>
 			{friends.map((friendUsername, index) => (
-				<View key={friendUsername}>
-					<Text style={{ marginBottom: 5 }}>{friendUsername}</Text>
-					{friendData[friendUsername] && friendData[friendUsername].imageUrl &&
-					<Image
-						source={{ uri: friendData[friendUsername].imageUrl }}
-						style={{ width: 50, height: 50 }}  // Sie können die Größe des Bilds anpassen
-					/>
-					}
-					{index !== friends.length - 1 && <View style={{ borderBottomWidth: 1, borderBottomColor: 'gray', marginBottom: 5 }} />}
-				</View>
+				<TouchableOpacity key={friendUsername} onPress={() => handleFriendClick(friendUsername)}>
+					<View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
+						{friendData[friendUsername] && friendData[friendUsername].imageUrl &&
+						<Image
+							source={{ uri: friendData[friendUsername].imageUrl }}
+							style={{ width: 50, height: 50, borderRadius: 25 }}  // Set borderRadius to half of width/height to make it round
+						/>
+						}
+						<Text style={{ marginLeft: 10 }}>{friendUsername}</Text>
+						{index !== friends.length - 1 &&
+						<View style={{ borderBottomWidth: 1, borderBottomColor: '#ec404b', marginTop: 5 }} />
+						}
+					</View>
+				</TouchableOpacity>
 			))}
-
 
 
 			<Modal
@@ -198,16 +219,14 @@ function FriendList() {
 					<View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
 						<Text style={{ fontSize: 18, marginBottom: 10 }}>Open Friend Requests:</Text>
 						{friendRequests.map(requestUsername => (
-							<View key={requestUsername}>
+							<View key={requestUsername} style={{ flexDirection: 'row', alignItems: 'center' }}>
 								<Text>{requestUsername}</Text>
-								<Button
-									title="Accept"
-									onPress={() => acceptFriendRequest(requestUsername, currentUsername)}
-								/>
-								<Button
-									title="Reject"
-									onPress={() => rejectFriendRequest(requestUsername, currentUsername)}
-								/>
+								<TouchableOpacity onPress={() => acceptFriendRequest(requestUsername, currentUsername)} style={{ marginLeft: 'auto' }}>
+									<Ionicons name="person-add-outline" size={24} color="green" />
+								</TouchableOpacity>
+								<TouchableOpacity onPress={() => rejectFriendRequest(requestUsername, currentUsername)} style={{ marginLeft: 10 }}>
+									<Ionicons name="remove-circle-outline" size={24} color="red" />
+								</TouchableOpacity>
 							</View>
 						))}
 						<Button
@@ -216,6 +235,7 @@ function FriendList() {
 						/>
 					</View>
 				</View>
+
 			</Modal>
 
 
