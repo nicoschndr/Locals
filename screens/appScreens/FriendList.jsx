@@ -107,10 +107,7 @@ function FriendList({navigation}) {
 
 						if (!friendQuerySnapshot.empty) {
 							const friendDoc = friendQuerySnapshot.docs[0];
-							friendData[friendUsername] = {
-								...friendDoc.data(),
-								newMessage: false
-							};
+							friendData[friendUsername] = friendDoc.data();
 						} else {
 							console.log(`No document found for friend: ${friendUsername}`);
 						}
@@ -130,7 +127,10 @@ function FriendList({navigation}) {
 
 		const searchResults = snapshot.docs
 			.map(doc => ({ id: doc.id, ...doc.data() }))
-			.filter(user => user.username.toLowerCase().includes(lowercaseSearchTerm));
+			.filter(user => (
+				user.username.toLowerCase().includes(lowercaseSearchTerm) &&
+				!friends.includes(user.username) // Filtere bereits bestehende Freunde aus den Suchergebnissen
+			));
 
 		setSearchResults(searchResults);
 	};
@@ -144,30 +144,20 @@ function FriendList({navigation}) {
 		setModalVisible(false);
 	}
 	/*
-    const handleFriendClick = (friendUsername) => {
-      const friendInfo = friendData[friendUsername];
-      Alert.alert(
-        "Erstmal nur objektausgabe vom geklickten User",
-        JSON.stringify(friendInfo),
-        [
-          { text: "OK", onPress: () => console.log("OK Pressed") }
-        ]
-      );
-    }
-     */
-
 	const handleFriendClick = (friendUsername) => {
-		const updatedFriendData = {
-			...friendData,
-			[friendUsername]: {
-				...friendData[friendUsername],
-				newMessage: false
-			}
-		};
-		setFriendData(updatedFriendData);
+		const friendInfo = friendData[friendUsername];
+		Alert.alert(
+			"Erstmal nur objektausgabe vom geklickten User",
+			JSON.stringify(friendInfo),
+			[
+				{ text: "OK", onPress: () => console.log("OK Pressed") }
+			]
+		);
+	}
+	 */
+	const handleFriendClick = (friendUsername) => {
 		navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
 	}
-
 	return (
 		<View>
 			<TouchableOpacity onPress={handleOpenRequests} style={{ position: 'absolute', top: 10, right: 10, zIndex: 999 }}>
@@ -219,9 +209,6 @@ function FriendList({navigation}) {
 						/>
 						}
 						<Text style={{ marginLeft: 10 }}>{friendUsername}</Text>
-						{friendData[friendUsername] && friendData[friendUsername].newMessage && (
-							<Text style={{ marginLeft: 5, color: 'red' }}>Neue Nachricht</Text>
-						)}
 						{index !== friends.length - 1 &&
 						<View style={{ borderBottomWidth: 1, borderBottomColor: '#ec404b', marginTop: 5 }} />
 						}
@@ -258,6 +245,11 @@ function FriendList({navigation}) {
 				</View>
 
 			</Modal>
+
+
+
+
+
 		</View>
 	);
 }

@@ -2,14 +2,21 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { firebase } from "../../firebase";
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Chat({ route }) {
+	const navigation = useNavigation();
 	const { friendUsername, currentUsername } = route.params;
 	const [message, setMessage] = useState('');
+	const [friendIsTyping, setFriendIsTyping] = useState(false);
 	const [messages, setMessages] = useState([]);
-	const [previousMessageHasTip, setPreviousMessageHasTip] = useState(false);
 	const inputRef = useRef(null);
 	const [inputHeight, setInputHeight] = useState(0);
+	const scrollViewRef = useRef(null);
+
+	useEffect(() => {
+		navigation.setOptions({ headerTitle: friendUsername });
+	}, [friendUsername, navigation]);
 
 	useEffect(() => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
@@ -25,12 +32,28 @@ export default function Chat({ route }) {
 
 			chatRoomSnapshot.ref.onSnapshot((snapshot) => {
 				setMessages(snapshot.data()?.messages || []);
+				scrollViewRef.current.scrollToEnd({ animated: true });
 			});
 		};
 
 		getChatRoom();
 	}, [friendUsername, currentUsername]);
 
+	useEffect(() => {
+		const typingRef = firebase.firestore().collection('typingIndicators')
+			.doc(currentUsername);
+
+		const unsubscribe = typingRef.onSnapshot((snapshot) => {
+			const data = snapshot.data();
+			if (data && data.isTyping) {
+				setFriendIsTyping(true);
+			} else {
+				setFriendIsTyping(false);
+			}
+		});
+
+		return () => unsubscribe();
+	}, [friendUsername]);
 
 	const handleContentSizeChange = (event) => {
 		const { contentSize } = event.nativeEvent;
@@ -45,7 +68,8 @@ export default function Chat({ route }) {
 		const newMessage = {
 			sender: currentUsername,
 			content: message,
-			timestamp: new Date().getTime()
+			timestamp: new Date().getTime(),
+			readStatus: false,
 		};
 
 		await chatRoomRef.update({
@@ -55,32 +79,73 @@ export default function Chat({ route }) {
 		});
 
 		setMessage('');
-		setPreviousMessageHasTip(false);
 		setInputHeight(0);
 		inputRef.current.clear();
+		inputRef.current.blur();
+	};
+
+	const markMessageAsRead = async (msg, index) => {
+		if (msg.sender !== currentUsername && !msg.readStatus) {
+			const sortedUsernames = [currentUsername, friendUsername].sort();
+			const chatRoomRef = firebase.firestore().collection('chatRooms').doc(sortedUsernames.join('_'));
+
+			const newMessages = [...messages];
+			newMessages[index].readStatus = true;
+
+			await chatRoomRef.update({
+				messages: newMessages
+			}).catch((error) => {
+				console.log('Error updating read status:', error);
+			});
+		}
+	};
+
+	const handleTyping = async (isTyping) => {
+		const typingRef = firebase.firestore().collection('typingIndicators')
+			.doc(friendUsername);
+
+		await typingRef.set({
+			isTyping
+		}).catch((error) => {
+			console.log('Error updating typing status:', error);
+		});
 	};
 
 	return (
 		<View style={styles.container}>
-			<ScrollView contentContainerStyle={styles.messageContainer}>
+			<ScrollView
+				ref={scrollViewRef}
+				contentContainerStyle={styles.messageContainer}
+				onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+			>
 				{messages.map((msg, index) => {
+
+					markMessageAsRead(msg, index);
 
 					const messageBubbleStyle = [
 						styles.messageBubble,
 						msg.sender === currentUsername ? styles.rightMessage : styles.leftMessage,
 					];
 
-
 					return (
 						<View key={index} style={messageBubbleStyle}>
 							<Text style={styles.messageText}>{msg.content}</Text>
 							<Text style={styles.timestampText}>{formatTimestamp(msg.timestamp)}</Text>
+							{msg.readStatus && msg.sender === currentUsername && <MaterialIcons name="done-all" size={16} color="#2a9df4" />}
 						</View>
 					);
 				})}
+				{friendIsTyping && (
+					<View style={styles.typingContainer}>
+						<Text style={styles.typingText}>Schreibt gerade...</Text>
+					</View>
+				)}
 			</ScrollView>
 			<View style={styles.inputContainer}>
 				<TextInput
+					onFocus={() => handleTyping(true)}
+					onBlur={() => handleTyping(false)}
+					onEndEditing={() => handleTyping(false)}
 					ref={inputRef}
 					style={[styles.input, { height: Math.min(5 * 18, inputHeight) }]}
 					value={message}
@@ -157,6 +222,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 8,
 		borderWidth: 1,
 		borderColor: 'gray',
-		borderRadius: 4,
+		borderRadius: 15,
 	},
 });
