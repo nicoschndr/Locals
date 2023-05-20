@@ -64,7 +64,9 @@ const Template = ({navigation}) => {
                 <View style={{alignSelf: "center"}}>
                     <View style={styles.profileImage}>
                         <Image
-                            source={require("../../assets/Profil_Test.jpg")}
+                            source={
+                                {uri: user.imageUrl}
+                            }
                             style={styles.image}
                             resizeMode="center"
                         ></Image>
