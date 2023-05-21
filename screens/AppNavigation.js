@@ -133,7 +133,7 @@ function AppNavigation() {
 					<Tab.Screen name="Home" component={HomeScreen} />
 					<Tab.Screen name="LiveMap" component={LiveMap} />
 					<Tab.Screen name="NewPost" component={NewPost} />
-					<Tab.Screen name="Me" component={ProfileDrawerScreen} />
+					<Tab.Screen name="Me" component={ProfileStackScreen} />
 					<Tab.Screen name="Settings" component={Settings} />
 				</Tab.Navigator>
 			) : (

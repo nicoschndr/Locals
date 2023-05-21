@@ -20,8 +20,9 @@ const Template = ({ navigation }) => {
 	useEffect(() => {
 		getUserData();
 	}, []);
+
 	const goToFriendList = () => {
-		navigation.navigate("FriendList");
+		navigation.navigate('FriendList');
 	};
 
 	React.useLayoutEffect(() => {
@@ -33,7 +34,6 @@ const Template = ({ navigation }) => {
 			),
 		});
 	}, [navigation]);
-
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 
@@ -98,7 +98,7 @@ const Template = ({ navigation }) => {
 						{user.firstName} {user.lastName}
 					</Text>
 					<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
-						Locals
+						@{user.username}
 					</Text>
 				</View>
 
