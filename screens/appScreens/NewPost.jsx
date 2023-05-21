@@ -9,7 +9,7 @@ import {
 	TextInput,
 	Button,
 	Pressable,
-	TouchableOpacity,
+	TouchableOpacity, TextBase,
 } from "react-native";
 import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,8 +19,9 @@ import DateTimePicker, {
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { render } from "react-dom";
 import firebase from "firebase/compat";
-import { auth, firestore } from "../../firebase";
+import {auth, firestore, storage} from "../../firebase";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
+import LocalsButton from "../../components/LocalsButton";
 
 const Template = ({ navigation }) => {
 	const windowWidth = Dimensions.get("window").width;
@@ -53,8 +54,7 @@ const Template = ({ navigation }) => {
 	};
 
 	const uploadPost = async () => {
-		const imageUrl = await uploadImage(imageUri);
-
+		/*const imageUrl = await uploadImage(imageUri);*/
 		auth;
 		firestore
 			.collection("posts")
@@ -67,11 +67,11 @@ const Template = ({ navigation }) => {
 				description: description,
 				gender: gender,
 				category: category,
-				date: date,
-				imageUrl: imageUrl,
+				date: date
+				/*imageUrl: imageUrl,*/
 			})
 			.then(() => {
-				uploadImage();
+				setUploading(false);
 				// setEmail("");
 				// setPassword("");
 				alert("Post created successfully");
@@ -104,16 +104,16 @@ const Template = ({ navigation }) => {
 					</Ionicons>
 				</TouchableOpacity>
 
-				<View style={{ alignSelf: "center" }}>
+				<View style={{ alignSelf: "center"}}>
 					<View style={styles.postImage}>
 						<LocalsImagePicker
-							style={styles.image}
 							onImageTaken={(uri) => setImageUri(uri)}
-						></LocalsImagePicker>
+							style={styles.image}
+						/>
 					</View>
 				</View>
 
-				<View style={styles.inputContainer}>
+				<View style={[styles.inputContainer, {marginTop: 70}]}>
 					<Text>Title</Text>
 					<TextInput
 						style={styles.inputText}
@@ -192,9 +192,9 @@ const Template = ({ navigation }) => {
 					}}
 				>
 					<Ionicons name={"camera-outline"} size={30}></Ionicons>
-					<Pressable style={styles.button} onPress={uploadPost}>
+					<TouchableOpacity style={styles.button} onPress={uploadPost}>
 						<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
-					</Pressable>
+					</TouchableOpacity>
 					<Ionicons name={"images-outline"} size={30}></Ionicons>
 				</View>
 			</ScrollView>
@@ -218,12 +218,6 @@ const styles = StyleSheet.create({
 		width: 100,
 		height: 100,
 		borderRadius: 100,
-		overflow: "hidden",
-	},
-	image: {
-		flex: 1,
-		width: "100%",
-		marginBottom: 40,
 	},
 	inputContainer: {
 		textAlign: "left",
@@ -249,5 +243,9 @@ const styles = StyleSheet.create({
 		borderRadius: 50,
 		backgroundColor: "#E63F3F",
 		width: 200,
+	},
+	image: {
+		width: "100%",
+		marginBottom: 40,
 	},
 });
