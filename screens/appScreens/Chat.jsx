@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, {useState, useEffect, useRef, useLayoutEffect} from 'react';
+import {View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Button} from 'react-native';
 import { firebase } from "../../firebase";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -17,6 +17,7 @@ export default function Chat({ route }) {
 	useEffect(() => {
 		navigation.setOptions({ headerTitle: friendUsername });
 	}, [friendUsername, navigation]);
+
 
 	useEffect(() => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
@@ -106,6 +107,7 @@ export default function Chat({ route }) {
 
 	return (
 		<View style={styles.container}>
+
 			<ScrollView
 				ref={scrollViewRef}
 				contentContainerStyle={styles.messageContainer}

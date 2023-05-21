@@ -19,11 +19,24 @@ import { auth } from "../firebase";
 import { Dimensions } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Sidebar from "../components/Sidebar";
+import { HeaderBackButton } from '@react-navigation/stack';
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const deviceWidth = Dimensions.get("window").width;
+
+function FriendStackNavigator() {
+	return (
+		<Stack.Navigator initialRouteName="FriendList" screenOptions={{headerShown: false}}>
+			<Stack.Screen name="FriendList" component={FriendList}/>
+			<Stack.Screen name="Chat" options={{headerShown: true}} component={Chat}
+
+			/>
+		</Stack.Navigator>
+	);
+}
 
 function ProfileDrawerScreen() {
 	return (
@@ -37,22 +50,16 @@ function ProfileDrawerScreen() {
 			drawerContent={(props) => <Sidebar {...props} />}
 		>
 			<Drawer.Screen name="Profile" component={Profile} />
-			<Drawer.Screen name="FriendList" component={FriendList} />
+			<Drawer.Screen
+				name="FriendList"
+				component={FriendStackNavigator}
+				options={{ headerShown: true }}
+			/>
+
 		</Drawer.Navigator>
 	);
 }
 
-const ProfileStack = createStackNavigator();
-
-function ProfileStackScreen() {
-	return (
-		<ProfileStack.Navigator initialRouteName="Profile">
-			<ProfileStack.Screen name="Profile" component={Profile} />
-			<ProfileStack.Screen name="FriendList" component={FriendList} />
-			<ProfileStack.Screen name="Chat" component={Chat} />
-		</ProfileStack.Navigator>
-	);
-}
 
 function AppNavigation() {
 	const [user, setUser] = useState(null);
@@ -133,7 +140,7 @@ function AppNavigation() {
 					<Tab.Screen name="Home" component={HomeScreen} />
 					<Tab.Screen name="LiveMap" component={LiveMap} />
 					<Tab.Screen name="NewPost" component={NewPost} />
-					<Tab.Screen name="Me" component={ProfileStackScreen} />
+					<Tab.Screen name="Me" component={ProfileDrawerScreen} />
 					<Tab.Screen name="Settings" component={Settings} />
 				</Tab.Navigator>
 			) : (
