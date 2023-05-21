@@ -7,7 +7,6 @@ import {
 	SafeAreaView,
 	ScrollView,
 	TouchableOpacity,
-	Button,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";

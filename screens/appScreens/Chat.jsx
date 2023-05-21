@@ -18,7 +18,6 @@ export default function Chat({ route }) {
 		navigation.setOptions({ headerTitle: friendUsername });
 	}, [friendUsername, navigation]);
 
-
 	useEffect(() => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
 		const chatRoomRef = firebase.firestore().collection('chatRooms')
@@ -40,13 +39,31 @@ export default function Chat({ route }) {
 				if (data) {
 					setMessages(data.messages || []);
 					setFriendIsTyping(data[`${friendUsername}_isTyping`] || false);
-					scrollViewRef.current.scrollToEnd({ animated: true });
+					if (scrollViewRef.current) {
+						scrollViewRef.current.scrollToEnd({ animated: true });
+					}
 				}
 			});
 		};
 
 		getChatRoom();
 	}, [friendUsername, currentUsername]);
+
+	useEffect(() => {
+		const typingRef = firebase.firestore().collection('typingIndicators')
+			.doc(currentUsername);
+
+		const unsubscribe = typingRef.onSnapshot((snapshot) => {
+			const data = snapshot.data();
+			if (data && data.isTyping) {
+				setFriendIsTyping(true);
+			} else {
+				setFriendIsTyping(false);
+			}
+		});
+
+		return () => unsubscribe();
+	}, [friendUsername]);
 
 	const handleContentSizeChange = (event) => {
 		const { contentSize } = event.nativeEvent;

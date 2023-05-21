@@ -30,7 +30,7 @@ const deviceWidth = Dimensions.get("window").width;
 function FriendStackNavigator() {
 	return (
 		<Stack.Navigator initialRouteName="FriendList" screenOptions={{headerShown: false}}>
-			<Stack.Screen name="FriendList" component={FriendList}/>
+			<Stack.Screen name="Friends" component={FriendList}/>
 			<Stack.Screen name="Chat" options={{headerShown: true}} component={Chat}
 
 			/>
