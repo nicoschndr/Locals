@@ -26,34 +26,26 @@ export default function Chat({ route }) {
 		const getChatRoom = async () => {
 			let chatRoomSnapshot = await chatRoomRef.get();
 			if (!chatRoomSnapshot.exists) {
-				await chatRoomRef.set({ messages: [] });
+				await chatRoomRef.set({
+					messages: [],
+					[`${currentUsername}_isTyping`]: false,
+					[`${friendUsername}_isTyping`]: false
+				});
 				chatRoomSnapshot = await chatRoomRef.get();
 			}
 
 			chatRoomSnapshot.ref.onSnapshot((snapshot) => {
-				setMessages(snapshot.data()?.messages || []);
-				scrollViewRef.current.scrollToEnd({ animated: true });
+				const data = snapshot.data();
+				if (data) {
+					setMessages(data.messages || []);
+					setFriendIsTyping(data[`${friendUsername}_isTyping`] || false);
+					scrollViewRef.current.scrollToEnd({ animated: true });
+				}
 			});
 		};
 
 		getChatRoom();
 	}, [friendUsername, currentUsername]);
-
-	useEffect(() => {
-		const typingRef = firebase.firestore().collection('typingIndicators')
-			.doc(currentUsername);
-
-		const unsubscribe = typingRef.onSnapshot((snapshot) => {
-			const data = snapshot.data();
-			if (data && data.isTyping) {
-				setFriendIsTyping(true);
-			} else {
-				setFriendIsTyping(false);
-			}
-		});
-
-		return () => unsubscribe();
-	}, [friendUsername]);
 
 	const handleContentSizeChange = (event) => {
 		const { contentSize } = event.nativeEvent;
@@ -101,11 +93,12 @@ export default function Chat({ route }) {
 	};
 
 	const handleTyping = async (isTyping) => {
-		const typingRef = firebase.firestore().collection('typingIndicators')
-			.doc(friendUsername);
+		const sortedUsernames = [currentUsername, friendUsername].sort();
+		const chatRoomRef = firebase.firestore().collection('chatRooms')
+			.doc(sortedUsernames.join('_'));
 
-		await typingRef.set({
-			isTyping
+		await chatRoomRef.update({
+			[`${currentUsername}_isTyping`]: isTyping
 		}).catch((error) => {
 			console.log('Error updating typing status:', error);
 		});
