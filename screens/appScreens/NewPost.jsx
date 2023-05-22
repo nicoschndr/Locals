@@ -9,7 +9,8 @@ import {
 	TextInput,
 	Button,
 	Pressable,
-	TouchableOpacity, TextBase,
+	TouchableOpacity,
+	TextBase,
 } from "react-native";
 import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,7 +20,7 @@ import DateTimePicker, {
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { render } from "react-dom";
 import firebase from "firebase/compat";
-import {auth, firestore, storage} from "../../firebase";
+import { auth, firestore, storage } from "../../firebase";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsButton from "../../components/LocalsButton";
 
@@ -57,7 +58,7 @@ const Template = ({ navigation }) => {
 		/*const imageUrl = await uploadImage(imageUri);*/
 		auth;
 		firestore
-			.collection("posts")
+			.collection("events")
 			.doc(auth.currentUser?.uid)
 			.set({
 				creator: auth.currentUser.uid,
@@ -67,7 +68,7 @@ const Template = ({ navigation }) => {
 				description: description,
 				gender: gender,
 				category: category,
-				date: date
+				date: date,
 				/*imageUrl: imageUrl,*/
 			})
 			.then(() => {
@@ -104,7 +105,7 @@ const Template = ({ navigation }) => {
 					</Ionicons>
 				</TouchableOpacity>
 
-				<View style={{ alignSelf: "center"}}>
+				<View style={{ alignSelf: "center" }}>
 					<View style={styles.postImage}>
 						<LocalsImagePicker
 							onImageTaken={(uri) => setImageUri(uri)}
@@ -113,7 +114,7 @@ const Template = ({ navigation }) => {
 					</View>
 				</View>
 
-				<View style={[styles.inputContainer, {marginTop: 70}]}>
+				<View style={[styles.inputContainer, { marginTop: 70 }]}>
 					<Text>Title</Text>
 					<TextInput
 						style={styles.inputText}

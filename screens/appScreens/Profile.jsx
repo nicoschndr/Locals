@@ -11,10 +11,6 @@ import {
 import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { firebase, firestore, storage } from "../../firebase";
-import Firestore = firebase.firestore.Firestore;
-import auth = firebase.auth;
-import Auth = firebase.auth.Auth;
-import LocalsImagePicker from "../../components/LocalsImagePicker";
 
 const Template = ({ navigation }) => {
 	useEffect(() => {
@@ -23,7 +19,7 @@ const Template = ({ navigation }) => {
 	}, []);
 
 	const goToFriendList = () => {
-		navigation.navigate('FriendList');
+		navigation.navigate("FriendList");
 	};
 
 	React.useLayoutEffect(() => {
@@ -40,8 +36,7 @@ const Template = ({ navigation }) => {
 
 	const uid = firebase.auth().currentUser.uid;
 	const [user, setUser] = useState({});
-	const [posts, setPosts] = useState({});
-
+	const [events, setEvents] = useState([]);
 
 	function getUserData() {
 		firestore
@@ -53,11 +48,15 @@ const Template = ({ navigation }) => {
 
 	function getUserPosts() {
 		firestore
-			.collection("posts")
-			.where('creator', '==', uid)
-			.get().then (r => r.forEach((doc) => {
-				setPosts({...doc.data()})
-		}))
+			.collection("events")
+			.where("creator", "==", uid)
+			.onSnapshot((snapshot) => {
+				const events = snapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+				setEvents(events);
+			});
 	}
 
 	return (
@@ -140,39 +139,28 @@ const Template = ({ navigation }) => {
 					</View>
 				</View>
 
-				<View style={{ marginTop: windowHeight * 0.05 }}>
+				<View
+					style={[styles.eventContainer, { marginTop: windowHeight * 0.05 }]}
+				>
 					<ScrollView
 						horizontal={true}
 						showsVerticalScrollIndicator={false}
 						showsHorizontalScrollIndicator={false}
 					>
-						<View style={styles.mediaImageContainer}>
-							<Image
-								source={require("../../assets/sunrise.jpg")}
-								style={styles.image}
-								resizeMode="center"
-							></Image>
-							<View style={styles.Test}></View>
-							<Text style={styles.imageText}>Test: AutoRefresh</Text>
-						</View>
-						<View style={styles.mediaImageContainer}>
-							<Image
-								source={require("../../assets/building.jpg")}
-								style={styles.image}
-								resizeMode="center"
-							></Image>
-							<View style={styles.Test}></View>
-							<Text style={styles.imageText}>Test Geopoint</Text>
-						</View>
-						<View style={styles.mediaImageContainer}>
-							<Image
-								source={require("../../assets/concert.jpg")}
-								style={styles.image}
-								resizeMode="center"
-							></Image>
-							<View style={styles.Test}></View>
-							<Text style={styles.imageText}>Test</Text>
-						</View>
+						{events.map((event) => (
+							<TouchableOpacity
+								style={styles.mediaImageContainer}
+								id={event.id}
+								onPress={() => navigation.navigate("EventDetails", { event })}
+							>
+								<Image
+									source={{ uri: event.imageUrl }}
+									style={styles.image}
+									resizeMode="center"
+								/>
+								<Text style={styles.imageText}>{event.title}</Text>
+							</TouchableOpacity>
+						))}
 					</ScrollView>
 					<Text
 						style={[
@@ -198,7 +186,7 @@ const Template = ({ navigation }) => {
 					>
 						<View style={styles.recentItemIndicator}></View>
 						<View>
-							<Text>{posts.title}</Text>
+							<Text>{events.title}</Text>
 						</View>
 					</View>
 				</View>
@@ -219,10 +207,8 @@ const styles = StyleSheet.create({
 		color: "#000000",
 	},
 	image: {
-		flex: 1,
 		width: 200,
 		height: 200,
-		borderRadius: 30,
 	},
 	titleBar: {
 		flexDirection: "row",
@@ -300,7 +286,10 @@ const styles = StyleSheet.create({
 		alignSelf: "center",
 		textAlign: "center",
 		fontSize: 20,
-		marginTop: -53,
+		bottom: 50,
 		width: 200,
+	},
+	eventContainer: {
+		marginHorizontal: 24,
 	},
 });

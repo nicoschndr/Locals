@@ -15,12 +15,12 @@ import Register from "./Auth/Register";
 import Profile from "./appScreens/Profile";
 import FriendList from "./appScreens/FriendList";
 import Chat from "./appScreens/Chat";
+import EventDetails from "./appScreens/EventDetails";
 import { auth } from "../firebase";
 import { Dimensions } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Sidebar from "../components/Sidebar";
-import { HeaderBackButton } from '@react-navigation/stack';
-
+import { HeaderBackButton } from "@react-navigation/stack";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -29,10 +29,15 @@ const deviceWidth = Dimensions.get("window").width;
 
 function FriendStackNavigator() {
 	return (
-		<Stack.Navigator initialRouteName="FriendList" screenOptions={{headerShown: false}}>
-			<Stack.Screen name="Friends" component={FriendList}/>
-			<Stack.Screen name="Chat" options={{headerShown: true}} component={Chat}
-
+		<Stack.Navigator
+			initialRouteName="FriendList"
+			screenOptions={{ headerShown: false }}
+		>
+			<Stack.Screen name="Friends" component={FriendList} />
+			<Stack.Screen
+				name="Chat"
+				options={{ headerShown: true }}
+				component={Chat}
 			/>
 		</Stack.Navigator>
 	);
@@ -55,11 +60,10 @@ function ProfileDrawerScreen() {
 				component={FriendStackNavigator}
 				options={{ headerShown: true }}
 			/>
-
+			<Drawer.Screen name="EventDetails" component={EventDetails} />
 		</Drawer.Navigator>
 	);
 }
-
 
 function AppNavigation() {
 	const [user, setUser] = useState(null);
