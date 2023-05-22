@@ -16,6 +16,7 @@ import Firestore = firebase.firestore.Firestore;
 import auth = firebase.auth;
 import Auth = firebase.auth.Auth;
 import LocalsImagePicker from "../../components/LocalsImagePicker";
+import Sidebar from "../../components/Sidebar";
 
 const Template = ({ navigation }) => {
 	useEffect(() => {
