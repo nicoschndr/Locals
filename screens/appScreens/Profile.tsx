@@ -14,10 +14,12 @@ import { firebase, firestore, storage } from "../../firebase";
 import Firestore = firebase.firestore.Firestore;
 import auth = firebase.auth;
 import Auth = firebase.auth.Auth;
+import LocalsImagePicker from "../../components/LocalsImagePicker";
 
 const Template = ({ navigation }) => {
 	useEffect(() => {
 		getUserData();
+		getUserPosts();
 	}, []);
 
 	const goToFriendList = () => {
@@ -38,6 +40,8 @@ const Template = ({ navigation }) => {
 
 	const uid = firebase.auth().currentUser.uid;
 	const [user, setUser] = useState({});
+	const [posts, setPosts] = useState({});
+
 
 	function getUserData() {
 		firestore
@@ -45,6 +49,15 @@ const Template = ({ navigation }) => {
 			.doc(uid)
 			.get()
 			.then((snapshot) => setUser(snapshot.data()));
+	}
+
+	function getUserPosts() {
+		firestore
+			.collection("posts")
+			.where('creator', '==', uid)
+			.get().then (r => r.forEach((doc) => {
+				setPosts({...doc.data()})
+		}))
 	}
 
 	return (
@@ -185,7 +198,7 @@ const Template = ({ navigation }) => {
 					>
 						<View style={styles.recentItemIndicator}></View>
 						<View>
-							<Text>spielt Tennis</Text>
+							<Text>{posts.title}</Text>
 						</View>
 					</View>
 				</View>
