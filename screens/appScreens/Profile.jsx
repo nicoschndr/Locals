@@ -12,9 +12,6 @@ import {
 import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { firebase, firestore, storage } from "../../firebase";
-import Firestore = firebase.firestore.Firestore;
-import auth = firebase.auth;
-import Auth = firebase.auth.Auth;
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import Sidebar from "../../components/Sidebar";
 
