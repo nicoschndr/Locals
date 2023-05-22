@@ -40,7 +40,18 @@ const Template = ({ navigation }) => {
 	const windowHeight = Dimensions.get("window").height;
 
 	const uid = firebase.auth().currentUser.uid;
-	const [user, setUser] = useState({});
+	const [user, setUser] = useState({
+		address: "",
+		age: "",
+		email: "",
+		firstName: "",
+		friendRequests: {},
+		friends: {},
+		imageUrl: "",
+		lastName: "",
+		mobile: "",
+		username: ""
+	});
 	const [posts, setPosts] = useState({});
 
 
@@ -49,7 +60,20 @@ const Template = ({ navigation }) => {
 			.collection("users")
 			.doc(uid)
 			.get()
-			.then((snapshot) => setUser(snapshot.data()));
+			.then((snapshot) => setUser(
+				{
+					address: snapshot.data().address,
+					age: snapshot.data().age,
+					email: snapshot.data().email,
+					firstName: snapshot.data().firstName,
+					friendRequests: snapshot.data().friemdRequests,
+					friends: snapshot.data().friends,
+					imageUrl: snapshot.data().imageUrl,
+					lastName: snapshot.data().lastName,
+					mobile: snapshot.data().mobile,
+					username: snapshot.data().username,
+				}
+			));
 	}
 
 	function getUserPosts() {
@@ -80,7 +104,7 @@ const Template = ({ navigation }) => {
 				<View style={{ alignSelf: "center" }}>
 					<View style={styles.profileImage}>
 						<Image
-							source={{ uri: user.imageUrl }}
+							source={user.imageUrl ? {uri: user.imageUrl} : null} alt={"../assets/avatar.png"}
 							style={styles.image}
 							resizeMode="center"
 						></Image>
@@ -198,8 +222,10 @@ const Template = ({ navigation }) => {
 						]}
 					>
 						<View style={styles.recentItemIndicator}></View>
-						<View>
-							<Text>{posts.title}</Text>
+						<View style={{flexDirection:"row"}}>
+							<Text>Nimmt an </Text>
+							<Text style={{fontWeight: "bold"}}>Event </Text>
+							<Text>teil</Text>
 						</View>
 					</View>
 				</View>
