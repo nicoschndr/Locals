@@ -40,6 +40,7 @@ const PostEvent = ({ navigation }) => {
 	const [gender, setGender] = useState("");
 	const [category, setCategory] = useState("");
 	const [location, setLocation] = useState(null);
+	const [geopoint, setGeopoint] = useState({ longitude: 0, latitude: 0 });
 
 	useEffect(() => {
 		getLocation();
@@ -75,6 +76,8 @@ const PostEvent = ({ navigation }) => {
 				category: category,
 				date: date,
 				imageUrl: imageUrl,
+				longitude: geopoint.longitude,
+				latitude: geopoint.latitude,
 			})
 			.then(() => {
 				setUploading(false);
@@ -108,8 +111,11 @@ const PostEvent = ({ navigation }) => {
 	}
 
 	return (
-		<KeyboardAvoidingView style={styles.container}>
-			<ScrollView showsVerticalScrollIndicator={false}>
+		<KeyboardAvoidingView style={styles.container} behavior="padding">
+			<ScrollView
+				showsVerticalScrollIndicator={false}
+				keyboardShouldPersistTaps="always"
+			>
 				<TouchableOpacity
 					style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
 					onPress={() => navigation.goBack()}
@@ -149,8 +155,13 @@ const PostEvent = ({ navigation }) => {
 						fetchDetails={true}
 						currentLocation={true}
 						currentLocationLabel="Current location"
+						listViewDisplayed={false}
 						onPress={(data, details = null) => {
 							setAddress(details.formatted_address);
+							setGeopoint({
+								longitude: details.geometry.location.lng,
+								latitude: details.geometry.location.lat,
+							});
 						}}
 						query={{
 							key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
@@ -223,16 +234,18 @@ const PostEvent = ({ navigation }) => {
 					style={{
 						// flexDirection: "row",
 						flexDirection: "center",
-						marginTop: 40,
+						marginTop: 30,
 						justifyContent: "space-between",
 					}}
 				>
 					{/* <Ionicons name={"camera-outline"} size={30}></Ionicons> */}
-					<LocalsButton
-						title="Post Event"
-						style={styles.button}
-						onPress={uploadPost}
-					/>
+					{!uploading && (
+						<LocalsButton
+							title="Post Event"
+							style={styles.button}
+							onPress={uploadPost}
+						/>
+					)}
 					{/* <Ionicons name={"images-outline"} size={30}></Ionicons> */}
 				</View>
 			</ScrollView>
