@@ -9,12 +9,23 @@ import { Image } from "react-native";
 async function sendFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
 
-	await usersRef.doc(receiverUsername).update({
-		friendRequests: {
-			[senderUsername]: true
-		}
-	});
+	// Suchen des Dokuments mit dem gegebenen Benutzernamen
+	const receiverQuerySnapshot = await usersRef.where('username', '==', receiverUsername).get();
+	if (!receiverQuerySnapshot.empty) {
+		// Das Dokument wurde gefunden, nehmen Sie das erste Ergebnis
+		const receiverDoc = receiverQuerySnapshot.docs[0];
+		const receiverId = receiverDoc.id;
+
+		// Update für das Dokument mit der ID durchführen
+		await usersRef.doc(receiverId).update({
+			[`friendRequests.${senderUsername}`]: true
+		});
+	} else {
+		// Das Dokument wurde nicht gefunden, handle den Fehler
+		console.error(`No document found with username: ${receiverUsername}`);
+	}
 }
+
 
 async function acceptFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
@@ -143,18 +154,7 @@ function FriendList({navigation}) {
 	const handleCloseModal = () => {
 		setModalVisible(false);
 	}
-	/*
-	const handleFriendClick = (friendUsername) => {
-		const friendInfo = friendData[friendUsername];
-		Alert.alert(
-			"Erstmal nur objektausgabe vom geklickten User",
-			JSON.stringify(friendInfo),
-			[
-				{ text: "OK", onPress: () => console.log("OK Pressed") }
-			]
-		);
-	}
-	 */
+
 	const handleFriendClick = (friendUsername) => {
 		navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
 	}
@@ -191,7 +191,8 @@ function FriendList({navigation}) {
 						/>
 					)}
 					<Text style={{fontWeight: 'bold', marginLeft: 10}}>{user.username}</Text>
-					<TouchableOpacity onPress={() => sendFriendRequest(currentUsername, user.username)} style={{ marginLeft: 'auto' }}>
+					<TouchableOpacity
+						onPress={() => sendFriendRequest(currentUsername, user.username)} style={{ marginLeft: 'auto' }}>
 						<Ionicons name="person-add-outline" size={24} color="#ec404b" />
 					</TouchableOpacity>
 				</View>
