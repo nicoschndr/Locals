@@ -30,13 +30,13 @@ const TemplateButton: React.FC<TemplateButtonProps> = ({
 const styles = StyleSheet.create({
 	primary: {
 		backgroundColor: "#ec404b",
-		borderRadius: 10,
+		borderRadius: 50,
 		paddingVertical: 5,
 		paddingHorizontal: 10,
 	},
 	secondary: {
 		backgroundColor: "#fff",
-		borderRadius: 10,
+		borderRadius: 50,
 		paddingVertical: 5,
 		paddingHorizontal: 10,
 	},

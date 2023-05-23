@@ -9,7 +9,7 @@ import Template from "./appScreens/Template";
 import HomeScreen from "./appScreens/Home";
 import LiveMap from "./appScreens/LiveMap";
 import Settings from "./appScreens/Settings";
-import NewPost from "./appScreens/NewPost";
+import PostEvent from "./appScreens/PostEvent";
 import Login from "./Auth/Login";
 import Register from "./Auth/Register";
 import Profile from "./appScreens/Profile";
@@ -54,7 +54,7 @@ const MainStackNavigator = () => {
 			<Stack.Screen name="Profile" component={Profile} />
 		</Stack.Navigator>
 	);
-}
+};
 
 function ProfileDrawerScreen() {
 	return (
@@ -108,7 +108,7 @@ function AppNavigation() {
 								iconName = focused ? "home" : "home-outline";
 							}
 							// NEW POST ICON
-							if (route.name === "NewPost") {
+							if (route.name === "PostEvent") {
 								iconName = focused ? "create" : "create-outline";
 							}
 							// LIVE MAP ICON
@@ -157,10 +157,9 @@ function AppNavigation() {
 				>
 					<Tab.Screen name="Home" component={MainStackNavigator} />
 					<Tab.Screen name="LiveMap" component={LiveMap} />
-					<Tab.Screen name="NewPost" component={NewPost} />
+					<Tab.Screen name="PostEvent" component={PostEvent} />
 					<Tab.Screen name="Me" component={ProfileDrawerScreen} />
 					<Tab.Screen name="Settings" component={Settings} />
-
 				</Tab.Navigator>
 			) : (
 				<Stack.Navigator>

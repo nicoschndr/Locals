@@ -11,20 +11,21 @@ import {
 	Pressable,
 	TouchableOpacity,
 	TextBase,
+	KeyboardAvoidingView,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
 	DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import RNDateTimePicker from "@react-native-community/datetimepicker";
-import { render } from "react-dom";
-import firebase from "firebase/compat";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import * as Location from "expo-location";
+
 import { auth, firestore, storage } from "../../firebase";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsButton from "../../components/LocalsButton";
 
-const Template = ({ navigation }) => {
+const PostEvent = ({ navigation }) => {
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 	const [datePicker, setDatePicker] = useState(false);
@@ -38,6 +39,11 @@ const Template = ({ navigation }) => {
 	const [description, setDescription] = useState("");
 	const [gender, setGender] = useState("");
 	const [category, setCategory] = useState("");
+	const [location, setLocation] = useState(null);
+
+	useEffect(() => {
+		getLocation();
+	}, []);
 
 	const uploadImage = async (uri) => {
 		setUploading(true);
@@ -45,7 +51,7 @@ const Template = ({ navigation }) => {
 		const blob = await response.blob();
 
 		let filename = new Date().getTime().toString();
-		var ref = storage.ref().child("Images/posts/" + filename);
+		var ref = storage.ref().child("Images/events/" + filename);
 		const snapshot = await ref.put(blob);
 
 		// Get the download URL after upload completes
@@ -90,8 +96,19 @@ const Template = ({ navigation }) => {
 		setDatePicker(false);
 	}
 
+	async function getLocation() {
+		let { status } = await Location.requestForegroundPermissionsAsync();
+		if (status !== "granted") {
+			alert("Permission to access location was denied");
+			return;
+		}
+
+		let location = await Location.getCurrentPositionAsync({});
+		setLocation(location);
+	}
+
 	return (
-		<SafeAreaView style={styles.container}>
+		<KeyboardAvoidingView style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<TouchableOpacity
 					style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
@@ -125,13 +142,31 @@ const Template = ({ navigation }) => {
 				</View>
 				<View style={styles.inputContainer}>
 					<Text>
-						Address<Text style={{ fontWeight: "bold" }}> or Set Marker*</Text>
+						Address
+						{/* <Text style={{ fontWeight: "bold" }}> or Set Marker*</Text> */}
 					</Text>
-					<TextInput
-						style={styles.inputText}
-						value={address}
-						onChangeText={(address) => setAddress(address)}
-					></TextInput>
+					<GooglePlacesAutocomplete
+						fetchDetails={true}
+						currentLocation={true}
+						currentLocationLabel="Current location"
+						onPress={(data, details = null) => {
+							setAddress(details.formatted_address);
+						}}
+						query={{
+							key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
+							language: "de",
+							components: "country:de",
+						}}
+						styles={{
+							textInput: styles.addressInput,
+							listView: {
+								width: "90%", // Set the width of the suggestions list
+							},
+							container: {
+								width: "100%", // Set the width of the container
+							},
+						}}
+					/>
 				</View>
 				<View style={styles.inputContainer}>
 					<Text>Group Size</Text>
@@ -167,48 +202,53 @@ const Template = ({ navigation }) => {
 				</View>
 				<View style={styles.inputContainer}>
 					<Text>Date</Text>
-					<View style={{ flexDirection: "row" }}>
+					<View style={{ flexDirection: "row", marginTop: 12 }}>
 						<Ionicons
 							name={"calendar-outline"}
 							onPress={showDatePicker}
 							size={30}
 						></Ionicons>
-						{datePicker && (
-							<DateTimePicker
-								value={date}
-								mode={"date"}
-								is24Hour={true}
-								onChange={onDateSelected}
-							/>
-						)}
-						<Text style={styles.date} onPress={showDatePicker}>
+						<DateTimePicker
+							value={date}
+							locale="de-DE"
+							onChange={onDateSelected}
+						/>
+
+						{/* <Text style={styles.date} onPress={showDatePicker}>
 							{date.toString()}
-						</Text>
+						</Text> */}
 					</View>
 				</View>
 				<View
 					style={{
-						flexDirection: "row",
+						// flexDirection: "row",
+						flexDirection: "center",
 						marginTop: 40,
 						justifyContent: "space-between",
 					}}
 				>
-					<Ionicons name={"camera-outline"} size={30}></Ionicons>
-					<TouchableOpacity style={styles.button} onPress={uploadPost}>
-						<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
-					</TouchableOpacity>
-					<Ionicons name={"images-outline"} size={30}></Ionicons>
+					{/* <Ionicons name={"camera-outline"} size={30}></Ionicons> */}
+					<LocalsButton
+						title="Post Event"
+						style={styles.button}
+						onPress={uploadPost}
+					/>
+					{/* <Ionicons name={"images-outline"} size={30}></Ionicons> */}
 				</View>
 			</ScrollView>
-		</SafeAreaView>
+		</KeyboardAvoidingView>
 	);
 };
 
-export default Template;
+export default PostEvent;
 
 const styles = StyleSheet.create({
+	addressInput: {
+		backgroundColor: "transparent",
+		borderBottomColor: "#000000",
+		borderBottomWidth: 1,
+	},
 	container: {
-		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
 	},
@@ -238,12 +278,6 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		alignSelf: "center",
-		alignItems: "center",
-		justifyContent: "center",
-		paddingVertical: 12,
-		paddingHorizontal: 32,
-		borderRadius: 50,
-		backgroundColor: "#E63F3F",
 		width: 200,
 	},
 	image: {
