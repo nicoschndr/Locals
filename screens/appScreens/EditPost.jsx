@@ -10,25 +10,24 @@ import {
 	Button,
 	Pressable,
 	TouchableOpacity,
-	TextBase,
+	KeyboardAvoidingView,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
 	DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
-import { render } from "react-dom";
 import firebase from "firebase/compat";
 import { auth, firestore, storage } from "../../firebase";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsButton from "../../components/LocalsButton";
 
-const Template = ({ navigation }) => {
+const EditPost = ({ navigation, route }) => {
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 	const [datePicker, setDatePicker] = useState(false);
-	const [date, setDate] = useState(new Date());
+	const [date, setDate] = useState("");
 	const [imageUri, setImageUri] = useState("");
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
@@ -38,6 +37,20 @@ const Template = ({ navigation }) => {
 	const [description, setDescription] = useState("");
 	const [gender, setGender] = useState("");
 	const [category, setCategory] = useState("");
+
+	// Extract the event data from the route
+	const { event } = route.params;
+
+	useEffect(() => {
+		setDate(event.date);
+		setImageUri(event.imageUrl);
+		setTitle(event.title);
+		setAddress(event.address);
+		setGroupSize(event.groupSize);
+		setDescription(event.description);
+		setGender(event.gender);
+		setCategory(event.category);
+	}, [event]);
 
 	const uploadImage = async (uri) => {
 		setUploading(true);
@@ -53,14 +66,18 @@ const Template = ({ navigation }) => {
 		return url;
 	};
 
-	const uploadPost = async () => {
-		const imageUrl = await uploadImage(imageUri);
-		auth;
-		firestore
+	const updatePost = async () => {
+		// Upload image only if imageUri has been changed
+		if (event.imageUri !== imageUri) {
+			const imageUrl = await uploadImage(imageUri);
+			setImageUri(imageUrl);
+		}
+
+		// Update the post in Firestore
+		await firestore
 			.collection("events")
-			.doc()
-			.set({
-				creator: auth.currentUser.uid,
+			.doc(event.id)
+			.update({
 				title: title,
 				address: address,
 				groupSize: groupSize,
@@ -68,17 +85,11 @@ const Template = ({ navigation }) => {
 				gender: gender,
 				category: category,
 				date: date,
-				imageUrl: imageUrl,
-			})
-			.then(() => {
-				setUploading(false);
-				// setEmail("");
-				// setPassword("");
-				alert("Post created successfully");
-				setTimeout(() => {
-					navigation.navigate("Profile");
-				}, 1000);
+				imageUrl: imageUrl || event.imageUrl, // Use existing imageUrl if it's not changed
 			});
+
+		alert("Post updated successfully");
+		navigation.goBack();
 	};
 
 	function showDatePicker() {
@@ -91,7 +102,7 @@ const Template = ({ navigation }) => {
 	}
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<KeyboardAvoidingView style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<TouchableOpacity
 					style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
@@ -194,17 +205,19 @@ const Template = ({ navigation }) => {
 					}}
 				>
 					<Ionicons name={"camera-outline"} size={30}></Ionicons>
-					<TouchableOpacity style={styles.button} onPress={uploadPost}>
-						<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
-					</TouchableOpacity>
+					{!uploading && (
+						<TouchableOpacity style={styles.button} onPress={updatePost}>
+							<Text style={{ color: "#FFFFFF" }}>Update Event</Text>
+						</TouchableOpacity>
+					)}
 					<Ionicons name={"images-outline"} size={30}></Ionicons>
 				</View>
 			</ScrollView>
-		</SafeAreaView>
+		</KeyboardAvoidingView>
 	);
 };
 
-export default Template;
+export default EditPost;
 
 const styles = StyleSheet.create({
 	container: {

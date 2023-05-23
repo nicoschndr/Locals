@@ -145,14 +145,18 @@ const Template = ({ navigation }) => {
 						showsVerticalScrollIndicator={false}
 						showsHorizontalScrollIndicator={false}
 					>
-						{posts.map((post) => (
-							<TouchableOpacity style={styles.mediaImageContainer} id={post.id}>
+						{posts.map((event) => (
+							<TouchableOpacity
+								style={styles.mediaImageContainer}
+								key={event.id}
+								onPress={() => navigation.navigate("EventDetails", { event })}
+							>
 								<Image
-									source={{ uri: post.imageUrl }}
+									source={{ uri: event.imageUrl }}
 									style={styles.image}
 									resizeMode="center"
 								/>
-								<Text style={styles.imageText}>{post.title}</Text>
+								<Text style={styles.imageText}>{event.title}</Text>
 							</TouchableOpacity>
 						))}
 					</ScrollView>
