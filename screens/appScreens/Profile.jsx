@@ -36,7 +36,7 @@ const Template = ({ navigation }) => {
 
 	const uid = firebase.auth().currentUser.uid;
 	const [user, setUser] = useState({});
-	const [events, setEvents] = useState([]);
+	const [posts, setPosts] = useState([]);
 
 	function getUserData() {
 		firestore
@@ -51,11 +51,11 @@ const Template = ({ navigation }) => {
 			.collection("events")
 			.where("creator", "==", uid)
 			.onSnapshot((snapshot) => {
-				const events = snapshot.docs.map((doc) => ({
+				const posts = snapshot.docs.map((doc) => ({
 					id: doc.id,
 					...doc.data(),
 				}));
-				setEvents(events);
+				setPosts(posts);
 			});
 	}
 
@@ -139,26 +139,20 @@ const Template = ({ navigation }) => {
 					</View>
 				</View>
 
-				<View
-					style={[styles.eventContainer, { marginTop: windowHeight * 0.05 }]}
-				>
+				<View style={{ marginTop: windowHeight * 0.05 }}>
 					<ScrollView
 						horizontal={true}
 						showsVerticalScrollIndicator={false}
 						showsHorizontalScrollIndicator={false}
 					>
-						{events.map((event) => (
-							<TouchableOpacity
-								style={styles.mediaImageContainer}
-								id={event.id}
-								onPress={() => navigation.navigate("EventDetails", { event })}
-							>
+						{posts.map((post) => (
+							<TouchableOpacity style={styles.mediaImageContainer} id={post.id}>
 								<Image
-									source={{ uri: event.imageUrl }}
+									source={{ uri: post.imageUrl }}
 									style={styles.image}
 									resizeMode="center"
 								/>
-								<Text style={styles.imageText}>{event.title}</Text>
+								<Text style={styles.imageText}>{post.title}</Text>
 							</TouchableOpacity>
 						))}
 					</ScrollView>
@@ -186,7 +180,7 @@ const Template = ({ navigation }) => {
 					>
 						<View style={styles.recentItemIndicator}></View>
 						<View>
-							<Text>{events.title}</Text>
+							<Text>{posts.title}</Text>
 						</View>
 					</View>
 				</View>
@@ -288,8 +282,5 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		bottom: 50,
 		width: 200,
-	},
-	eventContainer: {
-		marginHorizontal: 24,
 	},
 });
