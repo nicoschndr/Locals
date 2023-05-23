@@ -150,7 +150,7 @@ const Template = ({ route, navigation }) => {
 					id: doc.id,
 					...doc.data(),
 				}));
-				setPosts(posts);
+				setEvents(posts);
 			});
 	}
 
@@ -290,7 +290,7 @@ const Template = ({ route, navigation }) => {
 					>
 						<View style={styles.recentItemIndicator}></View>
 						<View>
-							<Text>{posts.title}</Text>
+							<Text>{events.title}</Text>
 						</View>
 					</View>
 				</View>
