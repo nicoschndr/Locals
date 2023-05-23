@@ -10,9 +10,13 @@ import {
 	Button,
 	Pressable,
 	TouchableOpacity,
-	TextBase,
+	TextBase, Platform, PermissionsAndroid,
 } from "react-native";
-import React, { useState } from "react";
+import MapView, { Marker } from "react-native-maps";
+import * as Location from 'expo-location';
+
+
+import React, {useEffect, useState} from "react";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
 	DateTimePickerEvent,
@@ -39,6 +43,60 @@ const Template = ({ navigation }) => {
 	const [description, setDescription] = useState("");
 	const [gender, setGender] = useState("");
 	const [category, setCategory] = useState("");
+	const [latitude, setLatitude] = useState(0);
+	const [longitude, setLongitude] = useState(0);
+	const [showMap, setShowMap] = useState(false);
+
+
+	useEffect(() => {
+		requestLocationPermission();
+	}, []);
+
+	const requestLocationPermission = async () => {
+		if (Platform.OS === "android") {
+			try {
+				const granted = await PermissionsAndroid.request(
+					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+				);
+				if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+					await getCurrentLocation();
+				} else {
+					console.log("Location permission denied");
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		} else {
+			await getCurrentLocation();
+		}
+	};
+
+	const getCurrentLocation = async () => {
+		try {
+			let { status } = await Location.requestForegroundPermissionsAsync();
+			if (status !== 'granted') {
+				alert('Permission to access location was denied');
+				return;
+			}
+
+			let location = await Location.getCurrentPositionAsync({});
+			const { latitude, longitude } = location.coords;
+			setLatitude(latitude);
+			setLongitude(longitude);
+			setAddress(`${latitude}, ${longitude}`);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+
+	const openMap = () => {
+		setShowMap(true);
+	};
+
+	const closeMap = () => {
+		setShowMap(false);
+	};
 
 	const uploadImage = async (uri) => {
 		setUploading(true);
@@ -100,12 +158,10 @@ const Template = ({ navigation }) => {
 						style={{ marginRight: windowWidth - 90 }}
 						name={"arrow-back-circle-outline"}
 						size={40}
-					>
-						{" "}
-					</Ionicons>
+					/>
 				</TouchableOpacity>
 
-				<View style={{ alignSelf: "center" }}>
+				<View style={{ alignSelf: "center", marginBottom: 100 }}>
 					<View style={styles.postImage}>
 						<LocalsImagePicker
 							onImageTaken={(uri) => setImageUri(uri)}
@@ -114,23 +170,60 @@ const Template = ({ navigation }) => {
 					</View>
 				</View>
 
-				<View style={[styles.inputContainer, { marginTop: 70 }]}>
-					<Text>Title</Text>
-					<TextInput
-						style={styles.inputText}
-						value={title}
-						onChangeText={(title) => setTitle(title)}
-					></TextInput>
-				</View>
 				<View style={styles.inputContainer}>
 					<Text>
 						Address<Text style={{ fontWeight: "bold" }}> or Set Marker*</Text>
 					</Text>
-					<TextInput
-						style={styles.inputText}
-						value={address}
-						onChangeText={(address) => setAddress(address)}
-					></TextInput>
+					<View style={{flexDirection: "row", alignItems: "center"}}>
+						<TextInput
+							style={[styles.inputText, { flex: 1 }]}
+							value={address}
+							onChangeText={(address) => setAddress(address)}
+						/>
+						<Ionicons
+							name={'locate-outline'}
+							size={30}
+							onPress={getCurrentLocation}
+							style={{marginLeft: 10}}
+						/>
+					</View>
+				</View>
+				<View>
+					{showMap ? (
+						<View style={{ flex: 1 }}>
+							<MapView
+								style={styles.map}
+								initialRegion={{
+									latitude: latitude,
+									longitude: longitude,
+									latitudeDelta: 0.0922,
+									longitudeDelta: 0.0421,
+								}}
+							>
+								<Marker
+									coordinate={{
+										latitude: latitude,
+										longitude: longitude,
+									}}
+									draggable
+									onDragEnd={(e) => {
+										const { latitude, longitude } = e.nativeEvent.coordinate;
+										setLatitude(latitude);
+										setLongitude(longitude);
+										setAddress(`${latitude}, ${longitude}`);
+									}}
+								/>
+							</MapView>
+
+							<TouchableOpacity style={styles.button} onPress={closeMap}>
+								<Text style={{ color: "#FFFFFF" }}>Karte schließen</Text>
+							</TouchableOpacity>
+						</View>
+					) : (
+						<TouchableOpacity style={styles.button} onPress={openMap}>
+							<Text style={{ color: "#FFFFFF" }}>Karte öffnen</Text>
+						</TouchableOpacity>
+					)}
 				</View>
 				<View style={styles.inputContainer}>
 					<Text>Group Size</Text>
@@ -138,7 +231,7 @@ const Template = ({ navigation }) => {
 						style={styles.inputText}
 						value={groupSize}
 						onChangeText={(groupSize) => setGroupSize(groupSize)}
-					></TextInput>
+					/>
 				</View>
 				<View style={styles.inputContainer}>
 					<Text>Description</Text>
@@ -200,8 +293,10 @@ const Template = ({ navigation }) => {
 				</View>
 			</ScrollView>
 		</SafeAreaView>
+
 	);
 };
+
 
 export default Template;
 
@@ -230,10 +325,10 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		marginTop: 10,
 	},
-	date: {
-		marginLeft: 10,
-		marginTop: 10,
-		fontWeight: "bold",
+	map: {
+		width: "100%",
+		height: 300,
+		marginTop: 20,
 	},
 	button: {
 		alignSelf: "center",
@@ -243,7 +338,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 32,
 		borderRadius: 50,
 		backgroundColor: "#E63F3F",
-		width: 200,
+		marginTop: 20,
 	},
 	image: {
 		width: "100%",
