@@ -69,10 +69,24 @@ const Template = ({ route, navigation }) => {
 				setCurrentFriends(snapshot.data().friends);
 				setFriendRequests(Object.keys(snapshot.data().friendRequests || {}));
 				checkFriendship(username, snapshot.data().friends);
+				getOpenFriendRequests()
 			});
 	}
 
-
+	function getOpenFriendRequests() {
+		firestore
+			.collection("users")
+			.doc(uid)
+			.get()
+			.then((snapshot) => {
+				const userData = snapshot.data();
+				const friendRequests = Object.keys(userData.friendRequests || {});
+				setFriendRequests(friendRequests); // Aktualisiere den Zustand mit den offenen Freundesanfragen
+			})
+			.catch((error) => {
+				console.error("Fehler beim Abrufen der Freundschaftsanfragen:", error);
+			});
+	}
 
 	function checkFriendship(username, friends) {
 		if (friends && friends[username]) {
@@ -101,7 +115,6 @@ const Template = ({ route, navigation }) => {
 
 
 	async function sendFriendRequest(senderUsername, receiverUsername) {
-
 		const usersRef = firebase.firestore().collection('users');
 
 		// Suchen des Dokuments mit dem gegebenen Benutzernamen
@@ -122,7 +135,6 @@ const Template = ({ route, navigation }) => {
 	}
 
 	function handleSendFriendRequest() {
-
 		const senderUsername = firebase.auth().currentUser.displayName; // Benutzernamen aus Firebase Auth holen
 		const receiverUsername = user.username;
 		sendFriendRequest(senderUsername, receiverUsername);
@@ -140,6 +152,7 @@ const Template = ({ route, navigation }) => {
 				setEvents(events);
 			});
 	}
+
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -166,27 +179,35 @@ const Template = ({ route, navigation }) => {
 							source={{ uri: user.imageUrl }}
 							style={styles.image}
 							resizeMode="center"
-						></Image>
+						/>
 					</View>
-					<TouchableOpacity style={styles.chat}>
-						<MaterialIcons
-							name={"chat"}
-							size={20}
-							color={"#FFFFFF"}
-						></MaterialIcons>
-					</TouchableOpacity>
-					{(!currentFriends[user.username] && user.username !== firebase.auth().currentUser.username) && (
-						<TouchableOpacity
-							style={styles.add}
-							onPress={() => sendFriendRequest(currentUsername, user.username)}						>
-							<MaterialIcons
-								name={"add"}
-								size={60}
-								color={"#FFFFFF"}
-							></MaterialIcons>
-						</TouchableOpacity>
+					{uid !== firebase.auth().currentUser.uid && (
+						<>
+							<TouchableOpacity style={styles.chat}>
+								<MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
+							</TouchableOpacity>
+							{(!currentFriends[user.username] && user.username !== currentUsername) && (
+								<TouchableOpacity
+									style={styles.add}
+									onPress={() => sendFriendRequest(currentUsername, user.username)}
+								>
+									{friendRequests.includes(currentUsername) ? (
+										<MaterialIcons
+											name={"schedule"}
+											size={60}
+											color={"#ffffff"}
+										/>
+									) : (
+										<MaterialIcons
+											name={"add"}
+											size={60}
+											color={"#FFFFFF"}
+										/>
+									)}
+								</TouchableOpacity>
+							)}
+						</>
 					)}
-
 				</View>
 
 				<View

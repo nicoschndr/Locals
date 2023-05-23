@@ -154,18 +154,7 @@ function FriendList({navigation}) {
 	const handleCloseModal = () => {
 		setModalVisible(false);
 	}
-	/*
-	const handleFriendClick = (friendUsername) => {
-		const friendInfo = friendData[friendUsername];
-		Alert.alert(
-			"Erstmal nur objektausgabe vom geklickten User",
-			JSON.stringify(friendInfo),
-			[
-				{ text: "OK", onPress: () => console.log("OK Pressed") }
-			]
-		);
-	}
-	 */
+
 	const handleFriendClick = (friendUsername) => {
 		navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
 	}
