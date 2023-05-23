@@ -47,6 +47,7 @@ const Template = ({ navigation }) => {
 	const [showMap, setShowMap] = useState(false);
 
 
+
 	useEffect(() => {
 		requestLocationPermission();
 	}, []);
@@ -73,8 +74,8 @@ const Template = ({ navigation }) => {
 	const getCurrentLocation = async () => {
 		try {
 			let { status } = await Location.requestForegroundPermissionsAsync();
-			if (status !== 'granted') {
-				alert('Permission to access location was denied');
+			if (status !== "granted") {
+				alert("Permission to access location was denied");
 				return;
 			}
 
@@ -87,7 +88,6 @@ const Template = ({ navigation }) => {
 			console.log(error);
 		}
 	};
-
 
 	const openMap = () => {
 		setShowMap(true);
@@ -111,9 +111,9 @@ const Template = ({ navigation }) => {
 		return url;
 	};
 
+
 	const uploadPost = async () => {
 		const imageUrl = await uploadImage(imageUri);
-		auth;
 		firestore
 			.collection("events")
 			.doc()
@@ -122,23 +122,20 @@ const Template = ({ navigation }) => {
 				title: title,
 				address: address,
 				groupSize: groupSize,
-				description: description,
-				gender: gender,
-				category: category,
-				date: date,
+				latitude: latitude,
+				longitude: longitude,
 				imageUrl: imageUrl,
 			})
 			.then(() => {
-				setUploading(false);
-				// setEmail("");
-				// setPassword("");
 				alert("Post created successfully");
 				setTimeout(() => {
 					navigation.navigate("Profile");
 				}, 1000);
+			})
+			.catch((error) => {
+				console.log(error);
 			});
 	};
-
 	function showDatePicker() {
 		setDatePicker(true);
 	}
@@ -171,6 +168,14 @@ const Template = ({ navigation }) => {
 					</View>
 				</View>
 
+				<View style={[styles.inputContainer, { marginTop: 70 }]}>
+					<Text>Title</Text>
+					<TextInput
+						style={styles.inputText}
+						value={title}
+						onChangeText={(title) => setTitle(title)}
+					></TextInput>
+				</View>
 				<View style={styles.inputContainer}>
 					<Text>
 						Address<Text style={{ fontWeight: "bold" }}> or Set Marker*</Text>
