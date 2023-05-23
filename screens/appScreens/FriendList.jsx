@@ -9,11 +9,23 @@ import { Image } from "react-native";
 async function sendFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
 
-	await usersRef.doc(receiverUsername).update({
-		friendRequests: {
-			[senderUsername]: true
-		}
-	});
+	// Suchen des Dokuments mit dem gegebenen Benutzernamen
+	const receiverQuerySnapshot = await usersRef.where('username', '==', receiverUsername).get();
+	if (!receiverQuerySnapshot.empty) {
+		// Das Dokument wurde gefunden, nehmen Sie das erste Ergebnis
+		const receiverDoc = receiverQuerySnapshot.docs[0];
+		const receiverId = receiverDoc.id;
+
+		// Update für das Dokument mit der ID durchführen
+		await usersRef.doc(receiverId).update({
+			friendRequests: {
+				[senderUsername]: true
+			}
+		});
+	} else {
+		// Das Dokument wurde nicht gefunden, handle den Fehler
+		console.error(`No document found with username: ${receiverUsername}`);
+	}
 }
 
 async function acceptFriendRequest(senderUsername, receiverUsername) {
