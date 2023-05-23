@@ -42,6 +42,17 @@ function FriendStackNavigator() {
 		</Stack.Navigator>
 	);
 }
+const MainStackNavigator = () => {
+	return (
+		<Stack.Navigator
+			initialRouteName="Home"
+			screenOptions={{ headerShown: false }}
+		>
+			<Stack.Screen name="Start" component={HomeScreen} />
+			<Stack.Screen name="Profile" component={Profile} />
+		</Stack.Navigator>
+	);
+}
 
 function ProfileDrawerScreen() {
 	return (
@@ -141,11 +152,12 @@ function AppNavigation() {
 						],
 					})}
 				>
-					<Tab.Screen name="Home" component={HomeScreen} />
+					<Tab.Screen name="Home" component={MainStackNavigator} />
 					<Tab.Screen name="LiveMap" component={LiveMap} />
 					<Tab.Screen name="NewPost" component={NewPost} />
 					<Tab.Screen name="Me" component={ProfileDrawerScreen} />
 					<Tab.Screen name="Settings" component={Settings} />
+
 				</Tab.Navigator>
 			) : (
 				<Stack.Navigator>

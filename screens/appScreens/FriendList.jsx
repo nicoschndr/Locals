@@ -18,15 +18,14 @@ async function sendFriendRequest(senderUsername, receiverUsername) {
 
 		// Update für das Dokument mit der ID durchführen
 		await usersRef.doc(receiverId).update({
-			friendRequests: {
-				[senderUsername]: true
-			}
+			[`friendRequests.${senderUsername}`]: true
 		});
 	} else {
 		// Das Dokument wurde nicht gefunden, handle den Fehler
 		console.error(`No document found with username: ${receiverUsername}`);
 	}
 }
+
 
 async function acceptFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
@@ -203,7 +202,8 @@ function FriendList({navigation}) {
 						/>
 					)}
 					<Text style={{fontWeight: 'bold', marginLeft: 10}}>{user.username}</Text>
-					<TouchableOpacity onPress={() => sendFriendRequest(currentUsername, user.username)} style={{ marginLeft: 'auto' }}>
+					<TouchableOpacity
+						onPress={() => sendFriendRequest(currentUsername, user.username)} style={{ marginLeft: 'auto' }}>
 						<Ionicons name="person-add-outline" size={24} color="#ec404b" />
 					</TouchableOpacity>
 				</View>
