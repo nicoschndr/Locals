@@ -16,6 +16,8 @@ import Profile from "./appScreens/Profile";
 import FriendList from "./appScreens/FriendList";
 import Chat from "./appScreens/Chat";
 import EventDetails from "./appScreens/EventDetails";
+import EditPost from "./appScreens/EditPost";
+
 import { auth } from "../firebase";
 import { Dimensions } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
@@ -72,6 +74,7 @@ function ProfileDrawerScreen() {
 				options={{ headerShown: true }}
 			/>
 			<Drawer.Screen name="EventDetails" component={EventDetails} />
+			<Drawer.Screen name="EditPost" component={EditPost} />
 		</Drawer.Navigator>
 	);
 }

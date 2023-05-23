@@ -7,7 +7,7 @@ import {
 	SafeAreaView,
 	ScrollView,
 	TouchableOpacity,
-	Alert
+	Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -29,7 +29,7 @@ const Template = ({ route, navigation }) => {
 	const uid = route.params?.uid || firebase.auth().currentUser.uid;
 	const [user, setUser] = useState({});
 	const [events, setEvents] = useState([]);
-	const [currentUsername, setCurrentUsername] = useState('');
+	const [currentUsername, setCurrentUsername] = useState("");
 	const [currentFriends, setCurrentFriends] = useState({});
 	const [friendRequests, setFriendRequests] = useState([]);
 
@@ -69,7 +69,7 @@ const Template = ({ route, navigation }) => {
 				setCurrentFriends(snapshot.data().friends);
 				setFriendRequests(Object.keys(snapshot.data().friendRequests || {}));
 				checkFriendship(username, snapshot.data().friends);
-				getOpenFriendRequests()
+				getOpenFriendRequests();
 			});
 	}
 
@@ -102,9 +102,9 @@ const Template = ({ route, navigation }) => {
 		const user = firebase.auth().currentUser;
 
 		if (user) {
-			const userDocRef = firebase.firestore().collection('users').doc(user.uid);
+			const userDocRef = firebase.firestore().collection("users").doc(user.uid);
 
-			userDocRef.onSnapshot(doc => {
+			userDocRef.onSnapshot((doc) => {
 				if (doc.exists) {
 					const userData = doc.data();
 					setCurrentUsername(userData.username);
@@ -113,12 +113,13 @@ const Template = ({ route, navigation }) => {
 		}
 	}, []);
 
-
 	async function sendFriendRequest(senderUsername, receiverUsername) {
-		const usersRef = firebase.firestore().collection('users');
+		const usersRef = firebase.firestore().collection("users");
 
 		// Suchen des Dokuments mit dem gegebenen Benutzernamen
-		const receiverQuerySnapshot = await usersRef.where('username', '==', receiverUsername).get();
+		const receiverQuerySnapshot = await usersRef
+			.where("username", "==", receiverUsername)
+			.get();
 		if (!receiverQuerySnapshot.empty) {
 			// Das Dokument wurde gefunden, nehmen Sie das erste Ergebnis
 			const receiverDoc = receiverQuerySnapshot.docs[0];
@@ -126,7 +127,7 @@ const Template = ({ route, navigation }) => {
 
 			// Update für das Dokument mit der ID durchführen
 			await usersRef.doc(receiverId).update({
-				[`friendRequests.${senderUsername}`]: true
+				[`friendRequests.${senderUsername}`]: true,
 			});
 		} else {
 			// Das Dokument wurde nicht gefunden, handle den Fehler
@@ -145,14 +146,13 @@ const Template = ({ route, navigation }) => {
 			.collection("events")
 			.where("creator", "==", uid)
 			.onSnapshot((snapshot) => {
-				const events = snapshot.docs.map((doc) => ({
+				const posts = snapshot.docs.map((doc) => ({
 					id: doc.id,
 					...doc.data(),
 				}));
-				setEvents(events);
+				setEvents(posts);
 			});
 	}
-
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -172,7 +172,6 @@ const Template = ({ route, navigation }) => {
 					</TouchableOpacity>
 				)}
 
-
 				<View style={{ alignSelf: "center" }}>
 					<View style={styles.profileImage}>
 						<Image
@@ -186,26 +185,25 @@ const Template = ({ route, navigation }) => {
 							<TouchableOpacity style={styles.chat}>
 								<MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
 							</TouchableOpacity>
-							{(!currentFriends[user.username] && user.username !== currentUsername) && (
-								<TouchableOpacity
-									style={styles.add}
-									onPress={() => sendFriendRequest(currentUsername, user.username)}
-								>
-									{friendRequests.includes(currentUsername) ? (
-										<MaterialIcons
-											name={"schedule"}
-											size={60}
-											color={"#ffffff"}
-										/>
-									) : (
-										<MaterialIcons
-											name={"add"}
-											size={60}
-											color={"#FFFFFF"}
-										/>
-									)}
-								</TouchableOpacity>
-							)}
+							{!currentFriends[user.username] &&
+								user.username !== currentUsername && (
+									<TouchableOpacity
+										style={styles.add}
+										onPress={() =>
+											sendFriendRequest(currentUsername, user.username)
+										}
+									>
+										{friendRequests.includes(currentUsername) ? (
+											<MaterialIcons
+												name={"schedule"}
+												size={60}
+												color={"#ffffff"}
+											/>
+										) : (
+											<MaterialIcons name={"add"} size={60} color={"#FFFFFF"} />
+										)}
+									</TouchableOpacity>
+								)}
 						</>
 					)}
 				</View>
@@ -247,9 +245,7 @@ const Template = ({ route, navigation }) => {
 					</View>
 				</View>
 
-				<View
-					style={[styles.eventContainer, { marginTop: windowHeight * 0.05 }]}
-				>
+				<View style={{ marginTop: windowHeight * 0.05 }}>
 					<ScrollView
 						horizontal={true}
 						showsVerticalScrollIndicator={false}
@@ -258,7 +254,7 @@ const Template = ({ route, navigation }) => {
 						{events.map((event) => (
 							<TouchableOpacity
 								style={styles.mediaImageContainer}
-								id={event.id}
+								key={event.id}
 								onPress={() => navigation.navigate("EventDetails", { event })}
 							>
 								<Image
@@ -396,8 +392,5 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		bottom: 50,
 		width: 200,
-	},
-	eventContainer: {
-		marginHorizontal: 24,
 	},
 });

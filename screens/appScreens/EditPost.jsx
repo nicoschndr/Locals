@@ -10,29 +10,24 @@ import {
 	Button,
 	Pressable,
 	TouchableOpacity,
-	TextBase, Platform, PermissionsAndroid,
+	KeyboardAvoidingView,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import * as Location from 'expo-location';
-
-
-import React, {useEffect, useState} from "react";
+import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker, {
 	DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
-import { render } from "react-dom";
 import firebase from "firebase/compat";
 import { auth, firestore, storage } from "../../firebase";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsButton from "../../components/LocalsButton";
 
-const Template = ({ navigation }) => {
+const EditPost = ({ navigation, route }) => {
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 	const [datePicker, setDatePicker] = useState(false);
-	const [date, setDate] = useState(new Date());
+	const [date, setDate] = useState("");
 	const [imageUri, setImageUri] = useState("");
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
@@ -42,60 +37,20 @@ const Template = ({ navigation }) => {
 	const [description, setDescription] = useState("");
 	const [gender, setGender] = useState("");
 	const [category, setCategory] = useState("");
-	const [latitude, setLatitude] = useState(0);
-	const [longitude, setLongitude] = useState(0);
-	const [showMap, setShowMap] = useState(false);
 
+	// Extract the event data from the route
+	const { event } = route.params;
 
 	useEffect(() => {
-		requestLocationPermission();
-	}, []);
-
-	const requestLocationPermission = async () => {
-		if (Platform.OS === "android") {
-			try {
-				const granted = await PermissionsAndroid.request(
-					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-				);
-				if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-					await getCurrentLocation();
-				} else {
-					console.log("Location permission denied");
-				}
-			} catch (error) {
-				console.log(error);
-			}
-		} else {
-			await getCurrentLocation();
-		}
-	};
-
-	const getCurrentLocation = async () => {
-		try {
-			let { status } = await Location.requestForegroundPermissionsAsync();
-			if (status !== 'granted') {
-				alert('Permission to access location was denied');
-				return;
-			}
-
-			let location = await Location.getCurrentPositionAsync({});
-			const { latitude, longitude } = location.coords;
-			setLatitude(latitude);
-			setLongitude(longitude);
-			setAddress(`${latitude}, ${longitude}`);
-		} catch (error) {
-			console.log(error);
-		}
-	};
-
-
-	const openMap = () => {
-		setShowMap(true);
-	};
-
-	const closeMap = () => {
-		setShowMap(false);
-	};
+		setDate(event.date);
+		setImageUri(event.imageUrl);
+		setTitle(event.title);
+		setAddress(event.address);
+		setGroupSize(event.groupSize);
+		setDescription(event.description);
+		setGender(event.gender);
+		setCategory(event.category);
+	}, [event]);
 
 	const uploadImage = async (uri) => {
 		setUploading(true);
@@ -111,14 +66,18 @@ const Template = ({ navigation }) => {
 		return url;
 	};
 
-	const uploadPost = async () => {
-		const imageUrl = await uploadImage(imageUri);
-		auth;
-		firestore
+	const updatePost = async () => {
+		// Upload image only if imageUri has been changed
+		if (event.imageUri !== imageUri) {
+			const imageUrl = await uploadImage(imageUri);
+			setImageUri(imageUrl);
+		}
+
+		// Update the post in Firestore
+		await firestore
 			.collection("events")
-			.doc()
-			.set({
-				creator: auth.currentUser.uid,
+			.doc(event.id)
+			.update({
 				title: title,
 				address: address,
 				groupSize: groupSize,
@@ -126,17 +85,11 @@ const Template = ({ navigation }) => {
 				gender: gender,
 				category: category,
 				date: date,
-				imageUrl: imageUrl,
-			})
-			.then(() => {
-				setUploading(false);
-				// setEmail("");
-				// setPassword("");
-				alert("Post created successfully");
-				setTimeout(() => {
-					navigation.navigate("Profile");
-				}, 1000);
+				imageUrl: imageUrl || event.imageUrl, // Use existing imageUrl if it's not changed
 			});
+
+		alert("Post updated successfully");
+		navigation.goBack();
 	};
 
 	function showDatePicker() {
@@ -149,7 +102,7 @@ const Template = ({ navigation }) => {
 	}
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<KeyboardAvoidingView style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<TouchableOpacity
 					style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
@@ -159,10 +112,12 @@ const Template = ({ navigation }) => {
 						style={{ marginRight: windowWidth - 90 }}
 						name={"arrow-back-circle-outline"}
 						size={40}
-					/>
+					>
+						{" "}
+					</Ionicons>
 				</TouchableOpacity>
 
-				<View style={{ alignSelf: "center", marginBottom: 100 }}>
+				<View style={{ alignSelf: "center" }}>
 					<View style={styles.postImage}>
 						<LocalsImagePicker
 							onImageTaken={(uri) => setImageUri(uri)}
@@ -171,60 +126,23 @@ const Template = ({ navigation }) => {
 					</View>
 				</View>
 
+				<View style={[styles.inputContainer, { marginTop: 70 }]}>
+					<Text>Title</Text>
+					<TextInput
+						style={styles.inputText}
+						value={title}
+						onChangeText={(title) => setTitle(title)}
+					></TextInput>
+				</View>
 				<View style={styles.inputContainer}>
 					<Text>
 						Address<Text style={{ fontWeight: "bold" }}> or Set Marker*</Text>
 					</Text>
-					<View style={{flexDirection: "row", alignItems: "center"}}>
-						<TextInput
-							style={[styles.inputText, { flex: 1 }]}
-							value={address}
-							onChangeText={(address) => setAddress(address)}
-						/>
-						<Ionicons
-							name={'locate-outline'}
-							size={30}
-							onPress={getCurrentLocation}
-							style={{marginLeft: 10}}
-						/>
-					</View>
-				</View>
-				<View>
-					{showMap ? (
-						<View style={{ flex: 1 }}>
-							<MapView
-								style={styles.map}
-								initialRegion={{
-									latitude: latitude,
-									longitude: longitude,
-									latitudeDelta: 0.0922,
-									longitudeDelta: 0.0421,
-								}}
-							>
-								<Marker
-									coordinate={{
-										latitude: latitude,
-										longitude: longitude,
-									}}
-									draggable
-									onDragEnd={(e) => {
-										const { latitude, longitude } = e.nativeEvent.coordinate;
-										setLatitude(latitude);
-										setLongitude(longitude);
-										setAddress(`${latitude}, ${longitude}`);
-									}}
-								/>
-							</MapView>
-
-							<TouchableOpacity style={styles.button} onPress={closeMap}>
-								<Text style={{ color: "#FFFFFF" }}>Karte schließen</Text>
-							</TouchableOpacity>
-						</View>
-					) : (
-						<TouchableOpacity style={styles.button} onPress={openMap}>
-							<Text style={{ color: "#FFFFFF" }}>Karte öffnen</Text>
-						</TouchableOpacity>
-					)}
+					<TextInput
+						style={styles.inputText}
+						value={address}
+						onChangeText={(address) => setAddress(address)}
+					></TextInput>
 				</View>
 				<View style={styles.inputContainer}>
 					<Text>Group Size</Text>
@@ -232,7 +150,7 @@ const Template = ({ navigation }) => {
 						style={styles.inputText}
 						value={groupSize}
 						onChangeText={(groupSize) => setGroupSize(groupSize)}
-					/>
+					></TextInput>
 				</View>
 				<View style={styles.inputContainer}>
 					<Text>Description</Text>
@@ -287,19 +205,19 @@ const Template = ({ navigation }) => {
 					}}
 				>
 					<Ionicons name={"camera-outline"} size={30}></Ionicons>
-					<TouchableOpacity style={styles.button} onPress={uploadPost}>
-						<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
-					</TouchableOpacity>
+					{!uploading && (
+						<TouchableOpacity style={styles.button} onPress={updatePost}>
+							<Text style={{ color: "#FFFFFF" }}>Update Event</Text>
+						</TouchableOpacity>
+					)}
 					<Ionicons name={"images-outline"} size={30}></Ionicons>
 				</View>
 			</ScrollView>
-		</SafeAreaView>
-
+		</KeyboardAvoidingView>
 	);
 };
 
-
-export default Template;
+export default EditPost;
 
 const styles = StyleSheet.create({
 	container: {
@@ -326,10 +244,10 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		marginTop: 10,
 	},
-	map: {
-		width: "100%",
-		height: 300,
-		marginTop: 20,
+	date: {
+		marginLeft: 10,
+		marginTop: 10,
+		fontWeight: "bold",
 	},
 	button: {
 		alignSelf: "center",
@@ -339,7 +257,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 32,
 		borderRadius: 50,
 		backgroundColor: "#E63F3F",
-		marginTop: 20,
+		width: 200,
 	},
 	image: {
 		width: "100%",
