@@ -1,48 +1,74 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, View, StyleSheet, Modal, TouchableOpacity, Linking, Platform } from 'react-native';
+import {
+	Animated,
+	Easing,
+	View,
+	StyleSheet,
+	Modal,
+	TouchableOpacity,
+	Linking,
+	Platform,
+	Button,
+	TextInput,
+	ScrollView,
+	FlatList,
+	Text,
+	Image
+} from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { auth, firebase } from "../../firebase";
-import { Text, Image } from "react-native";
-import LocalsButton from "../../components/LocalsButton";
+import { auth, firebase } from '../../firebase';
+import LocalsButton from '../../components/LocalsButton';
+import { MaterialIcons } from '@expo/vector-icons';
 
-const AnimatedCircle = ({ style }) => {
-	const scaleAnimation = useRef(new Animated.Value(0)).current;
-	const opacityAnimation = useRef(new Animated.Value(1)).current;
 
-	useEffect(() => {
-		Animated.loop(
-			Animated.timing(scaleAnimation, {
-				toValue: 1,
-				duration: 2000,
-				easing: Easing.linear,
-				useNativeDriver: true,
-			})
-		).start();
-	}, []);
+const Comment = ({
+					 comment,
+					 replies,
+					 goToComment,
+					 openReplyInput,
+					 highlighted,
+					 setHighlighted,
+				 }) => {
+	const [isHighlighted, setIsHighlighted] = useState(false);
 
 	useEffect(() => {
-		Animated.loop(
-			Animated.timing(opacityAnimation, {
-				toValue: 0,
-				duration: 2000,
-				easing: Easing.linear,
-				useNativeDriver: true,
-			})
-		).start();
-	}, []);
+		setIsHighlighted(highlighted === comment.id);
+	}, [highlighted, comment.id]);
 
 	return (
-		<Animated.View
+		<TouchableOpacity
+			onPress={() => goToComment(comment.id)}
 			style={[
-				style,
-				{ transform: [{ scale: scaleAnimation }], opacity: opacityAnimation },
+				styles.commentContainer,
+				isHighlighted ? styles.highlightedCommentContainer : null,
 			]}
 		>
-			<View style={styles.innerCircle} />
-		</Animated.View>
+			<Text style={styles.commentText}>
+				{comment.username}: {comment.commentText}
+			</Text>
+			<TouchableOpacity
+				onPress={() => openReplyInput(comment.id, comment.commentText)}
+				style={styles.replyButton}
+			>
+				<Text style={styles.replyButtonText}>Reply</Text>
+			</TouchableOpacity>
+			{replies.map((reply) => (
+				<Comment
+					key={reply.id}
+					comment={reply}
+					replies={reply.replies}
+					goToComment={goToComment}
+					openReplyInput={openReplyInput}
+					highlighted={highlighted}
+					setHighlighted={setHighlighted}
+				/>
+			))}
+		</TouchableOpacity>
 	);
 };
+
+
 
 const Livemap = () => {
 	const [location, setLocation] = useState(null);
@@ -50,6 +76,23 @@ const Livemap = () => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedEvent, setSelectedEvent] = useState({ attendees: [] });
 	const { user } = auth.currentUser;
+	const [comments, setComments] = useState([]);
+	const [newCommentText, setNewCommentText] = useState('');
+	const [replyToComment, setReplyToComment] = useState(null);
+	const [replyToCommentText, setReplyToCommentText] = useState(null);
+	const scrollViewRef = useRef();
+	const commentRefs = useRef({});
+	const [commentPositions, setCommentPositions] = useState({});
+	const [showComments, setShowComments] = useState(false);
+	const [highlighted, setHighlighted] = useState(false);
+
+	const onCommentLayout = (event, commentId) => {
+		const layout = event.nativeEvent.layout;
+		setCommentPositions((prevPositions) => ({
+			...prevPositions,
+			[commentId]: layout.y,
+		}));
+	};
 
 	const getUsername = async () => {
 		const user = auth.currentUser;
@@ -61,7 +104,6 @@ const Livemap = () => {
 		const username = userDoc.data().username;
 		return username;
 	};
-
 
 	const handleEventPress = (event) => {
 		setSelectedEvent(event);
@@ -77,10 +119,10 @@ const Livemap = () => {
 
 			await eventRef.update({
 				attendees: firebase.firestore.FieldValue.arrayUnion(username),
-				groupSize: firebase.firestore.FieldValue.increment(1)
+				groupSize: firebase.firestore.FieldValue.increment(1),
 			});
 
-			setSelectedEvent(prevState => ({
+			setSelectedEvent((prevState) => ({
 				...prevState,
 				attendees: [...prevState.attendees, username],
 				groupSize: prevState.groupSize + 1,
@@ -98,23 +140,26 @@ const Livemap = () => {
 
 			await eventRef.update({
 				attendees: firebase.firestore.FieldValue.arrayRemove(username),
-				groupSize: firebase.firestore.FieldValue.increment(-1)
+				groupSize: firebase.firestore.FieldValue.increment(-1),
 			});
 
-			setSelectedEvent(prevState => ({
+			setSelectedEvent((prevState) => ({
 				...prevState,
-				attendees: prevState.attendees.filter(user => user !== username),
+				attendees: prevState.attendees.filter((user) => user !== username),
 				groupSize: prevState.groupSize - 1,
 				isAttending: false,
 			}));
 		}
 	};
 
-
 	const toggleAttendance = async () => {
 		const username = await getUsername();
 
-		if (selectedEvent && selectedEvent.attendees && selectedEvent.attendees.includes(username)) {
+		if (
+			selectedEvent &&
+			selectedEvent.attendees &&
+			selectedEvent.attendees.includes(username)
+		) {
 			cancelAttendance();
 		} else {
 			attendEvent();
@@ -146,6 +191,11 @@ const Livemap = () => {
 		})();
 	}, []);
 
+	const openReplyInput = (commentId, commentText) => {
+		setReplyToComment(commentId);
+		setReplyToCommentText(commentText);
+	};
+
 	const openMapsApp = () => {
 		const { latitude, longitude } = selectedEvent;
 
@@ -155,6 +205,72 @@ const Livemap = () => {
 		});
 
 		Linking.openURL(url);
+	};
+
+	const addComment = async () => {
+		const user = firebase.auth().currentUser;
+		const username = await getUsername();
+
+		if (user && selectedEvent) {
+			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
+
+			const commentData = {
+				username: username,
+				commentText: newCommentText.toString(),
+				replyTo: replyToComment ? replyToComment : null,
+				timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+			};
+
+			await eventRef.collection('comments').add(commentData);
+		}
+		setNewCommentText('');
+		setReplyToComment(null);
+	};
+
+	useEffect(() => {
+		if (selectedEvent) {
+			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
+
+			eventRef
+				.collection('comments')
+				.orderBy('timestamp', 'asc')
+				.onSnapshot((snapshot) => {
+					const commentData = snapshot.docs.map((doc) => {
+						return {
+							id: doc.id,
+							...doc.data(),
+						};
+					});
+
+					const commentTree = buildCommentTree(commentData);
+					setComments(commentTree);
+				});
+		}
+	}, [selectedEvent]);
+
+	const buildCommentTree = (comments) => {
+		let commentMap = {};
+		let commentTree = [];
+
+		comments.forEach((comment) => {
+			comment.replies = [];
+			commentMap[comment.id] = comment;
+		});
+
+		comments.forEach((comment) => {
+			if (comment.replyTo) {
+				const parentComment = commentMap[comment.replyTo];
+				if (parentComment) {
+					parentComment.replies.push(comment);
+				} else {
+					commentTree.push(comment);
+				}
+			} else {
+				commentTree.push(comment);
+			}
+		});
+
+		return commentTree.reverse();
 	};
 
 	useEffect(() => {
@@ -169,7 +285,9 @@ const Livemap = () => {
 						...doc.data(),
 					};
 
-					event.isAttending = Array.isArray(event.attendees) && event.attendees.includes(username);
+					event.isAttending = Array.isArray(event.attendees)
+						? event.attendees.includes(username)
+						: false;
 					return event;
 				});
 
@@ -179,6 +297,27 @@ const Livemap = () => {
 
 		fetchEvents();
 	}, []);
+
+	const renderComment = ({ item }) => (
+		<Comment
+			comment={item}
+			replies={item.replies}
+			goToComment={goToComment}
+			openReplyInput={openReplyInput}
+			onLayout={(event) => onCommentLayout(event, item.id)}
+			highlighted={highlighted}
+			setHighlighted={setHighlighted}
+		/>
+	);
+
+	const goToComment = (commentId) => {
+		const position = commentPositions[commentId];
+		if (position && scrollViewRef.current) {
+			scrollViewRef.current.scrollTo({ y: position, animated: true });
+			setHighlighted(commentId);
+		}
+	};
+
 	return (
 		<View style={styles.container}>
 			{location && (
@@ -197,7 +336,7 @@ const Livemap = () => {
 							longitude: location.coords.longitude,
 						}}
 					>
-						<AnimatedCircle style={styles.outerCircle} />
+						<MaterialIcons name="location-on" size={30} color="#ec404b" />
 					</Marker>
 
 					{events.map((event) => (
@@ -216,24 +355,79 @@ const Livemap = () => {
 			)}
 			<Modal visible={modalVisible} animationType="slide">
 				<View style={styles.modalContainer}>
-					{selectedEvent && (
-						<View style={{ flex: 1, alignItems: "center" }}>
-							<Image style={styles.eventModalImage} source={{ uri: selectedEvent.imageUrl }} />
+					{selectedEvent && !showComments && (
+						<View style={{ flex: 1, alignItems: 'center' }}>
+							<Image
+								style={styles.eventModalImage}
+								source={{ uri: selectedEvent.imageUrl }}
+							/>
 							<Text style={styles.eventModalTitle}>{selectedEvent.title}</Text>
-							<Text style={styles.eventModalText}>Erstellt von: {selectedEvent.creator}</Text>
-							<LocalsButton title={"Hin da!"} onPress={openMapsApp} />
-							<Text style={styles.eventModalText}>Beschreibung: {selectedEvent.description}</Text>
-							<Text style={styles.eventModalText}>Wer ist eingeladen: {selectedEvent.gender}</Text>
-							<Text style={styles.eventModalText}>Kategorie: {selectedEvent.category}</Text>
+							<Text style={styles.eventModalText}>
+								Erstellt von: {selectedEvent.creator}
+							</Text>
+							<LocalsButton title={'Hin da!'} onPress={openMapsApp} />
+							<Text style={styles.eventModalText}>
+								Beschreibung: {selectedEvent.description}
+							</Text>
+							<Text style={styles.eventModalText}>
+								Wer ist eingeladen: {selectedEvent.gender}
+							</Text>
+							<Text style={styles.eventModalText}>
+								Kategorie: {selectedEvent.category}
+							</Text>
 
 							{selectedEvent.isAttending ? (
-								<LocalsButton title={"Nicht teilnehmen"} onPress={toggleAttendance} />
+								<LocalsButton
+									title={'Nicht teilnehmen'}
+									onPress={toggleAttendance}
+								/>
 							) : (
-								<LocalsButton title={"Teilnehmen"} onPress={toggleAttendance} />
+								<LocalsButton
+									title={'Teilnehmen'}
+									onPress={toggleAttendance}
+								/>
 							)}
 
+							<Text style={styles.eventModalText}>
+								Group Size: {selectedEvent.groupSize}
+							</Text>
+							<Button
+								title="Kommentare anzeigen"
+								onPress={() => setShowComments(true)}
+							/>
+						</View>
+					)}
 
-							<Text style={styles.eventModalText}>Group Size: {selectedEvent.groupSize}</Text>
+					{selectedEvent && showComments && (
+						<View style={{ flex: 1 }}>
+							<FlatList
+								ref={scrollViewRef}
+								data={comments}
+								renderItem={renderComment}
+								keyExtractor={(item) => item.id}
+							/>
+							<View style={styles.inputContainer}>
+								<TextInput
+									value={newCommentText}
+									onChangeText={setNewCommentText}
+									placeholder={
+										replyToComment
+											? `Antwort auf: ${replyToCommentText}`
+											: 'Schreibe einen Kommentar'
+									}
+									style={styles.input}
+								/>
+								<TouchableOpacity
+									style={styles.sendButton}
+									onPress={addComment}
+								>
+									<Text style={styles.sendButtonText}>Senden</Text>
+								</TouchableOpacity>
+							</View>
+							<Button
+								title="Zurück zur Event-Ansicht"
+								onPress={() => setShowComments(false)}
+							/>
 						</View>
 					)}
 
@@ -253,15 +447,11 @@ const styles = StyleSheet.create({
 	map: {
 		...StyleSheet.absoluteFillObject,
 	},
-	outerCircle: {
+	positionMarker: {
 		width: 24,
 		height: 24,
 		borderRadius: 12,
-		backgroundColor: 'transparent',
-		borderWidth: 2,
-		borderColor: 'blue',
-		alignItems: 'center',
-		justifyContent: 'center',
+		backgroundColor: 'blue',
 	},
 	eventContainer: {
 		alignItems: 'center',
@@ -313,6 +503,64 @@ const styles = StyleSheet.create({
 	mapButtonText: {
 		color: 'white',
 		fontSize: 16,
+	},
+	button: {
+		borderWidth: 1,
+		borderRadius: 4,
+		padding: 5,
+	},
+
+	commentContainer: {
+		marginTop: 10,
+		borderLeftWidth: 1,
+		borderRadius: 10, // Anpassen der Border-Radius-Eigenschaft für Bubble-Effekt
+		paddingHorizontal: 10,
+		paddingVertical: 5,
+		marginBottom: 10,
+		alignSelf: 'flex-start', // Zur Linksbündigkeit der eigenen Kommentare
+		backgroundColor: 'darkgrey', // Hintergrundfarbe für Kommentar-Bubbles
+
+	},
+	highlightedCommentContainer: {
+		backgroundColor: 'yellow',
+	},
+	commentText: {
+		fontSize: 14,
+	},
+	inputContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 10,
+	},
+	input: {
+		flex: 1,
+		borderWidth: 1,
+		borderRadius: 20,
+		paddingHorizontal: 10,
+		paddingVertical: 5,
+		marginRight: 10,
+		fontSize: 14,
+	},
+	sendButton: {
+		backgroundColor: 'lightblue',
+		paddingHorizontal: 10,
+		paddingVertical: 5,
+		borderRadius: 20,
+	},
+	sendButtonText: {
+		fontSize: 14,
+		color: 'white',
+	},
+	replyButton: {
+		paddingHorizontal: 10,
+		paddingVertical: 5,
+		borderRadius: 20,
+		backgroundColor: 'lightblue',
+		marginTop: 5,
+	},
+	replyButtonText: {
+		fontSize: 14,
+		color: 'black',
 	},
 });
 
