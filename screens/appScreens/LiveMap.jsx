@@ -562,12 +562,12 @@ const styles = StyleSheet.create({
 		backgroundColor: 'red',
 	},
 	highlightedEventMarker: {
-		width: 20,
-		height: 20,
+		width: 25,
+		height: 25,
 		borderRadius: 12,
-		backgroundColor: 'purple',
-		borderWidth: 2,
-		borderColor: 'green'
+		backgroundColor: 'red',
+		borderWidth: 4,
+		borderColor: 'blue'
 	},
 	eventTitle: {
 		fontSize: 12,
