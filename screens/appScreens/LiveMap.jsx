@@ -1,25 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-	Animated,
-	Easing,
-	View,
-	StyleSheet,
-	Modal,
-	TouchableOpacity,
-	Linking,
-	Platform,
 	Button,
-	TextInput,
-	ScrollView,
 	FlatList,
+	Image,
+	Linking,
+	Modal,
+	Platform,
+	StyleSheet,
 	Text,
-	Image
+	TextInput,
+	TouchableOpacity,
+	View
 } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, {Marker} from 'react-native-maps';
 import * as Location from 'expo-location';
-import { auth, firebase } from '../../firebase';
+import {auth, firebase} from '../../firebase';
 import LocalsButton from '../../components/LocalsButton';
-import { MaterialIcons } from '@expo/vector-icons';
+import {AntDesign, MaterialIcons} from '@expo/vector-icons';
 
 
 const Comment = ({
@@ -85,6 +82,15 @@ const Livemap = () => {
 	const [commentPositions, setCommentPositions] = useState({});
 	const [showComments, setShowComments] = useState(false);
 	const [highlighted, setHighlighted] = useState(false);
+	const [isEventLiked, setIsEventLiked] = useState(false);
+	const [username, setUsername] = useState(null);
+	const [impressions, setImpressions] = useState({});
+	const IMPRESSION_THRESHOLD = 2; // Hier können Sie den Schwellenwert definieren
+
+
+
+
+
 
 	const onCommentLayout = (event, commentId) => {
 		const layout = event.nativeEvent.layout;
@@ -102,12 +108,82 @@ const Livemap = () => {
 		const userRef = firebase.firestore().collection('users').doc(user.uid);
 		const userDoc = await userRef.get();
 		const username = userDoc.data().username;
+		setUsername(username);
 		return username;
 	};
 
+
 	const handleEventPress = (event) => {
+		updateImpressions(event.id); // Erhöhe die Impressions beim Klicken auf das Event
 		setSelectedEvent(event);
 		setModalVisible(true);
+	};
+	const updateImpressions = async (eventId) => {
+		setImpressions(prevImpressions => {
+			const eventImpressions = prevImpressions[eventId] || 0;
+			const newImpressions = {...prevImpressions, [eventId]: eventImpressions + 1};
+			return newImpressions;
+		});
+		// Update the impression count in Firebase
+		const eventRef = firebase.firestore().collection('events').doc(eventId);
+		await eventRef.update({
+			impressions: firebase.firestore.FieldValue.increment(1),
+		});
+	};
+
+	const toggleEventLike = async () => {
+		const username = await getUsername();
+
+		if (
+			selectedEvent &&
+			selectedEvent.likedBy &&
+			selectedEvent.likedBy.includes(username)
+		) {
+			await unlikeEvent();
+		} else {
+			await likeEvent();
+		}
+	};
+
+	const likeEvent = async () => {
+		const user = firebase.auth().currentUser;
+		const username = await getUsername();
+
+		if (user && selectedEvent) {
+			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
+			await updateImpressions(selectedEvent.id)
+
+			await eventRef.update({
+				likedBy: firebase.firestore.FieldValue.arrayUnion(username),
+			});
+
+			setSelectedEvent((prevState) => ({
+				...prevState,
+				likedBy: [...prevState.likedBy, username],
+			}));
+
+			setIsEventLiked(true);
+		}
+	};
+
+	const unlikeEvent = async () => {
+		const user = firebase.auth().currentUser;
+		const username = await getUsername();
+
+		if (user && selectedEvent) {
+			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
+
+			await eventRef.update({
+				likedBy: firebase.firestore.FieldValue.arrayRemove(username),
+			});
+
+			setSelectedEvent((prevState) => ({
+				...prevState,
+				likedBy: prevState.likedBy.filter((user) => user !== username),
+			}));
+
+			setIsEventLiked(false);
+		}
 	};
 
 	const attendEvent = async () => {
@@ -116,6 +192,7 @@ const Livemap = () => {
 
 		if (user && selectedEvent) {
 			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
+			await updateImpressions(selectedEvent.id)
 
 			await eventRef.update({
 				attendees: firebase.firestore.FieldValue.arrayUnion(username),
@@ -125,7 +202,7 @@ const Livemap = () => {
 			setSelectedEvent((prevState) => ({
 				...prevState,
 				attendees: [...prevState.attendees, username],
-				groupSize: prevState.groupSize + 1,
+				groupSize: prevState.groupSize - 1,
 				isAttending: true,
 			}));
 		}
@@ -146,7 +223,7 @@ const Livemap = () => {
 			setSelectedEvent((prevState) => ({
 				...prevState,
 				attendees: prevState.attendees.filter((user) => user !== username),
-				groupSize: prevState.groupSize - 1,
+				groupSize: prevState.groupSize + 1,
 				isAttending: false,
 			}));
 		}
@@ -213,6 +290,7 @@ const Livemap = () => {
 
 		if (user && selectedEvent) {
 			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
+			await updateImpressions(selectedEvent.id)
 
 			const commentData = {
 				username: username,
@@ -318,6 +396,10 @@ const Livemap = () => {
 		}
 	};
 
+
+
+
+
 	return (
 		<View style={styles.container}>
 			{location && (
@@ -348,7 +430,8 @@ const Livemap = () => {
 							}}
 							onPress={() => handleEventPress(event)}
 						>
-							<View style={styles.eventMarker} />
+
+							<View style={event.impressions >= IMPRESSION_THRESHOLD ? styles.highlightedEventMarker : styles.eventMarker} />
 						</Marker>
 					))}
 				</MapView>
@@ -389,8 +472,14 @@ const Livemap = () => {
 							)}
 
 							<Text style={styles.eventModalText}>
-								Group Size: {selectedEvent.groupSize}
+								Freie Plätze: {selectedEvent.groupSize}
 							</Text>
+							{selectedEvent.likedBy && selectedEvent.likedBy.includes(username) ? (
+								<AntDesign name="heart" size={24} color="red" onPress={toggleEventLike} />
+							) : (
+								<AntDesign name="heart" size={24} color="black" onPress={toggleEventLike} />
+							)}
+
 							<Button
 								title="Kommentare anzeigen"
 								onPress={() => setShowComments(true)}
@@ -461,6 +550,14 @@ const styles = StyleSheet.create({
 		height: 16,
 		borderRadius: 8,
 		backgroundColor: 'red',
+	},
+	highlightedEventMarker: {
+		width: 20,
+		height: 20,
+		borderRadius: 12,
+		backgroundColor: 'purple',
+		borderWidth: 2,
+		borderColor: 'green'
 	},
 	eventTitle: {
 		fontSize: 12,
