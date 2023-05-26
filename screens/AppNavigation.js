@@ -44,6 +44,7 @@ function FriendStackNavigator() {
 		</Stack.Navigator>
 	);
 }
+
 const MainStackNavigator = () => {
 	return (
 		<Stack.Navigator

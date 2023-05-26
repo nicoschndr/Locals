@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
 	Button,
 	FlatList,
@@ -11,14 +11,16 @@ import {
 	TextInput,
 	TouchableOpacity,
 	View,
-	Animated
+	Animated,
 } from 'react-native';
-import MapView, { Marker as DefaultMarker } from 'react-native-maps';
-const Marker = Animated.createAnimatedComponent(DefaultMarker);import * as Location from 'expo-location';
-import {auth, firebase} from '../../firebase';
+import MapView, { Marker as DefaultMarker, Circle } from 'react-native-maps'; // Circle-Komponente hinzugefügt
+import Slider from '@react-native-community/slider'; // Slider-Komponente hinzugefügt
+import * as Location from 'expo-location';
+import { auth, firebase } from '../../firebase';
 import LocalsButton from '../../components/LocalsButton';
-import {AntDesign, MaterialIcons} from '@expo/vector-icons';
+import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 
+const Marker = Animated.createAnimatedComponent(DefaultMarker);
 
 const Comment = ({
 					 comment,
@@ -66,8 +68,6 @@ const Comment = ({
 	);
 };
 
-
-
 const Livemap = () => {
 	const [location, setLocation] = useState(null);
 	const [events, setEvents] = useState([]);
@@ -87,13 +87,14 @@ const Livemap = () => {
 	const [username, setUsername] = useState(null);
 	const [impressions, setImpressions] = useState({});
 	const [markerOpacity, setMarkerOpacity] = useState(new Animated.Value(0));
+	const [radius, setRadius] = useState(10); // Radius-Status hinzugefügt und auf 10 Kilometer festgelegt
+	const [sliderValue, setSliderValue] = useState(10); // Zustand für den Slider-Wert
+	const [showRadius, setShowRadius] = useState(false); // Zustand für die Anzeige des Kreises
+	const [isSliderActive, setIsSliderActive] = useState(false);
 
-	const IMPRESSION_THRESHOLD = 2; // Hier können Sie den Schwellenwert definieren
 
 
-
-
-
+	const IMPRESSION_THRESHOLD = 2;
 
 	const onCommentLayout = (event, commentId) => {
 		const layout = event.nativeEvent.layout;
@@ -115,19 +116,21 @@ const Livemap = () => {
 		return username;
 	};
 
-
 	const handleEventPress = (event) => {
 		updateImpressions(event.id);
 		setSelectedEvent(event);
 		setModalVisible(true);
 	};
+
 	const updateImpressions = async (eventId) => {
-		setImpressions(prevImpressions => {
+		setImpressions((prevImpressions) => {
 			const eventImpressions = prevImpressions[eventId] || 0;
-			const newImpressions = {...prevImpressions, [eventId]: eventImpressions + 1};
+			const newImpressions = {
+				...prevImpressions,
+				[eventId]: eventImpressions + 1,
+			};
 			return newImpressions;
 		});
-		// Update the impression count in Firebase
 		const eventRef = firebase.firestore().collection('events').doc(eventId);
 		await eventRef.update({
 			impressions: firebase.firestore.FieldValue.increment(1),
@@ -153,8 +156,11 @@ const Livemap = () => {
 		const username = await getUsername();
 
 		if (user && selectedEvent) {
-			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
-			await updateImpressions(selectedEvent.id)
+			const eventRef = firebase
+				.firestore()
+				.collection('events')
+				.doc(selectedEvent.id);
+			await updateImpressions(selectedEvent.id);
 
 			await eventRef.update({
 				likedBy: firebase.firestore.FieldValue.arrayUnion(username),
@@ -174,7 +180,10 @@ const Livemap = () => {
 		const username = await getUsername();
 
 		if (user && selectedEvent) {
-			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
+			const eventRef = firebase
+				.firestore()
+				.collection('events')
+				.doc(selectedEvent.id);
 
 			await eventRef.update({
 				likedBy: firebase.firestore.FieldValue.arrayRemove(username),
@@ -194,8 +203,11 @@ const Livemap = () => {
 		const username = await getUsername();
 
 		if (user && selectedEvent) {
-			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
-			await updateImpressions(selectedEvent.id)
+			const eventRef = firebase
+				.firestore()
+				.collection('events')
+				.doc(selectedEvent.id);
+			await updateImpressions(selectedEvent.id);
 
 			await eventRef.update({
 				attendees: firebase.firestore.FieldValue.arrayUnion(username),
@@ -216,7 +228,10 @@ const Livemap = () => {
 		const username = await getUsername();
 
 		if (user && selectedEvent) {
-			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
+			const eventRef = firebase
+				.firestore()
+				.collection('events')
+				.doc(selectedEvent.id);
 
 			await eventRef.update({
 				attendees: firebase.firestore.FieldValue.arrayRemove(username),
@@ -292,8 +307,11 @@ const Livemap = () => {
 		const username = await getUsername();
 
 		if (user && selectedEvent) {
-			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
-			await updateImpressions(selectedEvent.id)
+			const eventRef = firebase
+				.firestore()
+				.collection('events')
+				.doc(selectedEvent.id);
+			await updateImpressions(selectedEvent.id);
 
 			const commentData = {
 				username: username,
@@ -310,7 +328,10 @@ const Livemap = () => {
 
 	useEffect(() => {
 		if (selectedEvent) {
-			const eventRef = firebase.firestore().collection('events').doc(selectedEvent.id);
+			const eventRef = firebase
+				.firestore()
+				.collection('events')
+				.doc(selectedEvent.id);
 
 			eventRef
 				.collection('comments')
@@ -374,7 +395,6 @@ const Livemap = () => {
 
 				setEvents(eventsData);
 
-				// Start the fade-in animation
 				Animated.timing(markerOpacity, {
 					toValue: 1,
 					duration: 5000,
@@ -406,9 +426,42 @@ const Livemap = () => {
 		}
 	};
 
+	const filterEventsByRadius = (events, radius) => {
+		if (!location) return events;
 
+		const { latitude, longitude } = location.coords;
 
+		return events.filter((event) => {
+			const eventDistance = getDistanceFromLatLonInKm(
+				latitude,
+				longitude,
+				event.latitude,
+				event.longitude
+			);
+			return eventDistance <= radius;
+		});
+	};
 
+	const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+		const R = 6371; // Radius der Erde in Kilometern
+		const dLat = deg2rad(lat2 - lat1); // deg2rad unten
+		const dLon = deg2rad(lon2 - lon1);
+		const a =
+			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+			Math.cos(deg2rad(lat1)) *
+			Math.cos(deg2rad(lat2)) *
+			Math.sin(dLon / 2) *
+			Math.sin(dLon / 2);
+		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		const d = R * c; // Entfernung in km
+		return d;
+	};
+
+	const deg2rad = (deg) => {
+		return deg * (Math.PI / 180);
+	};
+
+	const filteredEvents = filterEventsByRadius(events, radius); // Filtern der Ereignisse basierend auf dem Radius
 
 	return (
 		<View style={styles.container}>
@@ -431,7 +484,20 @@ const Livemap = () => {
 						<MaterialIcons name="location-on" size={30} color="#ec404b" />
 					</Marker>
 
-					{events.map((event) => (
+					{isSliderActive && ( // Anzeige des Kreises nur wenn showRadius true ist
+						<Circle
+							center={{
+								latitude: location.coords.latitude,
+								longitude: location.coords.longitude,
+							}}
+							radius={radius * 1000} // Konvertierung des Radius von Kilometern in Meter
+							strokeColor="blue"
+							strokeWidth={2}
+							fillColor="rgba(0, 0, 255, 0.1)"
+						/>
+					)}
+
+					{filteredEvents.map((event) => (
 						<Marker
 							key={event.id}
 							coordinate={{
@@ -441,11 +507,34 @@ const Livemap = () => {
 							onPress={() => handleEventPress(event)}
 							style={{ opacity: markerOpacity }}
 						>
-							<View style={event.impressions >= IMPRESSION_THRESHOLD ? styles.highlightedEventMarker : styles.eventMarker} />
+							<View
+								style={
+									event.impressions >= IMPRESSION_THRESHOLD
+										? styles.highlightedEventMarker
+										: styles.eventMarker
+								}
+							/>
 						</Marker>
 					))}
 				</MapView>
 			)}
+
+			<View style={styles.sliderContainer}>
+				<Slider
+					style={styles.slider}
+					minimumValue={1}
+					maximumValue={50}
+					step={1}
+					value={sliderValue}
+					onValueChange={(value) => {
+						setSliderValue(value);
+						setRadius(value);
+					}}
+					onSlidingStart={() => setIsSliderActive(true)}
+					onSlidingComplete={() => setIsSliderActive(false)}				/>
+				<Text style={styles.sliderValueText}>{sliderValue} km</Text>
+			</View>
+
 			<Modal visible={modalVisible} animationType="slide">
 				<View style={styles.modalContainer}>
 					{selectedEvent && !showComments && (
@@ -535,11 +624,28 @@ const Livemap = () => {
 					</TouchableOpacity>
 				</View>
 			</Modal>
+
 		</View>
 	);
 };
 
 const styles = StyleSheet.create({
+	sliderContainer: {
+		position: 'absolute',
+		bottom: 20,
+		left: 20,
+		right: 20,
+		alignItems: 'center',
+	},
+	sliderValueText: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		marginTop: 8,
+	},
+	slider: {
+		width: '100%',
+	},
+
 	container: {
 		flex: 1,
 	},
