@@ -10,10 +10,11 @@ import {
 	Text,
 	TextInput,
 	TouchableOpacity,
-	View
+	View,
+	Animated
 } from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
-import * as Location from 'expo-location';
+import MapView, { Marker as DefaultMarker } from 'react-native-maps';
+const Marker = Animated.createAnimatedComponent(DefaultMarker);import * as Location from 'expo-location';
 import {auth, firebase} from '../../firebase';
 import LocalsButton from '../../components/LocalsButton';
 import {AntDesign, MaterialIcons} from '@expo/vector-icons';
@@ -85,6 +86,8 @@ const Livemap = () => {
 	const [isEventLiked, setIsEventLiked] = useState(false);
 	const [username, setUsername] = useState(null);
 	const [impressions, setImpressions] = useState({});
+	const [markerOpacity, setMarkerOpacity] = useState(new Animated.Value(0));
+
 	const IMPRESSION_THRESHOLD = 2; // Hier können Sie den Schwellenwert definieren
 
 
@@ -114,7 +117,7 @@ const Livemap = () => {
 
 
 	const handleEventPress = (event) => {
-		updateImpressions(event.id); // Erhöhe die Impressions beim Klicken auf das Event
+		updateImpressions(event.id);
 		setSelectedEvent(event);
 		setModalVisible(true);
 	};
@@ -370,6 +373,13 @@ const Livemap = () => {
 				});
 
 				setEvents(eventsData);
+
+				// Start the fade-in animation
+				Animated.timing(markerOpacity, {
+					toValue: 1,
+					duration: 5000,
+					useNativeDriver: true,
+				}).start();
 			});
 		};
 
@@ -429,8 +439,8 @@ const Livemap = () => {
 								longitude: event.longitude,
 							}}
 							onPress={() => handleEventPress(event)}
+							style={{ opacity: markerOpacity }}
 						>
-
 							<View style={event.impressions >= IMPRESSION_THRESHOLD ? styles.highlightedEventMarker : styles.eventMarker} />
 						</Marker>
 					))}
