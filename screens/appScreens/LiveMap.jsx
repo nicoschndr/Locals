@@ -80,7 +80,7 @@ const Livemap = () => {
     const [showRadius, setShowRadius] = useState(false);
     const [isSliderActive, setIsSliderActive] = useState(false);
 
-    const IMPRESSION_THRESHOLD = 2;
+    const IMPRESSION_THRESHOLD = 100;
 
     const onCommentLayout = (event, commentId) => {
         const layout = event.nativeEvent.layout;
@@ -379,7 +379,6 @@ const Livemap = () => {
                 });
 
                 const filteredEvents = filterEventsByRadius(eventsData, radius);
-                console.log(filteredEvents)
                 setEvents(filteredEvents);
 
                 Animated.timing(markerOpacity, {
@@ -492,11 +491,10 @@ const Livemap = () => {
                             style={{ opacity: markerOpacity }}
                         >
                             <View
-                                style={
-                                    event.impressions >= IMPRESSION_THRESHOLD
-                                        ? styles.highlightedEventMarker
-                                        : styles.eventMarker
-                                }
+                                style={[
+                                    event.advertised ? styles.highlightedEventAdMarker : styles.eventMarker,
+                                    event.advertised ? null : event.impressions >= IMPRESSION_THRESHOLD ? styles.friendHighlightedMarker : null
+                                ]}
                             />
                         </Marker>
                     ))}
@@ -643,6 +641,14 @@ const styles = StyleSheet.create({
     eventContainer: {
         alignItems: 'center',
     },
+    friendHighlightedMarker: {
+        width: 16,
+        height: 16,
+        borderRadius: 2,
+        borderWidth: 2,
+        borderColor: 'orange',
+        backgroundColor: 'red',
+    },
     eventMarker: {
         width: 16,
         height: 16,
@@ -654,6 +660,14 @@ const styles = StyleSheet.create({
         height: 25,
         borderRadius: 12,
         backgroundColor: 'red',
+        borderWidth: 4,
+        borderColor: 'blue',
+    },
+    highlightedEventAdMarker:{
+        width: 30,
+        height: 30,
+        borderRadius: 12,
+        backgroundColor: 'green',
         borderWidth: 4,
         borderColor: 'blue',
     },

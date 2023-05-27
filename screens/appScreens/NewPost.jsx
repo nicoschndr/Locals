@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -5,28 +6,16 @@ import {
 	SafeAreaView,
 	ScrollView,
 	Dimensions,
-	Image,
 	TextInput,
-	Button,
-	Pressable,
 	TouchableOpacity,
-	TextBase, Platform, PermissionsAndroid,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import * as Location from 'expo-location';
-
-
-import React, {useEffect, useState} from "react";
+import { CheckBox } from 'react-native-elements';
+import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker, {
-	DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import RNDateTimePicker from "@react-native-community/datetimepicker";
-import { render } from "react-dom";
-import firebase from "firebase/compat";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { auth, firestore, storage } from "../../firebase";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
-import LocalsButton from "../../components/LocalsButton";
 
 const Template = ({ navigation }) => {
 	const windowWidth = Dimensions.get("window").width;
@@ -45,8 +34,7 @@ const Template = ({ navigation }) => {
 	const [latitude, setLatitude] = useState(0);
 	const [longitude, setLongitude] = useState(0);
 	const [showMap, setShowMap] = useState(false);
-
-
+	const [advertised, setAdvertised] = useState(false);
 
 	useEffect(() => {
 		requestLocationPermission();
@@ -111,20 +99,24 @@ const Template = ({ navigation }) => {
 		return url;
 	};
 
-
 	const uploadPost = async () => {
 		const imageUrl = await uploadImage(imageUri);
+
+		// Get the current user's document
+		const userDoc = await firestore.collection("users").doc(auth.currentUser.uid).get();
+		const username = userDoc.data().username;
+
 		firestore
 			.collection("events")
-			.doc()
-			.set({
-				creator: auth.currentUser.uid,
+			.add({
+				creator: username,
 				title: title,
 				address: address,
 				groupSize: groupSize,
 				latitude: latitude,
 				longitude: longitude,
 				imageUrl: imageUrl,
+				advertised: advertised,
 			})
 			.then(() => {
 				alert("Post created successfully");
@@ -141,8 +133,10 @@ const Template = ({ navigation }) => {
 	}
 
 	function onDateSelected(event, value) {
-		setDate(value);
 		setDatePicker(false);
+		if (value) {
+			setDate(value);
+		}
 	}
 
 	return (
@@ -174,26 +168,28 @@ const Template = ({ navigation }) => {
 						style={styles.inputText}
 						value={title}
 						onChangeText={(title) => setTitle(title)}
-					></TextInput>
+					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>
 						Address<Text style={{ fontWeight: "bold" }}> or Set Marker*</Text>
 					</Text>
-					<View style={{flexDirection: "row", alignItems: "center"}}>
+					<View style={{ flexDirection: "row", alignItems: "center" }}>
 						<TextInput
 							style={[styles.inputText, { flex: 1 }]}
 							value={address}
 							onChangeText={(address) => setAddress(address)}
 						/>
 						<Ionicons
-							name={'locate-outline'}
+							name={"locate-outline"}
 							size={30}
 							onPress={getCurrentLocation}
-							style={{marginLeft: 10}}
+							style={{ marginLeft: 10 }}
 						/>
 					</View>
 				</View>
+
 				<View>
 					{showMap ? (
 						<View style={{ flex: 1 }}>
@@ -231,6 +227,7 @@ const Template = ({ navigation }) => {
 						</TouchableOpacity>
 					)}
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Group Size</Text>
 					<TextInput
@@ -239,30 +236,34 @@ const Template = ({ navigation }) => {
 						onChangeText={(groupSize) => setGroupSize(groupSize)}
 					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Description</Text>
 					<TextInput
 						style={styles.inputText}
 						value={description}
 						onChangeText={(description) => setDescription(description)}
-					></TextInput>
+					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Gender</Text>
 					<TextInput
 						style={styles.inputText}
 						value={gender}
 						onChangeText={(gender) => setGender(gender)}
-					></TextInput>
+					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Category</Text>
 					<TextInput
 						style={styles.inputText}
 						value={category}
 						onChangeText={(category) => setCategory(category)}
-					></TextInput>
+					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Date</Text>
 					<View style={{ flexDirection: "row" }}>
@@ -270,12 +271,13 @@ const Template = ({ navigation }) => {
 							name={"calendar-outline"}
 							onPress={showDatePicker}
 							size={30}
-						></Ionicons>
+						/>
 						{datePicker && (
 							<DateTimePicker
 								value={date}
 								mode={"date"}
 								is24Hour={true}
+								display="spinner"
 								onChange={onDateSelected}
 							/>
 						)}
@@ -284,6 +286,7 @@ const Template = ({ navigation }) => {
 						</Text>
 					</View>
 				</View>
+
 				<View
 					style={{
 						flexDirection: "row",
@@ -291,18 +294,24 @@ const Template = ({ navigation }) => {
 						justifyContent: "space-between",
 					}}
 				>
-					<Ionicons name={"camera-outline"} size={30}></Ionicons>
+					<View style={{ flexDirection: "row", alignItems: "center" }}>
+						<CheckBox
+							title="Advertised"
+							checked={advertised}
+							onPress={() => setAdvertised(!advertised)}
+						/>
+					</View>
+
 					<TouchableOpacity style={styles.button} onPress={uploadPost}>
 						<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
 					</TouchableOpacity>
-					<Ionicons name={"images-outline"} size={30}></Ionicons>
+
+					<Ionicons name={"images-outline"} size={30} />
 				</View>
 			</ScrollView>
 		</SafeAreaView>
-
 	);
 };
-
 
 export default Template;
 
