@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -5,25 +6,16 @@ import {
 	SafeAreaView,
 	ScrollView,
 	Dimensions,
-	Image,
 	TextInput,
-	Button,
-	Pressable,
 	TouchableOpacity,
-	TextBase,
-	KeyboardAvoidingView,
 } from "react-native";
-import React, { useState, useEffect } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker, {
-	DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import MapView, { Marker } from "react-native-maps";
+import { CheckBox } from "react-native-elements";
 import * as Location from "expo-location";
-
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { auth, firestore, storage } from "../../firebase";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
-import LocalsButton from "../../components/LocalsButton";
 
 const PostEvent = ({ navigation }) => {
 	const windowWidth = Dimensions.get("window").width;
@@ -39,12 +31,59 @@ const PostEvent = ({ navigation }) => {
 	const [description, setDescription] = useState("");
 	const [gender, setGender] = useState("");
 	const [category, setCategory] = useState("");
-	const [location, setLocation] = useState(null);
-	const [geopoint, setGeopoint] = useState({ longitude: 0, latitude: 0 });
+	const [latitude, setLatitude] = useState(0);
+	const [longitude, setLongitude] = useState(0);
+	const [showMap, setShowMap] = useState(false);
+	const [advertised, setAdvertised] = useState(false);
 
 	useEffect(() => {
-		getLocation();
+		requestLocationPermission();
 	}, []);
+
+	const requestLocationPermission = async () => {
+		if (Platform.OS === "android") {
+			try {
+				const granted = await PermissionsAndroid.request(
+					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+				);
+				if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+					await getCurrentLocation();
+				} else {
+					console.log("Location permission denied");
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		} else {
+			await getCurrentLocation();
+		}
+	};
+
+	const getCurrentLocation = async () => {
+		try {
+			let { status } = await Location.requestForegroundPermissionsAsync();
+			if (status !== "granted") {
+				alert("Permission to access location was denied");
+				return;
+			}
+
+			let location = await Location.getCurrentPositionAsync({});
+			const { latitude, longitude } = location.coords;
+			setLatitude(latitude);
+			setLongitude(longitude);
+			setAddress(`${latitude}, ${longitude}`);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const openMap = () => {
+		setShowMap(true);
+	};
+
+	const closeMap = () => {
+		setShowMap(false);
+	};
 
 	const uploadImage = async (uri) => {
 		setUploading(true);
@@ -62,41 +101,45 @@ const PostEvent = ({ navigation }) => {
 
 	const uploadPost = async () => {
 		const imageUrl = await uploadImage(imageUri);
-		auth;
+
+		// Get the current user's document
+		const userDoc = await firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.get();
+		const username = userDoc.data().username;
+
 		firestore
 			.collection("events")
-			.doc()
-			.set({
-				creator: auth.currentUser.uid,
+			.add({
+				creator: username,
 				title: title,
 				address: address,
 				groupSize: groupSize,
-				description: description,
-				gender: gender,
-				category: category,
-				date: date,
+				latitude: latitude,
+				longitude: longitude,
 				imageUrl: imageUrl,
-				longitude: geopoint.longitude,
-				latitude: geopoint.latitude,
+				advertised: advertised,
 			})
 			.then(() => {
-				setUploading(false);
-				// setEmail("");
-				// setPassword("");
 				alert("Post created successfully");
 				setTimeout(() => {
 					navigation.navigate("Profile");
 				}, 1000);
+			})
+			.catch((error) => {
+				console.log(error);
 			});
 	};
-
 	function showDatePicker() {
 		setDatePicker(true);
 	}
 
 	function onDateSelected(event, value) {
-		setDate(value);
 		setDatePicker(false);
+		if (value) {
+			setDate(value);
+		}
 	}
 
 	async function getLocation() {
@@ -124,12 +167,10 @@ const PostEvent = ({ navigation }) => {
 						style={{ marginRight: windowWidth - 90 }}
 						name={"arrow-back-circle-outline"}
 						size={40}
-					>
-						{" "}
-					</Ionicons>
+					/>
 				</TouchableOpacity>
 
-				<View style={{ alignSelf: "center" }}>
+				<View style={{ alignSelf: "center", marginBottom: 100 }}>
 					<View style={styles.postImage}>
 						<LocalsImagePicker
 							onImageTaken={(uri) => setImageUri(uri)}
@@ -144,73 +185,103 @@ const PostEvent = ({ navigation }) => {
 						style={styles.inputText}
 						value={title}
 						onChangeText={(title) => setTitle(title)}
-					></TextInput>
+					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>
 						Address
 						{/* <Text style={{ fontWeight: "bold" }}> or Set Marker*</Text> */}
 					</Text>
-					<GooglePlacesAutocomplete
-						fetchDetails={true}
-						currentLocation={true}
-						currentLocationLabel="Current location"
-						listViewDisplayed={false}
-						onPress={(data, details = null) => {
-							setAddress(details.formatted_address);
-							setGeopoint({
-								longitude: details.geometry.location.lng,
-								latitude: details.geometry.location.lat,
-							});
-						}}
-						query={{
-							key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
-							language: "de",
-							components: "country:de",
-						}}
-						styles={{
-							textInput: styles.addressInput,
-							listView: {
-								width: "90%", // Set the width of the suggestions list
-							},
-							container: {
-								width: "100%", // Set the width of the container
-							},
-						}}
-					/>
+					<View style={{ flexDirection: "row", alignItems: "center" }}>
+						<TextInput
+							style={[styles.inputText, { flex: 1 }]}
+							value={address}
+							onChangeText={(address) => setAddress(address)}
+						/>
+						<Ionicons
+							name={"locate-outline"}
+							size={30}
+							onPress={getCurrentLocation}
+							style={{ marginLeft: 10 }}
+						/>
+					</View>
 				</View>
+
+				<View>
+					{showMap ? (
+						<View style={{ flex: 1 }}>
+							<MapView
+								style={styles.map}
+								initialRegion={{
+									latitude: latitude,
+									longitude: longitude,
+									latitudeDelta: 0.0922,
+									longitudeDelta: 0.0421,
+								}}
+							>
+								<Marker
+									coordinate={{
+										latitude: latitude,
+										longitude: longitude,
+									}}
+									draggable
+									onDragEnd={(e) => {
+										const { latitude, longitude } = e.nativeEvent.coordinate;
+										setLatitude(latitude);
+										setLongitude(longitude);
+										setAddress(`${latitude}, ${longitude}`);
+									}}
+								/>
+							</MapView>
+
+							<TouchableOpacity style={styles.button} onPress={closeMap}>
+								<Text style={{ color: "#FFFFFF" }}>Karte schließen</Text>
+							</TouchableOpacity>
+						</View>
+					) : (
+						<TouchableOpacity style={styles.button} onPress={openMap}>
+							<Text style={{ color: "#FFFFFF" }}>Karte öffnen</Text>
+						</TouchableOpacity>
+					)}
+				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Group Size</Text>
 					<TextInput
 						style={styles.inputText}
 						value={groupSize}
 						onChangeText={(groupSize) => setGroupSize(groupSize)}
-					></TextInput>
+					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Description</Text>
 					<TextInput
 						style={styles.inputText}
 						value={description}
 						onChangeText={(description) => setDescription(description)}
-					></TextInput>
+					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Gender</Text>
 					<TextInput
 						style={styles.inputText}
 						value={gender}
 						onChangeText={(gender) => setGender(gender)}
-					></TextInput>
+					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Category</Text>
 					<TextInput
 						style={styles.inputText}
 						value={category}
 						onChangeText={(category) => setCategory(category)}
-					></TextInput>
+					/>
 				</View>
+
 				<View style={styles.inputContainer}>
 					<Text>Date</Text>
 					<View style={{ flexDirection: "row", marginTop: 12 }}>
@@ -218,18 +289,23 @@ const PostEvent = ({ navigation }) => {
 							name={"calendar-outline"}
 							onPress={showDatePicker}
 							size={30}
-						></Ionicons>
-						<DateTimePicker
-							value={date}
-							locale="de-DE"
-							onChange={onDateSelected}
 						/>
-
-						{/* <Text style={styles.date} onPress={showDatePicker}>
+						{datePicker && (
+							<DateTimePicker
+								value={date}
+								mode={"date"}
+								is24Hour={true}
+								display="spinner"
+								onChange={onDateSelected}
+							/>
+						)}
+						<Text style={styles.date} onPress={showDatePicker}>
 							{date.toString()}
-						</Text> */}
+						</Text>{" "}
+						*/}
 					</View>
 				</View>
+
 				<View
 					style={{
 						// flexDirection: "row",
@@ -238,15 +314,19 @@ const PostEvent = ({ navigation }) => {
 						justifyContent: "space-between",
 					}}
 				>
-					{/* <Ionicons name={"camera-outline"} size={30}></Ionicons> */}
-					{!uploading && (
-						<LocalsButton
-							title="Post Event"
-							style={styles.button}
-							onPress={uploadPost}
+					<View style={{ flexDirection: "row", alignItems: "center" }}>
+						<CheckBox
+							title="Advertised"
+							checked={advertised}
+							onPress={() => setAdvertised(!advertised)}
 						/>
-					)}
-					{/* <Ionicons name={"images-outline"} size={30}></Ionicons> */}
+					</View>
+
+					<TouchableOpacity style={styles.button} onPress={uploadPost}>
+						<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
+					</TouchableOpacity>
+
+					<Ionicons name={"images-outline"} size={30} />
 				</View>
 			</ScrollView>
 		</KeyboardAvoidingView>
@@ -284,14 +364,20 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		marginTop: 10,
 	},
-	date: {
-		marginLeft: 10,
-		marginTop: 10,
-		fontWeight: "bold",
+	map: {
+		width: "100%",
+		height: 300,
+		marginTop: 20,
 	},
 	button: {
 		alignSelf: "center",
-		width: 200,
+		alignItems: "center",
+		justifyContent: "center",
+		paddingVertical: 12,
+		paddingHorizontal: 32,
+		borderRadius: 50,
+		backgroundColor: "#E63F3F",
+		marginTop: 20,
 	},
 	image: {
 		width: "100%",

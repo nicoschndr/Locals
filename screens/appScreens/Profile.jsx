@@ -111,7 +111,7 @@ const Template = ({ route, navigation }) => {
 				}
 			});
 		}
-	}, []);
+	}, [friendRequests]);
 
 	async function sendFriendRequest(senderUsername, receiverUsername) {
 		const usersRef = firebase.firestore().collection("users");
