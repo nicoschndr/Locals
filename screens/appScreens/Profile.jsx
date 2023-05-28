@@ -98,21 +98,6 @@ const Template = ({ route, navigation }) => {
 		}
 	}
 
-	useEffect(() => {
-		const user = firebase.auth().currentUser;
-
-		if (user) {
-			const userDocRef = firebase.firestore().collection("users").doc(user.uid);
-
-			userDocRef.onSnapshot((doc) => {
-				if (doc.exists) {
-					const userData = doc.data();
-					setCurrentUsername(userData.username);
-				}
-			});
-		}
-	}, [friendRequests]);
-
 	async function sendFriendRequest(senderUsername, receiverUsername) {
 		const usersRef = firebase.firestore().collection("users");
 
@@ -144,7 +129,8 @@ const Template = ({ route, navigation }) => {
 	function getUserPosts() {
 		firestore
 			.collection("events")
-			.where("creator", "==", uid)
+			//where("creator", "==", uid  or user.username
+			.where("creator", "==", user.username || uid)
 			.onSnapshot((snapshot) => {
 				const posts = snapshot.docs.map((doc) => ({
 					id: doc.id,
@@ -153,6 +139,21 @@ const Template = ({ route, navigation }) => {
 				setEvents(posts);
 			});
 	}
+
+	useEffect(() => {
+		const user = firebase.auth().currentUser;
+		getUserPosts();
+		if (user) {
+			const userDocRef = firebase.firestore().collection("users").doc(user.uid);
+
+			userDocRef.onSnapshot((doc) => {
+				if (doc.exists) {
+					const userData = doc.data();
+					setCurrentUsername(userData.username);
+				}
+			});
+		}
+	}, [friendRequests]);
 
 	return (
 		<SafeAreaView style={styles.container}>

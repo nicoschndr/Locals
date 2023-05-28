@@ -8,6 +8,7 @@ import {
 	Dimensions,
 	TextInput,
 	TouchableOpacity,
+	KeyboardAvoidingView,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { CheckBox } from "react-native-elements";
@@ -15,6 +16,7 @@ import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { auth, firestore, storage } from "../../firebase";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 
 const PostEvent = ({ navigation }) => {
@@ -194,10 +196,32 @@ const PostEvent = ({ navigation }) => {
 						{/* <Text style={{ fontWeight: "bold" }}> or Set Marker*</Text> */}
 					</Text>
 					<View style={{ flexDirection: "row", alignItems: "center" }}>
-						<TextInput
-							style={[styles.inputText, { flex: 1 }]}
-							value={address}
-							onChangeText={(address) => setAddress(address)}
+						<GooglePlacesAutocomplete
+							fetchDetails={true}
+							currentLocation={true}
+							currentLocationLabel="Current location"
+							listViewDisplayed={false}
+							onPress={(data, details = null) => {
+								setAddress(details.formatted_address);
+								setGeopoint({
+									longitude: details.geometry.location.lng,
+									latitude: details.geometry.location.lat,
+								});
+							}}
+							query={{
+								key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
+								language: "de",
+								components: "country:de",
+							}}
+							styles={{
+								textInput: styles.addressInput,
+								listView: {
+									width: "90%", // Set the width of the suggestions list
+								},
+								container: {
+									width: "100%", // Set the width of the container
+								},
+							}}
 						/>
 						<Ionicons
 							name={"locate-outline"}
@@ -301,8 +325,7 @@ const PostEvent = ({ navigation }) => {
 						)}
 						<Text style={styles.date} onPress={showDatePicker}>
 							{date.toString()}
-						</Text>{" "}
-						*/}
+						</Text>
 					</View>
 				</View>
 
@@ -321,11 +344,11 @@ const PostEvent = ({ navigation }) => {
 							onPress={() => setAdvertised(!advertised)}
 						/>
 					</View>
-
-					<TouchableOpacity style={styles.button} onPress={uploadPost}>
-						<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
-					</TouchableOpacity>
-
+					{!uploading && (
+						<TouchableOpacity style={styles.button} onPress={uploadPost}>
+							<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
+						</TouchableOpacity>
+					)}
 					<Ionicons name={"images-outline"} size={30} />
 				</View>
 			</ScrollView>
