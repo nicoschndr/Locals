@@ -76,6 +76,7 @@ function ProfileDrawerScreen() {
 			/>
 			<Drawer.Screen name="EventDetails" component={EventDetails} />
 			<Drawer.Screen name="EditPost" component={EditPost} />
+			<Drawer.Screen name="Settings" component={Settings} />
 		</Drawer.Navigator>
 	);
 }

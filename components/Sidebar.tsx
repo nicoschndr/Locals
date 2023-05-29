@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
-import {View, Text, StyleSheet, ScrollView, ImageBackground, Image} from "react-native";
+import {View, Text, StyleSheet, ScrollView, ImageBackground, Image, Pressable} from "react-native";
 import {DrawerItemList} from "@react-navigation/drawer";
 import {Ionicons} from "@expo/vector-icons";
-import {firebase, firestore} from "../firebase";
+import {auth, firebase, firestore} from "../firebase";
 
 const Sidebar = props => {
 
@@ -23,6 +23,17 @@ const Sidebar = props => {
                 }
             ));
     }
+
+    const logout = () => {
+        auth
+            .signOut()
+            .then(() => {
+                alert("Logged out!");
+            })
+            .then(() => {
+                props.navigation.navigate("Home");
+            });
+    };
 
     const uid = firebase.auth().currentUser.uid;
     const [user, setUser] = useState({
@@ -45,6 +56,10 @@ const Sidebar = props => {
             <View style={styles.container}>
                 <DrawerItemList {...props}/>
             </View>
+            <Pressable style={styles.label} onPress={logout}>
+                <Ionicons name="log-out-outline" size={19} color={'rgba(255, 0, 0, .87)'}></Ionicons>
+                <Text style={{fontWeight: 'bold', color: 'rgba(255, 0, 0, .87)'}}>Logout</Text>
+            </Pressable>
         </ScrollView>
     )
 }
@@ -75,5 +90,9 @@ const styles = StyleSheet.create({
         color: "rgba(255,255,255,0.8)",
         fontSize: 13,
         marginRight:4
+    },
+    label: {
+        flexDirection: "row",
+        margin: 16,
     }
 })

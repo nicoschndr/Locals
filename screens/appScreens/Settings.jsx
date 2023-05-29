@@ -1,9 +1,10 @@
-import {View, Text, Button, StyleSheet, Alert, TextInput, Modal} from "react-native";
+import {View, Text, Button, StyleSheet, Alert, TextInput, Modal, TouchableOpacity} from "react-native";
 import React, { useState } from "react";
 import {auth, firebase} from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import { useNavigation } from "@react-navigation/native";
 import LocalsTextInput from "../../components/LocalsTextInput";
+import {Ionicons} from "@expo/vector-icons";
 
 
 const Template = () => {
@@ -53,6 +54,18 @@ const Template = () => {
 
 	return (
 		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+			<TouchableOpacity
+				style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
+				onPress={() => navigation.goBack()}
+			>
+				<Ionicons
+					style={{ marginRight: windowWidth - 90 }}
+					name={"arrow-back-circle-outline"}
+					size={40}
+				>
+					{" "}
+				</Ionicons>
+			</TouchableOpacity>
 			<LocalsButton title="Sign Out" onPress={logout}
 						  style={{marginBottom: 10}} // Added some styling
 			/>
