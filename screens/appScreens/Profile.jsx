@@ -57,7 +57,7 @@ const Template = ({route, navigation}) => {
     }, [navigation, uid]);
 
     function getUserData() {
-       firestore
+        firestore
             .collection("users")
             .doc(uid)
             .get()
@@ -172,22 +172,22 @@ const Template = ({route, navigation}) => {
     }
 
     function setFollower() {
-            user.follower.forEach((r) => flw.push(r))
-            flw.push(auth.currentUser.displayName)
-            firestore
-                .collection("users")
-                .doc(uid)
-                .update({
-                    follower: flw
-                }).then(
-                setFollowing
-            )
-            flw = [];
+        user.follower.forEach((r) => flw.push(r))
+        flw.push(currentUsername)
+        firestore
+            .collection("users")
+            .doc(uid)
+            .update({
+                follower: flw
+            }).then(
+            setFollowing
+        )
+        flw = [];
     }
 
     function setFollowing() {
         currentUser.following.forEach((r) => flwng.push(r))
-        flwng.push(user.firstName + " " + user.lastName)
+        flwng.push(user.username)
         firestore
             .collection("users")
             .doc(auth.currentUser.uid)
@@ -201,7 +201,7 @@ const Template = ({route, navigation}) => {
 
     function setUnfollow() {
         user.follower.forEach((r) => flw.push(r))
-        const index = flw.indexOf(auth.currentUser.displayName)
+        const index = flw.indexOf(currentUsername)
         flw.splice(index, 1)
         firestore
             .collection("users")
@@ -216,7 +216,7 @@ const Template = ({route, navigation}) => {
 
     function setUnfollowing() {
         currentUser.following.forEach((r) => flwng.push(r))
-        const index = flwng.indexOf(user.firstName + " " + user.lastName)
+        const index = flwng.indexOf(user.username)
         flwng.splice(index, 1)
         firestore
             .collection("users")
@@ -283,57 +283,60 @@ const Template = ({route, navigation}) => {
                     )}
                 </View>
 
-                {user.follower && user.following && currentUser.follower && currentUser.following && (
-                <View
-                    style={[styles.infoContainer, {marginTop: windowHeight * 0.01}]}
-                >
-                    <Text style={[styles.text, {fontWeight: "200", fontSize: 36}]}>
-                        {user.firstName} {user.lastName}
-                    </Text>
-                    <Text style={[styles.text, {fontWeight: "200", fontSize: 14}]}>
-                        @{user.username}
-                    </Text>
-                    {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(user.firstName + " " + user.lastName) === false && (
-                        <TouchableOpacity style={{marginTop: 10}} onPress={setFollower}>
-                            <Text>Folgen</Text>
-                        </TouchableOpacity>
-                    )}
-                    {currentUser.following.includes(user.firstName + " " + user.lastName) === true && (
-                        <TouchableOpacity style={{marginTop: 10}} onPress={setUnfollow}>
-                            <Text>Nicht mehr Folgen</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
-                    )}
-
-                {user.follower && user.following && currentUser.follower && currentUser.following && (
-                <View
-                    style={[styles.statsContainer, {marginTop: windowHeight * 0.05}]}
-                >
-
-                    <View style={styles.statsBox}>
-                        <Text>Events</Text>
-                        <Text>{events.length}</Text>
-                    </View>
+                {user.follower && user.following && currentUser.follower && currentUser.following && user.username && (
                     <View
-                        style={[
-                            styles.statsBox,
-                            {
-                                borderColor: "DFD8C8",
-                                borderLeftWidth: 1,
-                                borderRightWidth: 1,
-                            },
-                        ]}
+                        style={[styles.infoContainer, {marginTop: windowHeight * 0.01}]}
                     >
-                        <Text>Follower</Text>
-                        <Text>{user.follower.length}</Text>
+                        <Text style={[styles.text, {fontWeight: "200", fontSize: 36}]}>
+                            {user.firstName} {user.lastName}
+                        </Text>
+                        <Text style={[styles.text, {fontWeight: "200", fontSize: 14}]}>
+                            @{user.username}
+                        </Text>
+                        {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(user.username) === false && (
+                            <TouchableOpacity style={{marginTop: 10}} onPress={setFollower}>
+                                <Text>Folgen</Text>
+                            </TouchableOpacity>
+                        )}
+                        {currentUser.following.includes(user.username) === true && (
+                            <TouchableOpacity style={{marginTop: 10}} onPress={setUnfollow}>
+                                <Text>Nicht mehr Folgen</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
-                    <View style={styles.statsBox}>
-                        <Text>Following</Text>
-                        <Text>{user.following.length}</Text>
-                    </View>
+                )}
 
-                </View>
+                {user.follower && user.following && currentUser.follower && currentUser.following && (
+                    <View
+                        style={[styles.statsContainer, {marginTop: windowHeight * 0.05}]}
+                    >
+                        <View style={styles.statsBox}>
+                            <Text>Events</Text>
+                            <Text>{events.length}</Text>
+                        </View>
+                        <View
+                            style={[
+                                styles.statsBox,
+                                {
+                                    borderColor: "DFD8C8",
+                                    borderLeftWidth: 1,
+                                    borderRightWidth: 1,
+                                },
+                            ]}
+                        >
+                            <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Follower',{user})}>
+                                <Text>Follower</Text>
+                                <Text>{user.follower.length}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following',{user})}>
+                            <View style={styles.statsBox}>
+                                <Text>Following</Text>
+                                <Text>{user.following.length}</Text>
+                            </View>
+                        </TouchableOpacity>
+
+                    </View>
                 )}
 
 
