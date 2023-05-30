@@ -9,20 +9,19 @@ const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 
-const Following = (route) => {
-
+const Following = ({route: {params}}) => {
     useEffect(() => {
         getCurrentUserData();
     }, []);
 
-
     const [currentUser, setCurrentUser] = useState({});
     const [followingUser, setFollowingUser] = useState([]);
+    const uid = params.uid;
 
     function getCurrentUserData() {
         firestore
             .collection("users")
-            .doc(auth.currentUser.uid)
+            .doc(uid)
             .get()
             .then((snapshot) => {
                 setCurrentUser(snapshot.data());
@@ -55,7 +54,11 @@ const Following = (route) => {
                 {currentUser.following.map((following) => (
                     <View style={{flexDirection: "row", justifyContent:"space-between", marginTop: 20}}>
                         <Text style={{marginLeft: 10}}>{following}</Text>
-                        <TouchableOpacity style={{marginRight: 10}}><Text>nicht mehr folgen</Text></TouchableOpacity>
+                        {auth.currentUser.uid === uid && (
+                            <TouchableOpacity style={{marginRight: 10}}>
+                                <Text>nicht mehr folgen</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 ))}
             </View>

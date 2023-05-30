@@ -55,6 +55,8 @@ const MainStackNavigator = () => {
         >
             <Stack.Screen name="Start" component={HomeScreen}/>
             <Stack.Screen name="Profile" component={Profile}/>
+            <Stack.Screen name="Follower" component={Follower}/>
+            <Stack.Screen name="Following" component={Following}/>
         </Stack.Navigator>
     );
 };

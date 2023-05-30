@@ -324,12 +324,12 @@ const Template = ({route, navigation}) => {
                                 },
                             ]}
                         >
-                            <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Follower',{user})}>
+                            <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Follower', {uid: uid})}>
                                 <Text>Follower</Text>
                                 <Text>{user.follower.length}</Text>
                             </TouchableOpacity>
                         </View>
-                        <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following',{user})}>
+                        <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {uid: uid})}>
                             <View style={styles.statsBox}>
                                 <Text>Following</Text>
                                 <Text>{user.following.length}</Text>
