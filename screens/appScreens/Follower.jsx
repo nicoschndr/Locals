@@ -1,8 +1,8 @@
-import {View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Dimensions} from "react-native";
+import {View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image} from "react-native";
 import React, {useEffect, useState} from "react";
 import {Ionicons} from "@expo/vector-icons";
 import {useNavigation} from "@react-navigation/native";
-import {auth, firestore} from "../../firebase";
+import {auth, firebase, firestore} from "../../firebase";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -12,10 +12,13 @@ const Follower = ({route: {params}}) => {
 
     useEffect(() => {
         getUserData();
+        getFollowerData();
     }, []);
 
     const [user, setUser] = useState({});
     const uid = params.uid;
+    const followerID = params.follower;
+    const [follower, setFollower] = useState([]);
 
     function getUserData() {
         firestore
@@ -25,6 +28,21 @@ const Follower = ({route: {params}}) => {
             .then((snapshot) => {
                 setUser(snapshot.data());
             })
+    }
+
+    function getFollowerData() {
+        if(followerID.length > 0) {
+            firestore
+                .collection('users')
+                .where(firebase.firestore.FieldPath.documentId(), 'in', followerID)
+                .get()
+                .then((snapshot) => {
+                    const fU = snapshot.docs.map((e) => ({
+                        ...e.data(),
+                    }))
+                    setFollower(fU)
+                })
+        }
     }
 
 
@@ -49,16 +67,15 @@ const Follower = ({route: {params}}) => {
                 )}
             </View>
             <Text style={{flexDirection: "row",marginTop: 30, alignSelf:"center", fontWeight: "bold", fontSize: 20}}>Follower</Text>
-            {user.follower && (
+            {follower.length > 0 && (
                 <View>
-                    {user.follower.map((follower) => (
-                        <View style={{flexDirection: "row", justifyContent:"space-between", marginTop: 20}}>
-                            <Text style={{marginLeft: 10}}>{follower}</Text>
-                            {auth.currentUser.uid === uid && (
-                                <TouchableOpacity style={{marginRight: 10}}>
-                                     <Text>entfernen</Text>
-                                </TouchableOpacity>
-                            )}
+                    {follower.map((follower) => (
+                        <View>
+                            <View style={{flexDirection: "row", marginTop: 10, marginLeft: 10}}>
+                                <Image source={{uri: follower.imageUrl}}
+                                       style={{width: 40, height: 40, borderRadius: 50}}></Image>
+                                <Text style={{marginLeft: 10, fontWeight: "bold"}}>{follower.username}{"\n"}<Text style={{fontWeight: "normal"}}>{follower.firstName + " " + follower.lastName}</Text></Text>
+                            </View>
                         </View>
                     ))}
                 </View>

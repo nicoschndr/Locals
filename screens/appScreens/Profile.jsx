@@ -173,7 +173,7 @@ const Template = ({route, navigation}) => {
 
     function setFollower() {
         user.follower.forEach((r) => flw.push(r))
-        flw.push(currentUsername)
+        flw.push(auth.currentUser.uid.toString())
         firestore
             .collection("users")
             .doc(uid)
@@ -187,7 +187,7 @@ const Template = ({route, navigation}) => {
 
     function setFollowing() {
         currentUser.following.forEach((r) => flwng.push(r))
-        flwng.push(user.username)
+        flwng.push(uid.toString())
         firestore
             .collection("users")
             .doc(auth.currentUser.uid)
@@ -201,7 +201,7 @@ const Template = ({route, navigation}) => {
 
     function setUnfollow() {
         user.follower.forEach((r) => flw.push(r))
-        const index = flw.indexOf(currentUsername)
+        const index = flw.indexOf(auth.currentUser.uid.toString())
         flw.splice(index, 1)
         firestore
             .collection("users")
@@ -216,7 +216,7 @@ const Template = ({route, navigation}) => {
 
     function setUnfollowing() {
         currentUser.following.forEach((r) => flwng.push(r))
-        const index = flwng.indexOf(user.username)
+        const index = flwng.indexOf(uid.toString())
         flwng.splice(index, 1)
         firestore
             .collection("users")
@@ -293,12 +293,12 @@ const Template = ({route, navigation}) => {
                         <Text style={[styles.text, {fontWeight: "200", fontSize: 14}]}>
                             @{user.username}
                         </Text>
-                        {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(user.username) === false && (
+                        {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && (
                             <TouchableOpacity style={{marginTop: 10}} onPress={setFollower}>
                                 <Text>Folgen</Text>
                             </TouchableOpacity>
                         )}
-                        {currentUser.following.includes(user.username) === true && (
+                        {currentUser.following.includes(uid) === true && (
                             <TouchableOpacity style={{marginTop: 10}} onPress={setUnfollow}>
                                 <Text>Nicht mehr Folgen</Text>
                             </TouchableOpacity>
@@ -324,17 +324,44 @@ const Template = ({route, navigation}) => {
                                 },
                             ]}
                         >
-                            <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Follower', {uid: uid})}>
-                                <Text>Follower</Text>
-                                <Text>{user.follower.length}</Text>
-                            </TouchableOpacity>
+                            {auth.currentUser.uid === uid && (
+                                <TouchableOpacity style={styles.statsBox}
+                                                  onPress={() => navigation.navigate('Follower', {uid: uid, follower: currentUser.follower})}>
+                                    <Text>Follower</Text>
+                                    <Text>{user.follower.length}</Text>
+                                </TouchableOpacity>
+                            )}
+                            {auth.currentUser.uid !== uid && (
+                                <TouchableOpacity style={styles.statsBox}
+                                                  onPress={() => navigation.navigate('Follower', {uid: uid, follower: user.follower})}>
+                                    <Text>Follower</Text>
+                                    <Text>{user.follower.length}</Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
-                        <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {uid: uid})}>
-                            <View style={styles.statsBox}>
-                                <Text>Following</Text>
-                                <Text>{user.following.length}</Text>
-                            </View>
-                        </TouchableOpacity>
+                        {auth.currentUser.uid === uid && (
+                            <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {
+                                uid: uid,
+                                following: currentUser.following
+                            })}>
+                                <View style={styles.statsBox}>
+                                    <Text>Following</Text>
+                                    <Text>{user.following.length}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        )}
+                        {auth.currentUser.uid !== uid && (
+                            <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {
+                                uid: uid,
+                                following: user.following
+                            })}>
+                                <View style={styles.statsBox}>
+                                    <Text>Following</Text>
+                                    <Text>{user.following.length}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        )}
+
 
                     </View>
                 )}

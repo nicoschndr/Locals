@@ -11,28 +11,47 @@ const windowHeight = Dimensions.get("window").height;
 
 const Following = ({route: {params}}) => {
     useEffect(() => {
-        getCurrentUserData();
+        getUserData();
+        getFollowingData();
     }, []);
 
-    const [currentUser, setCurrentUser] = useState({});
-    const [followingUser, setFollowingUser] = useState([]);
+    const [user, setUser] = useState({});
     const uid = params.uid;
+    const followingID = params.following;
+    const [following, setFollowing] = useState([]);
 
-    function getCurrentUserData() {
+
+    function getUserData() {
         firestore
             .collection("users")
             .doc(uid)
             .get()
             .then((snapshot) => {
-                setCurrentUser(snapshot.data());
+                setUser(snapshot.data());
             })
+    }
+
+    function getFollowingData() {
+        if(followingID.length > 0) {
+            firestore
+                .collection('users')
+                .where(firebase.firestore.FieldPath.documentId(), 'in', followingID)
+                .get()
+                .then((snapshot) => {
+                    const fU = snapshot.docs.map((e) => ({
+                        ...e.data(),
+                    }))
+                    setFollowing(fU)
+                })
+        }
     }
 
     const navigation = useNavigation();
 
     return (
         <ScrollView>
-            <View style={[styles.titleBar, {marginTop: windowHeight * 0.05, flexDirection: "row", borderBottomWidth:1}]}>
+            <View
+                style={[styles.titleBar, {marginTop: windowHeight * 0.05, flexDirection: "row", borderBottomWidth: 1}]}>
                 <TouchableOpacity
                     onPress={() => navigation.goBack()}
                 >
@@ -44,24 +63,29 @@ const Following = ({route: {params}}) => {
                         {" "}
                     </Ionicons>
                 </TouchableOpacity>
-                {currentUser.username && (
-                    <Text style={{fontWeight: "bold", fontSize: 20, alignSelf: "center"}}>{currentUser.username}</Text>
+                {user.username && (
+                    <Text style={{fontWeight: "bold", fontSize: 20, alignSelf: "center"}}>{user.username}</Text>
                 )}
             </View>
-            <Text style={{flexDirection: "row",marginTop: 30, alignSelf:"center", fontWeight: "bold", fontSize: 20}}>Following</Text>
-            {currentUser.following && (
-            <View>
-                {currentUser.following.map((following) => (
-                    <View style={{flexDirection: "row", justifyContent:"space-between", marginTop: 20}}>
-                        <Text style={{marginLeft: 10}}>{following}</Text>
-                        {auth.currentUser.uid === uid && (
-                            <TouchableOpacity style={{marginRight: 10}}>
-                                <Text>nicht mehr folgen</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                ))}
-            </View>
+            <Text style={{
+                flexDirection: "row",
+                marginTop: 30,
+                alignSelf: "center",
+                fontWeight: "bold",
+                fontSize: 20
+            }}>Following</Text>
+            {following.length > 0 && (
+                <View>
+                    {following.map((following) => (
+                        <View>
+                            <View style={{flexDirection: "row", marginTop: 10, marginLeft: 10}}>
+                                <Image source={{uri: following.imageUrl}}
+                                       style={{width: 40, height: 40, borderRadius: 50}}></Image>
+                                <Text style={{marginLeft: 10, fontWeight: "bold"}}>{following.username}{"\n"}<Text style={{fontWeight: "normal"}}>{following.firstName + " " + following.lastName}</Text></Text>
+                            </View>
+                        </View>
+                    ))}
+                </View>
             )}
         </ScrollView>
     )
