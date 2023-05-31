@@ -21,7 +21,12 @@ import RNDateTimePicker from "@react-native-community/datetimepicker";
 import firebase from "firebase/compat";
 import { auth, firestore, storage } from "../../firebase";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+
 import LocalsButton from "../../components/LocalsButton";
+import DropDownPicker from "react-native-dropdown-picker";
+
+import { set } from "react-native-reanimated";
 
 const EditPost = ({ navigation, route }) => {
 	const windowWidth = Dimensions.get("window").width;
@@ -36,7 +41,16 @@ const EditPost = ({ navigation, route }) => {
 	const [groupSize, setGroupSize] = useState("");
 	const [description, setDescription] = useState("");
 	const [gender, setGender] = useState("");
-	const [category, setCategory] = useState("");
+	const [category, setCategory] = useState([""]);
+
+	const [open, setOpen] = useState(false);
+	const [items, setItems] = useState([
+		{ label: "Sport", value: "sport" },
+		{ label: "Culture", value: "culture" },
+		{ label: "Concert", value: "concert" },
+		{ label: "Test", value: "test" },
+		{ label: "Party", value: "party" },
+	]);
 
 	// Extract the event data from the route
 	const { event } = route.params;
@@ -57,8 +71,9 @@ const EditPost = ({ navigation, route }) => {
 		const response = await fetch(uri);
 		const blob = await response.blob();
 
-		let filename = new Date().getTime().toString();
-		var ref = storage.ref().child("Images/posts/" + filename);
+		let filename = event.imageUrl;
+		// update image from url in firebase storage from the imagUrl
+		var ref = storage.refFromURL(filename);
 		const snapshot = await ref.put(blob);
 
 		// Get the download URL after upload completes
@@ -68,28 +83,39 @@ const EditPost = ({ navigation, route }) => {
 
 	const updatePost = async () => {
 		// Upload image only if imageUri has been changed
-		if (event.imageUri !== imageUri) {
-			const imageUrl = await uploadImage(imageUri);
-			setImageUri(imageUrl);
-		}
 
-		// Update the post in Firestore
-		await firestore
+		const imageUrl = await uploadImage(imageUri);
+		setImageUri(imageUrl);
+		// Get the current user's document
+		const userDoc = await firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.get();
+		const username = userDoc.data().username;
+
+		firestore
 			.collection("events")
 			.doc(event.id)
 			.update({
+				creator: username,
 				title: title,
 				address: address,
 				groupSize: groupSize,
-				description: description,
-				gender: gender,
 				category: category,
-				date: date,
-				imageUrl: imageUrl || event.imageUrl, // Use existing imageUrl if it's not changed
+				// latitude: latitude,
+				// longitude: longitude,
+				imageUrl: imageUrl,
+				// advertised: advertised,
+			})
+			.then(() => {
+				alert("Post created successfully");
+				setTimeout(() => {
+					navigation.goBack();
+				}, 1000);
+			})
+			.catch((error) => {
+				console.log(error);
 			});
-
-		alert("Post updated successfully");
-		navigation.goBack();
 	};
 
 	function showDatePicker() {
@@ -120,7 +146,8 @@ const EditPost = ({ navigation, route }) => {
 				<View style={{ alignSelf: "center" }}>
 					<View style={styles.postImage}>
 						<LocalsImagePicker
-							onImageTaken={(uri) => setImageUri(uri)}
+							placeholder={event.imageUrl}
+							onImageTaken={(imageUri) => setImageUri(imageUri)}
 							style={styles.image}
 						/>
 					</View>
@@ -136,13 +163,44 @@ const EditPost = ({ navigation, route }) => {
 				</View>
 				<View style={styles.inputContainer}>
 					<Text>
-						Address<Text style={{ fontWeight: "bold" }}> or Set Marker*</Text>
+						Address
+						{/* <Text style={{ fontWeight: "bold" }}> or Set Marker*</Text> */}
 					</Text>
-					<TextInput
-						style={styles.inputText}
-						value={address}
-						onChangeText={(address) => setAddress(address)}
-					></TextInput>
+					<View style={{ flexDirection: "row", alignItems: "center" }}>
+						<GooglePlacesAutocomplete
+							fetchDetails={true}
+							currentLocation={true}
+							currentLocationLabel="Current location"
+							listViewDisplayed={false}
+							onPress={(data, details = null) => {
+								setAddress(details.formatted_address);
+								setGeopoint({
+									longitude: details.geometry.location.lng,
+									latitude: details.geometry.location.lat,
+								});
+							}}
+							query={{
+								key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
+								language: "de",
+								components: "country:de",
+							}}
+							styles={{
+								textInput: styles.addressInput,
+								listView: {
+									width: "90%", // Set the width of the suggestions list
+								},
+								container: {
+									width: "100%", // Set the width of the container
+								},
+							}}
+						/>
+						{/* <Ionicons
+							name={"locate-outline"}
+							size={30}
+							onPress={getCurrentLocation}
+							style={{ marginLeft: 10 }}
+						/> */}
+					</View>
 				</View>
 				<View style={styles.inputContainer}>
 					<Text>Group Size</Text>
@@ -169,34 +227,43 @@ const EditPost = ({ navigation, route }) => {
 					></TextInput>
 				</View>
 				<View style={styles.inputContainer}>
-					<Text>Category</Text>
-					<TextInput
-						style={styles.inputText}
-						value={category}
-						onChangeText={(category) => setCategory(category)}
-					></TextInput>
-				</View>
-				<View style={styles.inputContainer}>
 					<Text>Date</Text>
 					<View style={{ flexDirection: "row" }}>
 						<Ionicons
 							name={"calendar-outline"}
 							onPress={showDatePicker}
 							size={30}
-						></Ionicons>
-						{datePicker && (
-							<DateTimePicker
-								value={date}
-								mode={"date"}
-								is24Hour={true}
-								onChange={onDateSelected}
-							/>
-						)}
-						<Text style={styles.date} onPress={showDatePicker}>
-							{date.toString()}
-						</Text>
+						/>
+						{/* <DateTimePicker
+							value={date}
+							locale="de-DE"
+							onChange={onDateSelected}
+						/> */}
 					</View>
 				</View>
+				<KeyboardAvoidingView style={styles.inputContainer}>
+					<Text>Category</Text>
+					<DropDownPicker
+						open={open}
+						value={category}
+						items={items}
+						setOpen={setOpen}
+						setValue={setCategory}
+						setItems={setItems}
+						multiple
+						mode="BADGE"
+						badgeDotColors={[
+							"#e76f51",
+							"#00b4d8",
+							"#e9c46a",
+							"#e76f51",
+							"#8ac926",
+							"#00b4d8",
+							"#e9c46a",
+						]}
+						style={{ marginTop: 10, width: 300 }}
+					/>
+				</KeyboardAvoidingView>
 				<View
 					style={{
 						flexDirection: "row",
@@ -205,11 +272,11 @@ const EditPost = ({ navigation, route }) => {
 					}}
 				>
 					<Ionicons name={"camera-outline"} size={30}></Ionicons>
-					{!uploading && (
-						<TouchableOpacity style={styles.button} onPress={updatePost}>
-							<Text style={{ color: "#FFFFFF" }}>Update Event</Text>
-						</TouchableOpacity>
-					)}
+					{/* {!uploading && ( */}
+					<TouchableOpacity style={styles.button} onPress={updatePost}>
+						<Text style={{ color: "#FFFFFF" }}>Update Event</Text>
+					</TouchableOpacity>
+					{/* )} */}
 					<Ionicons name={"images-outline"} size={30}></Ionicons>
 				</View>
 			</ScrollView>
@@ -220,6 +287,11 @@ const EditPost = ({ navigation, route }) => {
 export default EditPost;
 
 const styles = StyleSheet.create({
+	addressInput: {
+		backgroundColor: "transparent",
+		borderBottomColor: "#000000",
+		borderBottomWidth: 1,
+	},
 	container: {
 		flex: 1,
 		alignItems: "center",
