@@ -85,6 +85,8 @@ const Register = ({ navigation }) => {
 					username: username, // Fügen Sie den Benutzernamen zur Dokumentdaten hinzu
 					friends: {},
 					friendRequests: {},
+					follower: [],
+					following : [],
 				})
 				.then(() => {
 					setUploading(false);
