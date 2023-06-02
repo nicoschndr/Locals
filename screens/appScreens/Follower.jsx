@@ -1,4 +1,4 @@
-import {View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image} from "react-native";
+import {View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image, Alert} from "react-native";
 import React, {useEffect, useState} from "react";
 import {Ionicons} from "@expo/vector-icons";
 import {useNavigation} from "@react-navigation/native";
@@ -12,13 +12,17 @@ const Follower = ({route: {params}}) => {
 
     useEffect(() => {
         getUserData();
+        getCurrentUserData();
         getFollowerData();
     }, []);
 
     const [user, setUser] = useState({});
+    const [currentUser, setCurrentUser] = useState({});
     const uid = params.uid;
-    const followerID = params.follower;
+    const [followerID, setFollowingId] = useState(params.follower);
     const [follower, setFollower] = useState([]);
+    let flw = [];
+    let flwng = [];
 
     function getUserData() {
         firestore
@@ -30,6 +34,16 @@ const Follower = ({route: {params}}) => {
             })
     }
 
+    function getCurrentUserData() {
+        firestore
+            .collection("users")
+            .doc(auth.currentUser.uid)
+            .get()
+            .then((snapshot) => {
+                setCurrentUser(snapshot.data());
+            });
+    }
+
     function getFollowerData() {
         if(followerID.length > 0) {
             firestore
@@ -38,11 +52,69 @@ const Follower = ({route: {params}}) => {
                 .get()
                 .then((snapshot) => {
                     const fU = snapshot.docs.map((e) => ({
+                        uid: e.id,
                         ...e.data(),
                     }))
                     setFollower(fU)
                 })
         }
+    }
+
+    function deleteFollower(f) {
+        currentUser.follower.forEach((e) => {flw.push(e)})
+        const index = flw.indexOf(f.follower.uid)
+        flw.splice(index, 1)
+        firestore
+            .collection('users')
+            .doc(auth.currentUser.uid)
+            .update({
+                    follower: flw
+                }
+            ).then(
+        )
+        deleteFollowing(f)
+        flw= [];
+    }
+
+    function deleteFollowing(f){
+        f.follower.following.forEach((e) => flwng.push(e))
+        const index = flwng.indexOf(auth.currentUser.uid)
+        flwng.splice(index, 1)
+        firestore
+            .collection('users')
+            .doc(f.follower.uid)
+            .update({
+                following: flwng
+            }).then(
+                getCurrentUserData
+        )
+        flwng=[];
+    }
+
+    function notDeleteFollower(f){
+        f.follower.following.forEach((e) => flwng.push(e))
+        firestore
+            .collection('users')
+            .doc(f.follower.uid)
+            .update({
+                following: flwng
+            }).then()
+        notDeleteFollowing(f)
+        flwng=[];
+    }
+
+    function notDeleteFollowing(f){
+        currentUser.follower.forEach((e) => flw.push(e))
+        flw.push(f.follower.uid)
+        firestore
+            .collection('users')
+            .doc(auth.currentUser.uid)
+            .update({
+                follower: flw
+            }).then(
+                getCurrentUserData
+        )
+        flw =[];
     }
 
 
@@ -75,6 +147,16 @@ const Follower = ({route: {params}}) => {
                                 <Image source={{uri: follower.imageUrl}}
                                        style={{width: 40, height: 40, borderRadius: 50}}></Image>
                                 <Text style={{marginLeft: 10, fontWeight: "bold"}}>{follower.username}{"\n"}<Text style={{fontWeight: "normal"}}>{follower.firstName + " " + follower.lastName}</Text></Text>
+                                {currentUser.follower.includes(follower.uid) && user.email === auth.currentUser.email && (
+                                    <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => deleteFollower({follower})}>
+                                        <Text>entfernen</Text>
+                                    </TouchableOpacity>
+                                )}
+                                {!currentUser.follower.includes(follower.uid) && user.email === auth.currentUser.email && (
+                                    <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => notDeleteFollower({follower})}>
+                                        <Text>rückgängig</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         </View>
                     ))}
