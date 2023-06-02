@@ -158,12 +158,12 @@ const Following = ({route: {params}}) => {
                                 <Image source={{uri: following.imageUrl}}
                                        style={{width: 40, height: 40, borderRadius: 50}}></Image>
                                 <Text style={{marginLeft: 10, fontWeight: "bold"}}>{following.username}{"\n"}<Text style={{fontWeight: "normal"}}>{following.firstName + " " + following.lastName}</Text></Text>
-                                {currentUser.following.includes(following.uid) && (
+                                {currentUser.following.includes(following.uid) && user.email === auth.currentUser.email && (
                                 <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => unfollow({following})}>
                                     <Text>gefolgt</Text>
                                 </TouchableOpacity>
                             )}
-                                {!currentUser.following.includes(following.uid) && (
+                                {!currentUser.following.includes(following.uid) && user.email === auth.currentUser.email && (
                                     <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => follow({following})}>
                                         <Text>folgen</Text>
                                     </TouchableOpacity>
