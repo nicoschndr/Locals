@@ -169,7 +169,7 @@ function AppNavigation() {
                     })}
 
                 >
-                    <Tab.Screen name="Home" component={MainStackNavigator}/>
+                    <Tab.Screen options={{unmountOnBlur: true}} name="Home" component={MainStackNavigator}/>
                     <Tab.Screen name="LiveMap" component={LiveMap}/>
                     <Tab.Screen name="PostEvent" component={PostEvent}/>
                     <Tab.Screen options={{unmountOnBlur: true}} name="Me" component={ProfileDrawerScreen}/>
