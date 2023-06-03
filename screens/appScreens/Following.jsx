@@ -21,11 +21,11 @@ const Following = ({route: {params}}) => {
     const [user, setUser] = useState({});
     const [currentUser, setCurrentUser] = useState({});
     const uid = params.uid;
-    const [followingID, setFollowingId] = useState(params.following);
-    const [following, setFollowing] = useState([]);
+    const [followingIDs, setFollowingIds] = useState(params.following);
+    const [followingUsers, setFollowingUsers] = useState([]);
     const [unfollowId, setUnfollowId] = useState("");
-    let flw = [];
-    let flwng = [];
+    let fllwr = [];
+    let fllwng = [];
 
 
     function getUserData() {
@@ -49,77 +49,77 @@ const Following = ({route: {params}}) => {
     }
 
     function getFollowingData() {
-        if(followingID.length > 0) {
+        if(followingIDs.length > 0) {
             firestore
                 .collection('users')
-                .where(firebase.firestore.FieldPath.documentId(), 'in', followingID)
+                .where(firebase.firestore.FieldPath.documentId(), 'in', followingIDs)
                 .get()
                 .then((snapshot) => {
                     const fU = snapshot.docs.map((e) => ({
                         uid: e.id,
                         ...e.data(),
                     }))
-                    setFollowing(fU)
+                    setFollowingUsers(fU)
                 })
         }
     }
 
     function follow(userToFollow){
-        userToFollow.following.follower.forEach((r) => flw.push(r))
+        userToFollow.following.follower.forEach((r) => fllwr.push(r))
         firestore
             .collection("users")
             .doc(userToFollow.following.uid)
             .update({
-                follower: flw
+                follower: fllwr
             }).then(
         )
-        setfollowing(userToFollow)
-        flw = [];
+        setFollowing(userToFollow)
+        fllwr = [];
     }
 
-    function setfollowing(u) {
-        currentUser.following.forEach((r) => flwng.push(r))
-        flwng.push(u.following.uid.toString())
+    function setFollowing(userToFollow) {
+        currentUser.following.forEach((r) => fllwng.push(r))
+        fllwng.push(userToFollow.following.uid.toString())
         firestore
             .collection("users")
             .doc(auth.currentUser.uid)
             .update({
-                following: flwng
+                following: fllwng
             })
             .then(getCurrentUserData)
-        flwng = [];
+        fllwng = [];
     }
 
     function unfollow(userToUnfollow){
-        userToUnfollow.following.follower.forEach((r) => flw.push(r))
-        const index = flw.indexOf(auth.currentUser.uid.toString())
-        flw.splice(index, 1)
+        userToUnfollow.following.follower.forEach((r) => fllwr.push(r))
+        const index = fllwr.indexOf(auth.currentUser.uid.toString())
+        fllwr.splice(index, 1)
         firestore
             .collection("users")
             .doc(userToUnfollow.following.uid)
             .update({
-                follower: flw
+                follower: fllwr
             }).then(
 
         )
         setUnfollowing(userToUnfollow)
-        flw = [];
+        fllwr = [];
     }
 
-    function setUnfollowing(u) {
-        currentUser.following.forEach((r) => flwng.push(r))
-        const index = flwng.indexOf(u.following.uid.toString())
-        flwng.splice(index, 1)
+    function setUnfollowing(userToUnfollow) {
+        currentUser.following.forEach((r) => fllwng.push(r))
+        const index = fllwng.indexOf(userToUnfollow.following.uid.toString())
+        fllwng.splice(index, 1)
         firestore
             .collection("users")
             .doc(auth.currentUser.uid)
             .update({
-                following: flwng
+                following: fllwng
             })
             .then(
                 getCurrentUserData
             )
-        flwng = [];
+        fllwng = [];
     }
 
     const navigation = useNavigation();
@@ -150,9 +150,9 @@ const Following = ({route: {params}}) => {
                 fontWeight: "bold",
                 fontSize: 20
             }}>Following</Text>
-            {following.length > 0 && (
+            {followingUsers.length > 0 && (
                 <View>
-                    {following.map((following) => (
+                    {followingUsers.map((following) => (
                         <View>
                             <View style={{flexDirection: "row", marginTop: 10, marginLeft: 10}}>
                                 <Image source={{uri: following.imageUrl}}

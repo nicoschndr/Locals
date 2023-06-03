@@ -19,10 +19,10 @@ const Follower = ({route: {params}}) => {
     const [user, setUser] = useState({});
     const [currentUser, setCurrentUser] = useState({});
     const uid = params.uid;
-    const [followerID, setFollowingId] = useState(params.follower);
-    const [follower, setFollower] = useState([]);
-    let flw = [];
-    let flwng = [];
+    const [followerIDs, setFollowingIds] = useState(params.follower);
+    const [followers, setUserFollowers] = useState([]);
+    let fllwr = [];
+    let fllwng = [];
 
     function getUserData() {
         firestore
@@ -45,76 +45,76 @@ const Follower = ({route: {params}}) => {
     }
 
     function getFollowerData() {
-        if(followerID.length > 0) {
+        if(followerIDs.length > 0) {
             firestore
                 .collection('users')
-                .where(firebase.firestore.FieldPath.documentId(), 'in', followerID)
+                .where(firebase.firestore.FieldPath.documentId(), 'in', followerIDs)
                 .get()
                 .then((snapshot) => {
-                    const fU = snapshot.docs.map((e) => ({
+                    const f = snapshot.docs.map((e) => ({
                         uid: e.id,
                         ...e.data(),
                     }))
-                    setFollower(fU)
+                    setUserFollowers(f)
                 })
         }
     }
 
-    function deleteFollower(f) {
-        currentUser.follower.forEach((e) => {flw.push(e)})
-        const index = flw.indexOf(f.follower.uid)
-        flw.splice(index, 1)
+    function deleteFollower(follower) {
+        currentUser.follower.forEach((e) => {fllwr.push(e)})
+        const index = fllwr.indexOf(follower.follower.uid)
+        fllwr.splice(index, 1)
         firestore
             .collection('users')
             .doc(auth.currentUser.uid)
             .update({
-                    follower: flw
+                    follower: fllwr
                 }
             ).then(
         )
-        deleteFollowing(f)
-        flw= [];
+        deleteFollowing(follower)
+        fllwr= [];
     }
 
-    function deleteFollowing(f){
-        f.follower.following.forEach((e) => flwng.push(e))
-        const index = flwng.indexOf(auth.currentUser.uid)
-        flwng.splice(index, 1)
+    function deleteFollowing(follower){
+        follower.follower.following.forEach((e) => fllwng.push(e))
+        const index = fllwng.indexOf(auth.currentUser.uid)
+        fllwng.splice(index, 1)
         firestore
             .collection('users')
-            .doc(f.follower.uid)
+            .doc(follower.follower.uid)
             .update({
-                following: flwng
+                following: fllwng
             }).then(
                 getCurrentUserData
         )
-        flwng=[];
+        fllwng=[];
     }
 
-    function notDeleteFollower(f){
-        f.follower.following.forEach((e) => flwng.push(e))
+    function notDeleteFollower(follower){
+        follower.follower.following.forEach((e) => fllwng.push(e))
         firestore
             .collection('users')
-            .doc(f.follower.uid)
+            .doc(follower.follower.uid)
             .update({
-                following: flwng
+                following: fllwng
             }).then()
-        notDeleteFollowing(f)
-        flwng=[];
+        notDeleteFollowing(follower)
+        fllwng=[];
     }
 
-    function notDeleteFollowing(f){
-        currentUser.follower.forEach((e) => flw.push(e))
-        flw.push(f.follower.uid)
+    function notDeleteFollowing(follower){
+        currentUser.follower.forEach((e) => fllwr.push(e))
+        fllwr.push(follower.follower.uid)
         firestore
             .collection('users')
             .doc(auth.currentUser.uid)
             .update({
-                follower: flw
+                follower: fllwr
             }).then(
                 getCurrentUserData
         )
-        flw =[];
+        fllwr =[];
     }
 
 
@@ -139,9 +139,9 @@ const Follower = ({route: {params}}) => {
                 )}
             </View>
             <Text style={{flexDirection: "row",marginTop: 30, alignSelf:"center", fontWeight: "bold", fontSize: 20}}>Follower</Text>
-            {follower.length > 0 && (
+            {followers.length > 0 && (
                 <View>
-                    {follower.map((follower) => (
+                    {followers.map((follower) => (
                         <View>
                             <View style={{flexDirection: "row", marginTop: 10, marginLeft: 10}}>
                                 <Image source={{uri: follower.imageUrl}}
