@@ -144,6 +144,7 @@ const PostEvent = ({ navigation }) => {
 			.add({
 				creator: username,
 				title: title,
+				description: description,
 				address: address,
 				groupSize: groupSize,
 				latitude: latitude,
@@ -151,6 +152,8 @@ const PostEvent = ({ navigation }) => {
 				imageUrl: imageUrl,
 				advertised: advertised,
 				category: category,
+				date: date,
+				userId: auth.currentUser.uid,
 			})
 			.then(() => {
 				alert("Post created successfully");
@@ -167,10 +170,8 @@ const PostEvent = ({ navigation }) => {
 	}
 
 	function onDateSelected(event, value) {
+		setDate(value);
 		setDatePicker(false);
-		if (value) {
-			setDate(value);
-		}
 	}
 
 	async function getLocation() {
@@ -216,7 +217,7 @@ const PostEvent = ({ navigation }) => {
 						style={styles.inputText}
 						value={title}
 						onChangeText={(title) => setTitle(title)}
-						// is mendatory
+					// is mendatory
 					/>
 				</View>
 
