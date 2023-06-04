@@ -32,7 +32,7 @@ const EditPost = ({ navigation, route }) => {
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 	const [datePicker, setDatePicker] = useState(false);
-	const [date, setDate] = useState("");
+	const [date, setDate] = useState(new Date());
 	const [imageUri, setImageUri] = useState("");
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
@@ -64,6 +64,7 @@ const EditPost = ({ navigation, route }) => {
 		setDescription(event.description);
 		setGender(event.gender);
 		setCategory(event.category);
+		setDate(event.date);
 	}, [event]);
 
 	const uploadImage = async (uri) => {
@@ -104,6 +105,7 @@ const EditPost = ({ navigation, route }) => {
 				category: category,
 				// latitude: latitude,
 				// longitude: longitude,
+				date: date,
 				imageUrl: imageUrl,
 				// advertised: advertised,
 			})
@@ -126,6 +128,7 @@ const EditPost = ({ navigation, route }) => {
 		setDate(value);
 		setDatePicker(false);
 	}
+
 
 	return (
 		<KeyboardAvoidingView style={styles.container}>
