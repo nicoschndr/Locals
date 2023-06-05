@@ -11,10 +11,6 @@ import LocalsTextInput from "../../components/LocalsTextInput";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsButton from "../../components/LocalsButton";
 import { auth, firestore, storage } from "../../firebase";
-import { useNavigation } from "@react-navigation/native";
-import { ScrollView } from "react-native-gesture-handler";
-import { uploadBytes } from "firebase/storage";
-import { getDownloadURL } from "firebase/storage";
 
 const Register = ({ navigation }) => {
 	const [email, setEmail] = useState("");
@@ -61,20 +57,20 @@ const Register = ({ navigation }) => {
 	};
 
 	const register = async () => {
+		const isUsernameAvailable = await checkUsernameAvailability();
 		const imageUrl = await uploadImage(imageUri);
 
-		const isUsernameAvailable = await checkUsernameAvailability();
-
 		if (!isUsernameAvailable) {
-			alert("Der Benutzername ist bereits vergeben. Bitte wählen Sie einen anderen.");
+			alert(
+				"Der Benutzername ist bereits vergeben. Bitte wählen Sie einen anderen."
+			);
 			return;
 		}
 
-		auth.createUserWithEmailAndPassword(email, password).then(() => {
-			firestore
-				.collection("users")
-				.doc(auth.currentUser?.uid)
-				.set({
+		auth
+			.createUserWithEmailAndPassword(email, password)
+			.then(() => {
+				firestore.collection("users").doc(auth.currentUser?.uid).set({
 					email: email,
 					firstName: firstName,
 					lastName: lastName,
@@ -85,13 +81,17 @@ const Register = ({ navigation }) => {
 					username: username, // Fügen Sie den Benutzernamen zur Dokumentdaten hinzu
 					friends: {},
 					friendRequests: {},
-				})
-				.then(() => {
-					setUploading(false);
-					alert("Konto erfolgreich erstellt");
-					navigation.navigate("Home");
 				});
-		});
+			})
+			.then(() => {
+				setUploading(false);
+				alert("Konto erfolgreich erstellt");
+				navigation.navigate("Home");
+			})
+			.catch((error) => {
+				setUploading(false);
+				alert(error);
+			});
 	};
 
 	return (
