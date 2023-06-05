@@ -81,7 +81,14 @@ const Register = ({ navigation }) => {
 					username: username, // Fügen Sie den Benutzernamen zur Dokumentdaten hinzu
 					friends: {},
 					friendRequests: {},
-				});
+					follower: [],
+					following: [],
+				})
+					.then(() => {
+						setUploading(false);
+						alert("Konto erfolgreich erstellt");
+						navigation.navigate("Home");
+					});
 			})
 			.then(() => {
 				setUploading(false);

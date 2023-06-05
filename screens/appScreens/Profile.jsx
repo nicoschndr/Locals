@@ -11,11 +11,12 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { firebase, firestore, storage } from "../../firebase";
+import { auth, firebase, firestore, storage } from "../../firebase";
 
 const Template = ({ route, navigation }) => {
 	useEffect(() => {
 		getUserData();
+		getCurrentUserData();
 		getUserPosts();
 	}, []);
 
@@ -23,15 +24,21 @@ const Template = ({ route, navigation }) => {
 		navigation.navigate("FriendList");
 	};
 
+	let flwng = [];
+	let flw = [];
+
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 
 	const uid = route.params?.uid || firebase.auth().currentUser.uid;
 	const [user, setUser] = useState({});
+	const [currentUser, setCurrentUser] = useState({});
 	const [events, setEvents] = useState([]);
 	const [currentUsername, setCurrentUsername] = useState("");
 	const [currentFriends, setCurrentFriends] = useState({});
 	const [friendRequests, setFriendRequests] = useState([]);
+	const [followerSize, setFollowerSize] = useState("");
+	const [followingSize, setFollowingSize] = useState("");
 
 	React.useLayoutEffect(() => {
 		if (uid === firebase.auth().currentUser.uid) {
@@ -57,6 +64,16 @@ const Template = ({ route, navigation }) => {
 			.then((snapshot) => {
 				setUser(snapshot.data());
 				getCurrentUserFriends(snapshot.data().username);
+			})
+	}
+
+	function getCurrentUserData() {
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.get()
+			.then((snapshot) => {
+				setCurrentUser(snapshot.data());
 			});
 	}
 
@@ -98,6 +115,25 @@ const Template = ({ route, navigation }) => {
 		}
 	}
 
+	useEffect(() => {
+		const user = firebase.auth().currentUser;
+
+		if (user) {
+			const userDocRef = firebase.firestore().collection("users").doc(user.uid);
+		}
+	}, [friendRequests]);
+
+	// async function sendFriendRequest(senderUsername, receiverUsername) {
+	// 	const usersRef = firebase.firestore().collection("users");
+
+	// 	userDocRef.onSnapshot((doc) => {
+	// 		if (doc.exists) {
+	// 			const userData = doc.data();
+	// 			setCurrentUsername(userData.username);
+	// 		}
+	// 	});
+	// }
+
 	async function sendFriendRequest(senderUsername, receiverUsername) {
 		const usersRef = firebase.firestore().collection("users");
 
@@ -125,7 +161,6 @@ const Template = ({ route, navigation }) => {
 		const receiverUsername = user.username;
 		sendFriendRequest(senderUsername, receiverUsername);
 	}
-
 	function getUserPosts() {
 		firestore
 			.collection("events")
@@ -154,6 +189,135 @@ const Template = ({ route, navigation }) => {
 			});
 		}
 	}, [friendRequests]);
+	function setFollower() {
+		user.follower.forEach((r) => flw.push(r))
+		flw.push(auth.currentUser.uid.toString())
+		firestore
+			.collection("users")
+			.doc(uid)
+			.update({
+				follower: flw
+			}).then(
+				setFollowing
+			)
+		flw = [];
+	}
+
+	function setFollowing() {
+		currentUser.following.forEach((r) => flwng.push(r))
+		flwng.push(uid.toString())
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.update({
+				following: flwng
+			})
+			.then(getCurrentUserData)
+			.then(getUserData)
+		flwng = [];
+	}
+
+	function setUnfollow() {
+		user.follower.forEach((r) => flw.push(r))
+		const index = flw.indexOf(auth.currentUser.uid.toString())
+		flw.splice(index, 1)
+		firestore
+			.collection("users")
+			.doc(uid)
+			.update({
+				follower: flw
+			}).then(
+				setUnfollowing
+			)
+		flw = [];
+	}
+
+	function setUnfollowing() {
+		currentUser.following.forEach((r) => flwng.push(r))
+		const index = flwng.indexOf(uid.toString())
+		flwng.splice(index, 1)
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.update({
+				following: flwng
+			})
+			.then(getCurrentUserData)
+			.then(getUserData)
+		flwng = [];
+	}
+
+
+	function getUserPosts() {
+		firestore
+			.collection("events")
+			.where("creator", "==", uid)
+			.onSnapshot((snapshot) => {
+				const posts = snapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+				setEvents(posts);
+			});
+	}
+
+	// 	function setFollower() {
+	// 		user.follower.forEach((r) => flw.push(r))
+	// flw.push(currentUsername)
+	// 	firestore
+	// 	.collection("users")
+	// 	.doc(uid)
+	// 	.update({
+	// 		follower: flw
+	// }).then(
+	// 	setFollowing
+	// 	)
+	// 	flw = [];
+	// }
+
+	function setFollowing() {
+		currentUser.following.forEach((r) => flwng.push(r))
+		flwng.push(user.username)
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.update({
+				following: flwng
+			})
+			.then(getCurrentUserData)
+			.then(getUserData)
+		flwng = [];
+	}
+
+	function setUnfollow() {
+		user.follower.forEach((r) => flw.push(r))
+		const index = flw.indexOf(currentUsername)
+		flw.splice(index, 1)
+		firestore
+			.collection("users")
+			.doc(uid)
+			.update({
+				follower: flw
+			}).then(
+				setUnfollowing
+			)
+		flw = [];
+	}
+
+	function setUnfollowing() {
+		currentUser.following.forEach((r) => flwng.push(r))
+		const index = flwng.indexOf(user.username)
+		flwng.splice(index, 1)
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.update({
+				following: flwng
+			})
+			.then(getCurrentUserData)
+			.then(getUserData)
+		flwng = [];
+	}
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -209,95 +373,92 @@ const Template = ({ route, navigation }) => {
 					)}
 				</View>
 
-				<View
-					style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
-				>
-					<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-						{user.firstName} {user.lastName}
-					</Text>
-					<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
-						@{user.username}
-					</Text>
-				</View>
-
-				<View
-					style={[styles.statsContainer, { marginTop: windowHeight * 0.05 }]}
-				>
-					<View style={styles.statsBox}>
-						<Text>Events</Text>
-						<Text>0</Text>
-					</View>
+				{user.follower && user.following && currentUser.follower && currentUser.following && user.username && (
 					<View
-						style={[
-							styles.statsBox,
-							{
-								borderColor: "DFD8C8",
-								borderLeftWidth: 1,
-								borderRightWidth: 1,
-							},
-						]}
+						style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
 					>
-						<Text>Follower</Text>
-						<Text>0</Text>
-					</View>
-					<View style={styles.statsBox}>
-						<Text>Following</Text>
-						<Text>0</Text>
-					</View>
-				</View>
-
-				<View style={{ marginTop: windowHeight * 0.05 }}>
-					<ScrollView
-						horizontal={true}
-						showsVerticalScrollIndicator={false}
-						showsHorizontalScrollIndicator={false}
-					>
-						{events.map((event) => (
-							<TouchableOpacity
-								style={styles.mediaImageContainer}
-								key={event.id}
-								onPress={() => navigation.navigate("EventDetails", { event })}
-							>
-								<Image
-									source={{ uri: event.imageUrl }}
-									style={styles.image}
-									resizeMode="center"
-								/>
-								<Text style={styles.imageText}>{event.title}</Text>
+						<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
+							{user.firstName} {user.lastName}
+						</Text>
+						<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
+							@{user.username}
+						</Text>
+						{uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && (
+							<TouchableOpacity style={{ marginTop: 10 }} onPress={setFollower}>
+								<Text>Folgen</Text>
 							</TouchableOpacity>
-						))}
-					</ScrollView>
-					<Text
-						style={[
-							styles.text,
-							styles.recent,
-							{
-								marginLeft: windowWidth * 0.15,
-								marginTop: windowHeight * 0.05,
-							},
-						]}
-					>
-						Recent Activity
-					</Text>
-
-					<View
-						style={[
-							styles.recentItem,
-							{
-								marginBottom: windowHeight * 0.02,
-								marginLeft: windowWidth * 0.15,
-							},
-						]}
-					>
-						<View style={styles.recentItemIndicator}></View>
-						<View>
-							<Text>{events.title}</Text>
-						</View>
+						)}
+						{currentUser.following.includes(uid) === true && (
+							<TouchableOpacity style={{ marginTop: 10 }} onPress={setUnfollow}>
+								<Text>Nicht mehr Folgen</Text>
+							</TouchableOpacity>
+						)}
 					</View>
-				</View>
+				)}
+
+				{user.follower && user.following && currentUser.follower && currentUser.following && (
+					<View
+						style={[styles.statsContainer, { marginTop: windowHeight * 0.05 }]}
+					>
+						<View style={styles.statsBox}>
+							<Text>Events</Text>
+							<Text>{events.length}</Text>
+						</View>
+						<View
+							style={[
+								styles.statsBox,
+								{
+									borderColor: "DFD8C8",
+									borderLeftWidth: 1,
+									borderRightWidth: 1,
+								},
+							]}
+						>
+							{auth.currentUser.uid === uid && (
+								<TouchableOpacity style={styles.statsBox}
+									onPress={() => navigation.navigate('Follower', { uid: uid, follower: currentUser.follower })}>
+									<Text>Follower</Text>
+									<Text>{user.follower.length}</Text>
+								</TouchableOpacity>
+							)}
+							{auth.currentUser.uid !== uid && (
+								<TouchableOpacity style={styles.statsBox}
+									onPress={() => navigation.navigate('Follower', { uid: uid, follower: user.follower })}>
+									<Text>Follower</Text>
+									<Text>{user.follower.length}</Text>
+								</TouchableOpacity>
+							)}
+						</View>
+						{auth.currentUser.uid === uid && (
+							<TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {
+								uid: uid,
+								following: currentUser.following
+							})}>
+								<View style={styles.statsBox}>
+									<Text>Following</Text>
+									<Text>{user.following.length}</Text>
+								</View>
+							</TouchableOpacity>
+						)}
+						{auth.currentUser.uid !== uid && (
+							<TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {
+								uid: uid,
+								following: user.following
+							})}>
+								<View style={styles.statsBox}>
+									<Text>Following</Text>
+									<Text>{user.following.length}</Text>
+								</View>
+							</TouchableOpacity>
+						)}
+
+
+					</View>
+				)}
 			</ScrollView>
 		</SafeAreaView>
-	);
+	)
+
 };
 
 export default Template;
