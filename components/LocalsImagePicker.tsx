@@ -7,12 +7,14 @@ import { Ionicons } from "@expo/vector-icons";
 
 export interface LocalsImagePickerProps {
 	onImageTaken: (imageUri: string) => void;
+	placeholder?: string;
 	imageSize?: "small" | "medium" | "large";
 	style?: StyleProp<ViewStyle>;
 }
 
 const LocalsImagePicker: React.FC<LocalsImagePickerProps> = ({
 	onImageTaken,
+	placeholder,
 	imageSize = "medium",
 	style,
 }) => {
@@ -45,12 +47,15 @@ const LocalsImagePicker: React.FC<LocalsImagePickerProps> = ({
 
 	return (
 		<View style={[styles.imagePicker, style]}>
-			{pickedImage ? (
+			{pickedImage || placeholder ? (
 				<TouchableOpacity
 					onPress={takeImageHandler}
 					style={styles.buttonContainer}
 				>
-					<Image style={styles.image} source={{ uri: pickedImage }} />
+					<Image
+						style={styles.image}
+						source={{ uri: pickedImage || placeholder }}
+					/>
 					{/* edit button icon over the image */}
 					<View
 						style={{

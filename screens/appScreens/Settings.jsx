@@ -1,4 +1,13 @@
-import { View, Text, Button, StyleSheet, Alert, TextInput, Modal, TouchableOpacity, Dimensions } from "react-native";
+import {
+	View,
+	Text,
+	Button,
+	StyleSheet,
+	Alert,
+	TextInput,
+	Dimensions,
+	Modal,
+} from "react-native";
 import React, { useState } from "react";
 import { auth, firebase } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
@@ -6,12 +15,11 @@ import { useNavigation } from "@react-navigation/native";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import { Ionicons } from "@expo/vector-icons";
 
-
 const Template = () => {
 	const navigation = useNavigation();
-	const [oldPassword, setOldPassword] = useState('');
-	const [newPassword, setNewPassword] = useState('');
-	const [confirmPassword, setConfirmPassword] = useState('');
+	const [oldPassword, setOldPassword] = useState("");
+	const [newPassword, setNewPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
 	const [modalVisible, setModalVisible] = useState(false);
 
 	const windowWidth = Dimensions.get("window").width;
@@ -36,13 +44,12 @@ const Template = () => {
 
 			// Passwort ändern
 			await user.updatePassword(newPassword);
-			Alert.alert('Passwort wurde erfolgreich geändert');
+			Alert.alert("Passwort wurde erfolgreich geändert");
 		} catch (error) {
 			console.log(error);
-			Alert.alert('Fehler beim Ändern des Passworts');
+			Alert.alert("Fehler beim Ändern des Passworts");
 		}
-	}
-
+	};
 
 	const logout = () => {
 		auth
@@ -53,6 +60,55 @@ const Template = () => {
 			.then(() => {
 				navigation.navigate("Home");
 			});
+	};
+
+	const deleteAccount = async () => {
+		const imageUrl = await firebase
+			.firestore()
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.get()
+			.then((documentSnapshot) => {
+				return documentSnapshot.data().imageUrl;
+			});
+
+		await firebase
+			.firestore()
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.delete()
+			.then(() => {
+				firebase.storage().refFromURL(imageUrl).delete();
+
+				auth.currentUser
+					.delete()
+					.then(() => {
+						alert("Account deleted!");
+					})
+					.then(() => {
+						navigation.navigate("Home");
+					});
+			});
+	};
+
+	const DeleteAccountPrompt = () => {
+		Alert.alert(
+			"Account löschen",
+			"Möchten Sie Ihren Account wirklich löschen?",
+			[
+				{
+					text: "Abbrechen",
+					onPress: () => console.log("Cancel Pressed"),
+					style: "cancel",
+				},
+				{
+					text: "Löschen",
+					onPress: () => deleteAccount(),
+					style: "destructive",
+				},
+			],
+			{ cancelable: false }
+		);
 	};
 
 	return (
@@ -77,7 +133,11 @@ const Template = () => {
 				style={{ marginBottom: 10 }} // Added some styling
 			/>
 
-
+			<LocalsButton
+				title="Account löschen"
+				onPress={DeleteAccountPrompt}
+				style={{ marginTop: 10 }} // Added some styling
+			/>
 
 			<Modal
 				animationType="slide"
@@ -109,13 +169,11 @@ const Template = () => {
 							onChangeText={setConfirmPassword}
 							secureTextEntry={true}
 							style={{ marginBottom: 10 }} // Added some styling
-
 						/>
 						<LocalsButton
 							title="Bestätigen"
 							onPress={changePassword}
 							style={{ marginBottom: 10 }} // Added some styling
-
 						/>
 						<LocalsButton
 							title="Schließen"
@@ -125,7 +183,6 @@ const Template = () => {
 				</View>
 			</Modal>
 		</View>
-
 	);
 };
 
