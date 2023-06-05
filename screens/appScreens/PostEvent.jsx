@@ -216,7 +216,7 @@ const PostEvent = ({ navigation }) => {
 						style={styles.inputText}
 						value={title}
 						onChangeText={(title) => setTitle(title)}
-						// is mendatory
+					// is mendatory
 					/>
 				</View>
 
