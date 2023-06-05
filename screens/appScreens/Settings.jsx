@@ -1,10 +1,10 @@
-import {View, Text, Button, StyleSheet, Alert, TextInput, Modal, TouchableOpacity} from "react-native";
+import { View, Text, Button, StyleSheet, Alert, TextInput, Modal, TouchableOpacity, Dimensions } from "react-native";
 import React, { useState } from "react";
-import {auth, firebase} from "../../firebase";
+import { auth, firebase } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import { useNavigation } from "@react-navigation/native";
 import LocalsTextInput from "../../components/LocalsTextInput";
-import {Ionicons} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 
 const Template = () => {
@@ -13,6 +13,9 @@ const Template = () => {
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [modalVisible, setModalVisible] = useState(false);
+
+	const windowWidth = Dimensions.get("window").width;
+	const windowHeight = Dimensions.get("window").height;
 
 	const changePassword = async () => {
 		// Überprüfen Sie, ob das neue Passwort und das Bestätigungspasswort gleich sind
@@ -67,11 +70,11 @@ const Template = () => {
 				</Ionicons>
 			</TouchableOpacity>
 			<LocalsButton title="Sign Out" onPress={logout}
-						  style={{marginBottom: 10}} // Added some styling
+				style={{ marginBottom: 10 }} // Added some styling
 			/>
 			<LocalsButton title={"Passwort ändern"}
-						  onPress={() => setModalVisible(true)}
-						  style={{marginBottom: 10}} // Added some styling
+				onPress={() => setModalVisible(true)}
+				style={{ marginBottom: 10 }} // Added some styling
 			/>
 
 
@@ -82,14 +85,14 @@ const Template = () => {
 				visible={modalVisible}
 				onRequestClose={() => setModalVisible(false)}
 			>
-				<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-					<View style={{backgroundColor: 'white', padding: 20, borderRadius: 10}}>
+				<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+					<View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
 						<LocalsTextInput
 							placeholder="Altes Passwort"
 							value={oldPassword}
 							onChangeText={setOldPassword}
 							secureTextEntry={true}
-							style={{width: '100%', marginBottom: 10}} // Added some styling
+							style={{ width: '100%', marginBottom: 10 }} // Added some styling
 
 						/>
 						<LocalsTextInput
@@ -97,7 +100,7 @@ const Template = () => {
 							value={newPassword}
 							onChangeText={setNewPassword}
 							secureTextEntry={true}
-							style={{width: '100%', marginBottom: 10}} // Added some styling
+							style={{ width: '100%', marginBottom: 10 }} // Added some styling
 
 						/>
 						<LocalsTextInput
@@ -105,13 +108,13 @@ const Template = () => {
 							value={confirmPassword}
 							onChangeText={setConfirmPassword}
 							secureTextEntry={true}
-							style={{marginBottom: 10}} // Added some styling
+							style={{ marginBottom: 10 }} // Added some styling
 
 						/>
 						<LocalsButton
 							title="Bestätigen"
 							onPress={changePassword}
-							style={{marginBottom: 10}} // Added some styling
+							style={{ marginBottom: 10 }} // Added some styling
 
 						/>
 						<LocalsButton

@@ -8,6 +8,7 @@ import {
 	Dimensions,
 	TextInput,
 	TouchableOpacity,
+	KeyboardAvoidingView
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { CheckBox } from "react-native-elements";
@@ -301,8 +302,7 @@ const PostEvent = ({ navigation }) => {
 						)}
 						<Text style={styles.date} onPress={showDatePicker}>
 							{date.toString()}
-						</Text>{" "}
-						*/}
+						</Text>
 					</View>
 				</View>
 

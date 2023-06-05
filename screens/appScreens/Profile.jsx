@@ -13,7 +13,7 @@ import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { firebase, firestore, storage } from "../../firebase";
 
-const Template = ({ route, navigation }) => {
+const Profile = ({ route, navigation }) => {
 	useEffect(() => {
 		getUserData();
 		getUserPosts();
@@ -299,7 +299,7 @@ const Template = ({ route, navigation }) => {
 	);
 };
 
-export default Template;
+export default Profile;
 
 const styles = StyleSheet.create({
 	container: {

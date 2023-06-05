@@ -5,7 +5,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 
 // Import screen components
-import Template from "./appScreens/Template";
 import HomeScreen from "./appScreens/Home";
 import LiveMap from "./appScreens/LiveMap";
 import Settings from "./appScreens/Settings";
@@ -180,7 +179,7 @@ function AuthScreen() {
 	return (
 		<Tab.Navigator
 			screenOptions={({ route }) => ({
-				tabBarIcon: ({ focused, color, size }) => {},
+				tabBarIcon: ({ focused, color, size }) => { },
 				tabBarLabelStyle: {
 					fontSize: 12,
 				},
