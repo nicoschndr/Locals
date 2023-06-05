@@ -432,9 +432,9 @@ const Livemap = () => {
 		const a =
 			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
 			Math.cos(deg2rad(lat1)) *
-				Math.cos(deg2rad(lat2)) *
-				Math.sin(dLon / 2) *
-				Math.sin(dLon / 2);
+			Math.cos(deg2rad(lat2)) *
+			Math.sin(dLon / 2) *
+			Math.sin(dLon / 2);
 		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		const d = R * c; // Entfernung in km
 		return d;
@@ -457,8 +457,7 @@ const Livemap = () => {
 						latitudeDelta: 0.0922,
 						longitudeDelta: 0.0421,
 					}}
-					showsUserLocation={true}
-					showsMyLocationButton
+					showsUserLocation
 				>
 					{isSliderActive && (
 						<Circle
@@ -491,8 +490,8 @@ const Livemap = () => {
 									event.advertised
 										? null
 										: event.impressions >= IMPRESSION_THRESHOLD
-										? styles.friendHighlightedMarker
-										: null,
+											? styles.friendHighlightedMarker
+											: null,
 								]}
 							/>
 						</Marker>
@@ -512,7 +511,7 @@ const Livemap = () => {
 				<Slider
 					style={styles.slider}
 					minimumValue={1}
-					maximumValue={250}
+					maximumValue={21250}
 					step={1}
 					value={sliderValue}
 					onValueChange={(value) => {
@@ -561,7 +560,7 @@ const Livemap = () => {
 								Freie Plätze: {selectedEvent.groupSize}
 							</Text>
 							{selectedEvent.likedBy &&
-							selectedEvent.likedBy.includes(username) ? (
+								selectedEvent.likedBy.includes(username) ? (
 								<AntDesign
 									name="heart"
 									size={24}

@@ -146,7 +146,6 @@ function AppNavigation() {
 						tabBarActiveTintColor: "#ec404b",
 						tabBarInactiveTintColor: "#734e61",
 						headerShown: false,
-
 						tabBarStyle: [
 							{
 								display: "flex",
@@ -179,7 +178,7 @@ function AuthScreen() {
 	return (
 		<Tab.Navigator
 			screenOptions={({ route }) => ({
-				tabBarIcon: ({ focused, color, size }) => {},
+				tabBarIcon: ({ focused, color, size }) => { },
 				tabBarLabelStyle: {
 					fontSize: 12,
 				},

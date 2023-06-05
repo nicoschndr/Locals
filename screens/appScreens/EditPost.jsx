@@ -139,8 +139,8 @@ const EditPost = ({ navigation, route }) => {
 				>
 					<Ionicons
 						style={{ marginRight: windowWidth - 90 }}
-						name={"arrow-back-circle-outline"}
-						size={40}
+						name={"chevron-back"}
+						size={36}
 					>
 						{" "}
 					</Ionicons>
