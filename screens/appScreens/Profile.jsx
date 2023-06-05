@@ -189,7 +189,63 @@ const Template = ({ route, navigation }) => {
 			});
 		}
 	}, [friendRequests]);
+	function setFollower() {
+		user.follower.forEach((r) => flw.push(r))
+		flw.push(auth.currentUser.uid.toString())
+		firestore
+			.collection("users")
+			.doc(uid)
+			.update({
+				follower: flw
+			}).then(
+				setFollowing
+			)
+		flw = [];
+	}
 
+	function setFollowing() {
+		currentUser.following.forEach((r) => flwng.push(r))
+		flwng.push(uid.toString())
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.update({
+				following: flwng
+			})
+			.then(getCurrentUserData)
+			.then(getUserData)
+		flwng = [];
+	}
+
+	function setUnfollow() {
+		user.follower.forEach((r) => flw.push(r))
+		const index = flw.indexOf(auth.currentUser.uid.toString())
+		flw.splice(index, 1)
+		firestore
+			.collection("users")
+			.doc(uid)
+			.update({
+				follower: flw
+			}).then(
+				setUnfollowing
+			)
+		flw = [];
+	}
+
+	function setUnfollowing() {
+		currentUser.following.forEach((r) => flwng.push(r))
+		const index = flwng.indexOf(uid.toString())
+		flwng.splice(index, 1)
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.update({
+				following: flwng
+			})
+			.then(getCurrentUserData)
+			.then(getUserData)
+		flwng = [];
+	}
 
 
 	function getUserPosts() {
@@ -205,19 +261,19 @@ const Template = ({ route, navigation }) => {
 			});
 	}
 
-	function setFollower() {
-		user.follower.forEach((r) => flw.push(r))
-		flw.push(currentUsername)
-		firestore
-			.collection("users")
-			.doc(uid)
-			.update({
-				follower: flw
-			}).then(
-				setFollowing
-			)
-		flw = [];
-	}
+	// 	function setFollower() {
+	// 		user.follower.forEach((r) => flw.push(r))
+	// flw.push(currentUsername)
+	// 	firestore
+	// 	.collection("users")
+	// 	.doc(uid)
+	// 	.update({
+	// 		follower: flw
+	// }).then(
+	// 	setFollowing
+	// 	)
+	// 	flw = [];
+	// }
 
 	function setFollowing() {
 		currentUser.following.forEach((r) => flwng.push(r))
@@ -327,12 +383,12 @@ const Template = ({ route, navigation }) => {
 						<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
 							@{user.username}
 						</Text>
-						{uid !== firebase.auth().currentUser.uid && currentUser.following.includes(user.username) === false && (
+						{uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && (
 							<TouchableOpacity style={{ marginTop: 10 }} onPress={setFollower}>
 								<Text>Folgen</Text>
 							</TouchableOpacity>
 						)}
-						{currentUser.following.includes(user.username) === true && (
+						{currentUser.following.includes(uid) === true && (
 							<TouchableOpacity style={{ marginTop: 10 }} onPress={setUnfollow}>
 								<Text>Nicht mehr Folgen</Text>
 							</TouchableOpacity>
@@ -358,74 +414,50 @@ const Template = ({ route, navigation }) => {
 								},
 							]}
 						>
-							<TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Follower', { uid: uid })}>
-								<Text>Follower</Text>
-								<Text>{user.follower.length}</Text>
-							</TouchableOpacity>
+							{auth.currentUser.uid === uid && (
+								<TouchableOpacity style={styles.statsBox}
+									onPress={() => navigation.navigate('Follower', { uid: uid, follower: currentUser.follower })}>
+									<Text>Follower</Text>
+									<Text>{user.follower.length}</Text>
+								</TouchableOpacity>
+							)}
+							{auth.currentUser.uid !== uid && (
+								<TouchableOpacity style={styles.statsBox}
+									onPress={() => navigation.navigate('Follower', { uid: uid, follower: user.follower })}>
+									<Text>Follower</Text>
+									<Text>{user.follower.length}</Text>
+								</TouchableOpacity>
+							)}
 						</View>
-						<TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', { uid: uid })}>
-							<View style={styles.statsBox}>
-								<Text>Following</Text>
-								<Text>{user.following.length}</Text>
-							</View>
-						</TouchableOpacity>
+						{auth.currentUser.uid === uid && (
+							<TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {
+								uid: uid,
+								following: currentUser.following
+							})}>
+								<View style={styles.statsBox}>
+									<Text>Following</Text>
+									<Text>{user.following.length}</Text>
+								</View>
+							</TouchableOpacity>
+						)}
+						{auth.currentUser.uid !== uid && (
+							<TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {
+								uid: uid,
+								following: user.following
+							})}>
+								<View style={styles.statsBox}>
+									<Text>Following</Text>
+									<Text>{user.following.length}</Text>
+								</View>
+							</TouchableOpacity>
+						)}
+
 
 					</View>
 				)}
-
-
-				<View style={{ marginTop: windowHeight * 0.05 }}>
-					<ScrollView
-						horizontal={true}
-						showsVerticalScrollIndicator={false}
-						showsHorizontalScrollIndicator={false}
-					>
-						{events.map((event) => (
-							<TouchableOpacity
-								style={styles.mediaImageContainer}
-								key={event.id}
-								onPress={() => navigation.navigate("EventDetails", { event })}
-							>
-								<Image
-									source={{ uri: event.imageUrl }}
-									style={styles.image}
-									resizeMode="center"
-								/>
-								<Text style={styles.imageText}>{event.title}</Text>
-							</TouchableOpacity>
-						))}
-					</ScrollView>
-					<Text
-						style={[
-							styles.text,
-							styles.recent,
-							{
-								marginLeft: windowWidth * 0.15,
-								marginTop: windowHeight * 0.05,
-							},
-						]}
-					>
-						Recent Activity
-					</Text>
-
-					<View
-						style={[
-							styles.recentItem,
-							{
-								marginBottom: windowHeight * 0.02,
-								marginLeft: windowWidth * 0.15,
-							},
-						]}
-					>
-						<View style={styles.recentItemIndicator}></View>
-						<View>
-							<Text>{events.title}</Text>
-						</View>
-					</View>
-				</View>
 			</ScrollView>
 		</SafeAreaView>
-	);
+	)
 
 };
 

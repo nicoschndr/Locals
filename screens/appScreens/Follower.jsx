@@ -1,8 +1,8 @@
-import {View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Dimensions} from "react-native";
+import {View, Text, Button, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image, Alert} from "react-native";
 import React, {useEffect, useState} from "react";
 import {Ionicons} from "@expo/vector-icons";
 import {useNavigation} from "@react-navigation/native";
-import {auth, firestore} from "../../firebase";
+import {auth, firebase, firestore} from "../../firebase";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -12,10 +12,17 @@ const Follower = ({route: {params}}) => {
 
     useEffect(() => {
         getUserData();
+        getCurrentUserData();
+        getFollowerData();
     }, []);
 
     const [user, setUser] = useState({});
+    const [currentUser, setCurrentUser] = useState({});
     const uid = params.uid;
+    const [followerIDs, setFollowingIds] = useState(params.follower);
+    const [followers, setUserFollowers] = useState([]);
+    let fllwr = [];
+    let fllwng = [];
 
     function getUserData() {
         firestore
@@ -25,6 +32,89 @@ const Follower = ({route: {params}}) => {
             .then((snapshot) => {
                 setUser(snapshot.data());
             })
+    }
+
+    function getCurrentUserData() {
+        firestore
+            .collection("users")
+            .doc(auth.currentUser.uid)
+            .get()
+            .then((snapshot) => {
+                setCurrentUser(snapshot.data());
+            });
+    }
+
+    function getFollowerData() {
+        if(followerIDs.length > 0) {
+            firestore
+                .collection('users')
+                .where(firebase.firestore.FieldPath.documentId(), 'in', followerIDs)
+                .get()
+                .then((snapshot) => {
+                    const f = snapshot.docs.map((e) => ({
+                        uid: e.id,
+                        ...e.data(),
+                    }))
+                    setUserFollowers(f)
+                })
+        }
+    }
+
+    function deleteFollower(follower) {
+        currentUser.follower.forEach((e) => {fllwr.push(e)})
+        const index = fllwr.indexOf(follower.follower.uid)
+        fllwr.splice(index, 1)
+        firestore
+            .collection('users')
+            .doc(auth.currentUser.uid)
+            .update({
+                    follower: fllwr
+                }
+            ).then(
+        )
+        deleteFollowing(follower)
+        fllwr= [];
+    }
+
+    function deleteFollowing(follower){
+        follower.follower.following.forEach((e) => fllwng.push(e))
+        const index = fllwng.indexOf(auth.currentUser.uid)
+        fllwng.splice(index, 1)
+        firestore
+            .collection('users')
+            .doc(follower.follower.uid)
+            .update({
+                following: fllwng
+            }).then(
+                getCurrentUserData
+        )
+        fllwng=[];
+    }
+
+    function notDeleteFollower(follower){
+        follower.follower.following.forEach((e) => fllwng.push(e))
+        firestore
+            .collection('users')
+            .doc(follower.follower.uid)
+            .update({
+                following: fllwng
+            }).then()
+        notDeleteFollowing(follower)
+        fllwng=[];
+    }
+
+    function notDeleteFollowing(follower){
+        currentUser.follower.forEach((e) => fllwr.push(e))
+        fllwr.push(follower.follower.uid)
+        firestore
+            .collection('users')
+            .doc(auth.currentUser.uid)
+            .update({
+                follower: fllwr
+            }).then(
+                getCurrentUserData
+        )
+        fllwr =[];
     }
 
 
@@ -49,16 +139,25 @@ const Follower = ({route: {params}}) => {
                 )}
             </View>
             <Text style={{flexDirection: "row",marginTop: 30, alignSelf:"center", fontWeight: "bold", fontSize: 20}}>Follower</Text>
-            {user.follower && (
+            {followers.length > 0 && (
                 <View>
-                    {user.follower.map((follower) => (
-                        <View style={{flexDirection: "row", justifyContent:"space-between", marginTop: 20}}>
-                            <Text style={{marginLeft: 10}}>{follower}</Text>
-                            {auth.currentUser.uid === uid && (
-                                <TouchableOpacity style={{marginRight: 10}}>
-                                     <Text>entfernen</Text>
-                                </TouchableOpacity>
-                            )}
+                    {followers.map((follower) => (
+                        <View>
+                            <View style={{flexDirection: "row", marginTop: 10, marginLeft: 10}}>
+                                <Image source={{uri: follower.imageUrl}}
+                                       style={{width: 40, height: 40, borderRadius: 50}}></Image>
+                                <Text style={{marginLeft: 10, fontWeight: "bold"}}>{follower.username}{"\n"}<Text style={{fontWeight: "normal"}}>{follower.firstName + " " + follower.lastName}</Text></Text>
+                                {currentUser.follower.includes(follower.uid) && user.email === auth.currentUser.email && (
+                                    <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => deleteFollower({follower})}>
+                                        <Text>entfernen</Text>
+                                    </TouchableOpacity>
+                                )}
+                                {!currentUser.follower.includes(follower.uid) && user.email === auth.currentUser.email && (
+                                    <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => notDeleteFollower({follower})}>
+                                        <Text>rückgängig</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
                         </View>
                     ))}
                 </View>
