@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from "react";
-import {View, Text, StyleSheet, ScrollView, ImageBackground, Image, Pressable} from "react-native";
-import {DrawerItemList} from "@react-navigation/drawer";
-import {Ionicons} from "@expo/vector-icons";
-import {auth, firebase, firestore} from "../firebase";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, ImageBackground, Image, Pressable } from "react-native";
+import { DrawerItemList } from "@react-navigation/drawer";
+import { Ionicons } from "@expo/vector-icons";
+import { auth, firebase, firestore } from "../firebase";
 
 const Sidebar = props => {
 
@@ -43,22 +43,22 @@ const Sidebar = props => {
     });
     return (
         <ScrollView>
-            <ImageBackground source={require("../assets/backgroundSidebar.png")} style={{paddingTop: 48, padding: 16}}>
-                <Image source={user.imageUrl ? {uri: user.imageUrl} : null} style={styles.image}></Image>
+            <ImageBackground source={require("../assets/backgroundSidebar.png")} style={{ paddingTop: 48, padding: 16 }}>
+                <Image source={user.imageUrl ? { uri: user.imageUrl } : null} style={styles.image}></Image>
                 <Text style={styles.name}>{user.firstName} {user.lastName}</Text>
 
-                <View style={{flexDirection: "row"}}>
+                <View style={{ flexDirection: "row" }}>
                     <Text style={styles.followers}>0 Followers</Text>
                     <Ionicons name="md-people" size={16} color="rgba(255,255,255, 0.8)"></Ionicons>
                 </View>
             </ImageBackground>
 
             <View style={styles.container}>
-                <DrawerItemList {...props}/>
+                <DrawerItemList {...props} />
             </View>
             <Pressable style={styles.label} onPress={logout}>
                 <Ionicons name="log-out-outline" size={19} color={'rgba(255, 0, 0, .87)'}></Ionicons>
-                <Text style={{fontWeight: 'bold', color: 'rgba(255, 0, 0, .87)'}}>Logout</Text>
+                <Text style={{ fontWeight: 'bold', color: 'rgba(255, 0, 0, .87)' }}>Logout</Text>
             </Pressable>
         </ScrollView>
     )
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     followers: {
         color: "rgba(255,255,255,0.8)",
         fontSize: 13,
-        marginRight:4
+        marginRight: 4
     },
     label: {
         flexDirection: "row",

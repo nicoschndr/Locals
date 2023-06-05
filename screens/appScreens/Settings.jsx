@@ -7,6 +7,7 @@ import {
 	TextInput,
 	Dimensions,
 	Modal,
+	TouchableOpacity
 } from "react-native";
 import React, { useState } from "react";
 import { auth, firebase } from "../../firebase";
