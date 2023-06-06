@@ -1,558 +1,710 @@
 import {
-	View,
-	Image,
-	Text,
-	StyleSheet,
-	Dimensions,
-	SafeAreaView,
-	ScrollView,
-	TouchableOpacity,
-	Alert,
+    View,
+    Image,
+    Text,
+    StyleSheet,
+    Dimensions,
+    SafeAreaView,
+    ScrollView,
+    TouchableOpacity,
+    Alert, Modal, Pressable, TextInput, KeyboardAvoidingView,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { auth, firebase, firestore, storage } from "../../firebase";
-
-const Profile = ({ route, navigation }) => {
-	useEffect(() => {
-		getUserData();
-		getCurrentUserData();
-		getUserPosts();
-	}, []);
-
-	const goToFriendList = () => {
-		navigation.navigate("FriendList");
-	};
-
-	let flwng = [];
-	let flw = [];
-
-	const windowWidth = Dimensions.get("window").width;
-	const windowHeight = Dimensions.get("window").height;
-
-	const uid = route.params?.uid || firebase.auth().currentUser.uid;
-	const [user, setUser] = useState({});
-	const [currentUser, setCurrentUser] = useState({});
-	const [events, setEvents] = useState([]);
-	const [currentUsername, setCurrentUsername] = useState("");
-	const [currentFriends, setCurrentFriends] = useState({});
-	const [friendRequests, setFriendRequests] = useState([]);
-	const [followerSize, setFollowerSize] = useState("");
-	const [followingSize, setFollowingSize] = useState("");
-
-	React.useLayoutEffect(() => {
-		if (uid === firebase.auth().currentUser.uid) {
-			navigation.setOptions({
-				headerRight: () => (
-					<TouchableOpacity onPress={goToFriendList}>
-						<Ionicons name={"people"} size={25} style={{ marginRight: 15 }} />
-					</TouchableOpacity>
-				),
-			});
-		} else {
-			navigation.setOptions({
-				headerRight: null,
-			});
-		}
-	}, [navigation, uid]);
-
-	function getUserData() {
-		firestore
-			.collection("users")
-			.doc(uid)
-			.get()
-			.then((snapshot) => {
-				setUser(snapshot.data());
-				getCurrentUserFriends(snapshot.data().username);
-			})
-	}
-
-	function getCurrentUserData() {
-		firestore
-			.collection("users")
-			.doc(auth.currentUser.uid)
-			.get()
-			.then((snapshot) => {
-				setCurrentUser(snapshot.data());
-			});
-	}
-
-	function getCurrentUserFriends(username) {
-		firestore
-			.collection("users")
-			.doc(firebase.auth().currentUser.uid)
-			.get()
-			.then((snapshot) => {
-				setCurrentFriends(snapshot.data().friends);
-				setFriendRequests(Object.keys(snapshot.data().friendRequests || {}));
-				checkFriendship(username, snapshot.data().friends);
-				getOpenFriendRequests();
-			});
-	}
-
-	function getOpenFriendRequests() {
-		firestore
-			.collection("users")
-			.doc(uid)
-			.get()
-			.then((snapshot) => {
-				const userData = snapshot.data();
-				const friendRequests = Object.keys(userData.friendRequests || {});
-				setFriendRequests(friendRequests); // Aktualisiere den Zustand mit den offenen Freundesanfragen
-			})
-			.catch((error) => {
-				console.error("Fehler beim Abrufen der Freundschaftsanfragen:", error);
-			});
-	}
-
-	function checkFriendship(username, friends) {
-		if (friends && friends[username]) {
-			// Der Benutzer ist ein Freund
-			console.log(`Der Benutzer ${username} ist ein Freund.`);
-		} else {
-			// Der Benutzer ist kein Freund
-			console.log(`Der Benutzer ${username} ist kein Freund.`);
-		}
-	}
-
-	useEffect(() => {
-		const user = firebase.auth().currentUser;
-
-		if (user) {
-			const userDocRef = firebase.firestore().collection("users").doc(user.uid);
-		}
-	}, [friendRequests]);
-
-	// async function sendFriendRequest(senderUsername, receiverUsername) {
-	// 	const usersRef = firebase.firestore().collection("users");
-
-	// 	userDocRef.onSnapshot((doc) => {
-	// 		if (doc.exists) {
-	// 			const userData = doc.data();
-	// 			setCurrentUsername(userData.username);
-	// 		}
-	// 	});
-	// }
-
-	async function sendFriendRequest(senderUsername, receiverUsername) {
-		const usersRef = firebase.firestore().collection("users");
-
-		// Suchen des Dokuments mit dem gegebenen Benutzernamen
-		const receiverQuerySnapshot = await usersRef
-			.where("username", "==", receiverUsername)
-			.get();
-		if (!receiverQuerySnapshot.empty) {
-			// Das Dokument wurde gefunden, nehmen Sie das erste Ergebnis
-			const receiverDoc = receiverQuerySnapshot.docs[0];
-			const receiverId = receiverDoc.id;
-
-			// Update für das Dokument mit der ID durchführen
-			await usersRef.doc(receiverId).update({
-				[`friendRequests.${senderUsername}`]: true,
-			});
-		} else {
-			// Das Dokument wurde nicht gefunden, handle den Fehler
-			console.error(`No document found with username: ${receiverUsername}`);
-		}
-	}
-
-	function handleSendFriendRequest() {
-		const senderUsername = firebase.auth().currentUser.displayName; // Benutzernamen aus Firebase Auth holen
-		const receiverUsername = user.username;
-		sendFriendRequest(senderUsername, receiverUsername);
-	}
-	function getUserPosts() {
-		firestore
-			.collection("events")
-			//where("creator", "==", uid  or user.username
-			.where("creator", "==", user.username || uid)
-			.onSnapshot((snapshot) => {
-				const posts = snapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				}));
-				setEvents(posts);
-			});
-	}
-
-	useEffect(() => {
-		const user = firebase.auth().currentUser;
-		getUserPosts();
-		if (user) {
-			const userDocRef = firebase.firestore().collection("users").doc(user.uid);
-
-			userDocRef.onSnapshot((doc) => {
-				if (doc.exists) {
-					const userData = doc.data();
-					setCurrentUsername(userData.username);
-				}
-			});
-		}
-	}, [friendRequests]);
-	function setFollower() {
-		user.follower.forEach((r) => flw.push(r))
-		flw.push(auth.currentUser.uid.toString())
-		firestore
-			.collection("users")
-			.doc(uid)
-			.update({
-				follower: flw
-			}).then(
-				setFollowing
-			)
-		flw = [];
-	}
-
-	function setFollowing() {
-		currentUser.following.forEach((r) => flwng.push(r))
-		flwng.push(uid.toString())
-		firestore
-			.collection("users")
-			.doc(auth.currentUser.uid)
-			.update({
-				following: flwng
-			})
-			.then(getCurrentUserData)
-			.then(getUserData)
-		flwng = [];
-	}
-
-	function setUnfollow() {
-		user.follower.forEach((r) => flw.push(r))
-		const index = flw.indexOf(auth.currentUser.uid.toString())
-		flw.splice(index, 1)
-		firestore
-			.collection("users")
-			.doc(uid)
-			.update({
-				follower: flw
-			}).then(
-				setUnfollowing
-			)
-		flw = [];
-	}
-
-	function setUnfollowing() {
-		currentUser.following.forEach((r) => flwng.push(r))
-		const index = flwng.indexOf(uid.toString())
-		flwng.splice(index, 1)
-		firestore
-			.collection("users")
-			.doc(auth.currentUser.uid)
-			.update({
-				following: flwng
-			})
-			.then(getCurrentUserData)
-			.then(getUserData)
-		flwng = [];
-	}
+import React, {useEffect, useState} from "react";
+import {Ionicons, MaterialIcons} from "@expo/vector-icons";
+import {auth, firebase, firestore, storage} from "../../firebase";
+import LocalsButton from "../../components/LocalsButton";
+import keyboardAvoidingView from "react-native-web/src/exports/KeyboardAvoidingView";
 
 
-	function getUserPosts() {
-		firestore
-			.collection("events")
-			.where("creator", "==", uid)
-			.onSnapshot((snapshot) => {
-				const posts = snapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				}));
-				setEvents(posts);
-			});
-	}
+const Profile = ({route, navigation}) => {
+    useEffect(() => {
+        getUserData();
+        getCurrentUserData();
+        getUserPosts();
+    }, []);
 
-	// 	function setFollower() {
-	// 		user.follower.forEach((r) => flw.push(r))
-	// flw.push(currentUsername)
-	// 	firestore
-	// 	.collection("users")
-	// 	.doc(uid)
-	// 	.update({
-	// 		follower: flw
-	// }).then(
-	// 	setFollowing
-	// 	)
-	// 	flw = [];
-	// }
+    const goToFriendList = () => {
+        navigation.navigate("FriendList");
+    };
 
-	function setFollowing() {
-		currentUser.following.forEach((r) => flwng.push(r))
-		flwng.push(user.username)
-		firestore
-			.collection("users")
-			.doc(auth.currentUser.uid)
-			.update({
-				following: flwng
-			})
-			.then(getCurrentUserData)
-			.then(getUserData)
-		flwng = [];
-	}
+    let flwng = [];
+    let flw = [];
+    let blockedUsers = [];
 
-	function setUnfollow() {
-		user.follower.forEach((r) => flw.push(r))
-		const index = flw.indexOf(currentUsername)
-		flw.splice(index, 1)
-		firestore
-			.collection("users")
-			.doc(uid)
-			.update({
-				follower: flw
-			}).then(
-				setUnfollowing
-			)
-		flw = [];
-	}
+    const windowWidth = Dimensions.get("window").width;
+    const windowHeight = Dimensions.get("window").height;
 
-	function setUnfollowing() {
-		currentUser.following.forEach((r) => flwng.push(r))
-		const index = flwng.indexOf(user.username)
-		flwng.splice(index, 1)
-		firestore
-			.collection("users")
-			.doc(auth.currentUser.uid)
-			.update({
-				following: flwng
-			})
-			.then(getCurrentUserData)
-			.then(getUserData)
-		flwng = [];
-	}
+    const uid = route.params?.uid || firebase.auth().currentUser.uid;
+    const [user, setUser] = useState({});
+    const [currentUser, setCurrentUser] = useState({});
+    const [events, setEvents] = useState([]);
+    const [currentUsername, setCurrentUsername] = useState("");
+    const [currentFriends, setCurrentFriends] = useState({});
+    const [friendRequests, setFriendRequests] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [reportModal, setReportModal] = useState(false);
+    const [followerSize, setFollowerSize] = useState("");
+    const [followingSize, setFollowingSize] = useState("");
+    const [text, onChangeText] = React.useState('');
+    const [number, onChangeNumber] = React.useState('');
+    const [reportCategory, setReportCategory] = useState([])
 
-	return (
-		<SafeAreaView style={styles.container}>
-			<ScrollView showsVerticalScrollIndicator={false}>
-				{uid === firebase.auth().currentUser.uid && (
-					<TouchableOpacity
-						style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
-						onPress={navigation.openDrawer}
-					>
-						<Ionicons
-							style={{ marginLeft: windowWidth - 50 }}
-							name={"reorder-three-outline"}
-							size={40}
-						>
-							{" "}
-						</Ionicons>
-					</TouchableOpacity>
-				)}
+    React.useLayoutEffect(() => {
+        if (uid === firebase.auth().currentUser.uid) {
+            navigation.setOptions({
+                headerRight: () => (
+                    <TouchableOpacity onPress={goToFriendList}>
+                        <Ionicons name={"people"} size={25} style={{marginRight: 15}}/>
+                    </TouchableOpacity>
+                ),
+            });
+        } else {
+            navigation.setOptions({
+                headerRight: null,
+            });
+        }
+    }, [navigation, uid]);
 
-				<View style={{ alignSelf: "center" }}>
-					<View style={styles.profileImage}>
-						<Image
-							source={{ uri: user.imageUrl }}
-							style={styles.image}
-							resizeMode="center"
-						/>
-					</View>
-					{uid !== firebase.auth().currentUser.uid && (
-						<>
-							<TouchableOpacity style={styles.chat}>
-								<MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
-							</TouchableOpacity>
-							{!currentFriends[user.username] &&
-								user.username !== currentUsername && (
-									<TouchableOpacity
-										style={styles.add}
-										onPress={() =>
-											sendFriendRequest(currentUsername, user.username)
-										}
-									>
-										{friendRequests.includes(currentUsername) ? (
-											<MaterialIcons
-												name={"schedule"}
-												size={60}
-												color={"#ffffff"}
-											/>
-										) : (
-											<MaterialIcons name={"add"} size={60} color={"#FFFFFF"} />
-										)}
-									</TouchableOpacity>
-								)}
-						</>
-					)}
-				</View>
+    function getUserData() {
+        firestore
+            .collection("users")
+            .doc(uid)
+            .get()
+            .then((snapshot) => {
+                setUser(snapshot.data());
+                getCurrentUserFriends(snapshot.data().username);
+            })
+    }
 
-				{user.follower && user.following && currentUser.follower && currentUser.following && user.username && (
-					<View
-						style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
-					>
-						<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-							{user.firstName} {user.lastName}
-						</Text>
-						<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
-							@{user.username}
-						</Text>
-						{uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && (
-							<TouchableOpacity style={{ marginTop: 10 }} onPress={setFollower}>
-								<Text>Folgen</Text>
-							</TouchableOpacity>
-						)}
-						{currentUser.following.includes(uid) === true && (
-							<TouchableOpacity style={{ marginTop: 10 }} onPress={setUnfollow}>
-								<Text>Nicht mehr Folgen</Text>
-							</TouchableOpacity>
-						)}
-					</View>
-				)}
+    function getCurrentUserData() {
+        firestore
+            .collection("users")
+            .doc(auth.currentUser.uid)
+            .get()
+            .then((snapshot) => {
+                setCurrentUser(snapshot.data());
+            });
+    }
 
-				{user.follower && user.following && currentUser.follower && currentUser.following && (
-					<View
-						style={[styles.statsContainer, { marginTop: windowHeight * 0.05 }]}
-					>
-						<View style={styles.statsBox}>
-							<Text>Events</Text>
-							<Text>{events.length}</Text>
-						</View>
-						<View
-							style={[
-								styles.statsBox,
-								{
-									borderColor: "DFD8C8",
-									borderLeftWidth: 1,
-									borderRightWidth: 1,
-								},
-							]}
-						>
-							{auth.currentUser.uid === uid && (
-								<TouchableOpacity style={styles.statsBox}
-									onPress={() => navigation.navigate('Follower', { uid: uid, follower: currentUser.follower })}>
-									<Text>Follower</Text>
-									<Text>{user.follower.length}</Text>
-								</TouchableOpacity>
-							)}
-							{auth.currentUser.uid !== uid && (
-								<TouchableOpacity style={styles.statsBox}
-									onPress={() => navigation.navigate('Follower', { uid: uid, follower: user.follower })}>
-									<Text>Follower</Text>
-									<Text>{user.follower.length}</Text>
-								</TouchableOpacity>
-							)}
-						</View>
-						{auth.currentUser.uid === uid && (
-							<TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {
-								uid: uid,
-								following: currentUser.following
-							})}>
-								<View style={styles.statsBox}>
-									<Text>Following</Text>
-									<Text>{user.following.length}</Text>
-								</View>
-							</TouchableOpacity>
-						)}
-						{auth.currentUser.uid !== uid && (
-							<TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Following', {
-								uid: uid,
-								following: user.following
-							})}>
-								<View style={styles.statsBox}>
-									<Text>Following</Text>
-									<Text>{user.following.length}</Text>
-								</View>
-							</TouchableOpacity>
-						)}
+    function getCurrentUserFriends(username) {
+        firestore
+            .collection("users")
+            .doc(firebase.auth().currentUser.uid)
+            .get()
+            .then((snapshot) => {
+                setCurrentFriends(snapshot.data().friends);
+                setFriendRequests(Object.keys(snapshot.data().friendRequests || {}));
+                checkFriendship(username, snapshot.data().friends);
+                getOpenFriendRequests();
+            });
+    }
+
+    function getOpenFriendRequests() {
+        firestore
+            .collection("users")
+            .doc(uid)
+            .get()
+            .then((snapshot) => {
+                const userData = snapshot.data();
+                const friendRequests = Object.keys(userData.friendRequests || {});
+                setFriendRequests(friendRequests); // Aktualisiere den Zustand mit den offenen Freundesanfragen
+            })
+            .catch((error) => {
+                console.error("Fehler beim Abrufen der Freundschaftsanfragen:", error);
+            });
+    }
+
+    function checkFriendship(username, friends) {
+        if (friends && friends[username]) {
+            // Der Benutzer ist ein Freund
+            console.log(`Der Benutzer ${username} ist ein Freund.`);
+        } else {
+            // Der Benutzer ist kein Freund
+            console.log(`Der Benutzer ${username} ist kein Freund.`);
+        }
+    }
+
+    useEffect(() => {
+        const user = firebase.auth().currentUser;
+
+        if (user) {
+            const userDocRef = firebase.firestore().collection("users").doc(user.uid);
+        }
+    }, [friendRequests]);
+
+    async function sendFriendRequest(senderUsername, receiverUsername) {
+        const usersRef = firebase.firestore().collection("users");
+
+        // Suchen des Dokuments mit dem gegebenen Benutzernamen
+        const receiverQuerySnapshot = await usersRef
+            .where("username", "==", receiverUsername)
+            .get();
+        if (!receiverQuerySnapshot.empty) {
+            // Das Dokument wurde gefunden, nehmen Sie das erste Ergebnis
+            const receiverDoc = receiverQuerySnapshot.docs[0];
+            const receiverId = receiverDoc.id;
+
+            // Update für das Dokument mit der ID durchführen
+            await usersRef.doc(receiverId).update({
+                [`friendRequests.${senderUsername}`]: true,
+            });
+        } else {
+            // Das Dokument wurde nicht gefunden, handle den Fehler
+            console.error(`No document found with username: ${receiverUsername}`);
+        }
+    }
+
+    function handleSendFriendRequest() {
+        const senderUsername = firebase.auth().currentUser.displayName; // Benutzernamen aus Firebase Auth holen
+        const receiverUsername = user.username;
+        sendFriendRequest(senderUsername, receiverUsername);
+    }
+
+    function getUserPosts() {
+        firestore
+            .collection("events")
+            //where("creator", "==", uid  or user.username
+            .where("creator", "==", user.username || uid)
+            .onSnapshot((snapshot) => {
+                const posts = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setEvents(posts);
+            });
+    }
+
+    useEffect(() => {
+        const user = firebase.auth().currentUser;
+        getUserPosts();
+        if (user) {
+            const userDocRef = firebase.firestore().collection("users").doc(user.uid);
+
+            userDocRef.onSnapshot((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    setCurrentUsername(userData.username);
+                }
+            });
+        }
+    }, [friendRequests]);
+
+    function setFollower() {
+        user.follower.forEach((r) => flw.push(r))
+        flw.push(auth.currentUser.uid.toString())
+        firestore
+            .collection("users")
+            .doc(uid)
+            .update({
+                follower: flw
+            }).then(
+            setFollowing
+        )
+        flw = [];
+    }
+
+    function setFollowing() {
+        currentUser.following.forEach((r) => flwng.push(r))
+        flwng.push(uid.toString())
+        firestore
+            .collection("users")
+            .doc(auth.currentUser.uid)
+            .update({
+                following: flwng
+            })
+            .then(getCurrentUserData)
+            .then(getUserData)
+        flwng = [];
+    }
+
+    function setUnfollow() {
+        user.follower.forEach((r) => flw.push(r))
+        const index = flw.indexOf(auth.currentUser.uid.toString())
+        flw.splice(index, 1)
+        firestore
+            .collection("users")
+            .doc(uid)
+            .update({
+                follower: flw
+            }).then(
+            setUnfollowing
+        )
+        flw = [];
+    }
+
+    function setUnfollowing() {
+        currentUser.following.forEach((r) => flwng.push(r))
+        const index = flwng.indexOf(uid.toString())
+        flwng.splice(index, 1)
+        firestore
+            .collection("users")
+            .doc(auth.currentUser.uid)
+            .update({
+                following: flwng
+            })
+            .then(getCurrentUserData)
+            .then(getUserData)
+        flwng = [];
+    }
 
 
-					</View>
-				)}
-			</ScrollView>
-		</SafeAreaView>
-	)
+    function changeModal() {
+        setModalVisible(false)
+        setReportModal(true)
+    }
+
+    function reportUser() {
+        firestore
+            .collection('users')
+            .doc(uid)
+            .update({
+                [`reportedBy.${currentUsername}`]: {Time: new Date(), Category: reportCategory, Text: text}
+            }).then(
+        )
+        setReportCategory([])
+    }
+
+    function blockUser() {
+        currentUser.blockedUsers.forEach((e) => blockedUsers.push(e))
+        blockedUsers.push(user.username)
+        firestore
+            .collection('users')
+            .doc(auth.currentUser.uid)
+            .update({
+                blockedUsers: blockedUsers
+            })
+        setModalVisible(false)
+        blockedUsers = []
+    }
+
+    return (
+
+        <SafeAreaView style={styles.container}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    {uid === firebase.auth().currentUser.uid && (
+                        <TouchableOpacity
+                            style={[styles.titleBar, {marginTop: windowHeight * 0.05}]}
+                            onPress={navigation.openDrawer}
+                        >
+                            <Ionicons
+                                style={{marginLeft: windowWidth - 50}}
+                                name={"reorder-three-outline"}
+                                size={40}
+                            >
+                                {" "}
+                            </Ionicons>
+                        </TouchableOpacity>
+                    )}
+
+                    {uid !== firebase.auth().currentUser.uid && (
+                        <TouchableOpacity
+                            style={[styles.titleBar, {marginTop: windowHeight * 0.05}]}
+                            onPress={() => setModalVisible(true)}
+                        >
+                            <Ionicons
+                                style={{marginLeft: windowWidth - 50}}
+                                name={"ellipsis-vertical"}
+                                size={40}
+                            >
+                                {" "}
+                            </Ionicons>
+                        </TouchableOpacity>
+                    )}
+
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={modalVisible}>
+                        <TouchableOpacity style={{width: windowWidth, height: windowHeight}}
+                                          onPress={() => setModalVisible(false)}>
+                        </TouchableOpacity>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <TouchableOpacity onPress={() => changeModal()} style={{marginLeft: 20, marginTop: 20}}><Text>melden
+                                    ...</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => blockUser()}
+                                                  style={{marginLeft: 20, marginTop: 20}}><Text
+                                    style={{color: 'rgba(255, 0, 0, .87)'}}>blockieren</Text></TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal>
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={reportModal}>
+                        <TouchableOpacity style={{width: windowWidth, height: windowHeight}}
+                                          onPress={() => setReportModal(false)}>
+                        </TouchableOpacity>
+
+                        <View style={styles.centeredView}>
+                            <View style={styles.reportModalView}>
+                                <Text style={{
+                                    alignSelf: "center",
+                                    fontWeight: "bold",
+                                    fontSize: 20,
+                                    borderBottomWidth: 1,
+                                    flexDirection: "row"
+                                }}>melden</Text>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Belästigung'
+                                ])} style={{marginLeft: 20, marginTop: 20}}><Text>Belästigung</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Hassrede'
+                                ])} style={{marginLeft: 20, marginTop: 20}}><Text>Hassrede</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Gewalt'
+                                ])} style={{marginLeft: 20, marginTop: 20}}><Text>Gewalt</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Spam'
+                                ])} style={{marginLeft: 20, marginTop: 20}}><Text>Spam</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Betrug'
+                                ])} style={{marginLeft: 20, marginTop: 20}}><Text>Betrug</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Identitätsdiebstahl'
+                                ])} style={{
+                                    marginLeft: 20,
+                                    marginTop: 20
+                                }}><Text>Identitätsdiebstahl</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Nacktheit oder sexuelle Inhalte'
+                                ])} style={{marginLeft: 20, marginTop: 20}}><Text>Nacktheit oder sexuelle Inhalte</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Urheberrechtsverletzung'
+                                ])} style={{
+                                    marginLeft: 20,
+                                    marginTop: 20
+                                }}><Text>Urheberrechtsverletzung</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Falsche Informationen'
+                                ])} style={{marginLeft: 20, marginTop: 20}}><Text>Falsche
+                                    Informationen</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => setReportCategory([
+                                    ...reportCategory,
+                                    'Verletzung der Privatsphäre'
+                                ])} style={{marginLeft: 20, marginTop: 20}}><Text>Verletzung der
+                                    Privatsphäre</Text></TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{marginLeft: 20, marginTop: 20}}><Text>Sonstiges:</Text></TouchableOpacity>
+                                <TextInput
+                                    editable
+                                    multiline
+                                    onChangeText={onChangeText}
+                                    value={text}
+                                    style={styles.input}
+                                >
+                                </TextInput>
+                                <LocalsButton style={{marginTop: 20, alignSelf: "center"}} title={"absenden"}
+                                              onPress={reportUser}></LocalsButton>
+                            </View>
+                        </View>
+                    </Modal>
+
+
+                    <View style={{alignSelf: "center"}}>
+                        <View style={styles.profileImage}>
+                            <Image
+                                source={{uri: user.imageUrl}}
+                                style={styles.image}
+                                resizeMode="center"
+                            />
+                        </View>
+                        {uid !== firebase.auth().currentUser.uid && (
+                            <>
+                                <TouchableOpacity style={styles.chat}>
+                                    <MaterialIcons name={"chat"} size={20} color={"#FFFFFF"}/>
+                                </TouchableOpacity>
+                                {!currentFriends[user.username] &&
+                                    user.username !== currentUsername && (
+                                        <TouchableOpacity
+                                            style={styles.add}
+                                            onPress={() =>
+                                                sendFriendRequest(currentUsername, user.username)
+                                            }
+                                        >
+                                            {friendRequests.includes(currentUsername) ? (
+                                                <MaterialIcons
+                                                    name={"schedule"}
+                                                    size={60}
+                                                    color={"#ffffff"}
+                                                />
+                                            ) : (
+                                                <MaterialIcons name={"add"} size={60} color={"#FFFFFF"}/>
+                                            )}
+                                        </TouchableOpacity>
+                                    )}
+                            </>
+                        )}
+                    </View>
+
+                    {user.follower && user.following && currentUser.follower && currentUser.following && user.username && (
+                        <View
+                            style={[styles.infoContainer, {marginTop: windowHeight * 0.01}]}
+                        >
+                            <Text style={[styles.text, {fontWeight: "200", fontSize: 36}]}>
+                                {user.firstName} {user.lastName}
+                            </Text>
+                            <Text style={[styles.text, {fontWeight: "200", fontSize: 14}]}>
+                                @{user.username}
+                            </Text>
+                            {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && (
+                                <TouchableOpacity style={{marginTop: 10}} onPress={setFollower}>
+                                    <Text>Folgen</Text>
+                                </TouchableOpacity>
+                            )}
+                            {currentUser.following.includes(uid) === true && (
+                                <TouchableOpacity style={{marginTop: 10}} onPress={setUnfollow}>
+                                    <Text>Nicht mehr Folgen</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    )}
+
+                    {user.follower && user.following && currentUser.follower && currentUser.following && (
+                        <View
+                            style={[styles.statsContainer, {marginTop: windowHeight * 0.05}]}
+                        >
+                            <View style={styles.statsBox}>
+                                <Text>Events</Text>
+                                <Text>{events.length}</Text>
+                            </View>
+                            <View
+                                style={[
+                                    styles.statsBox,
+                                    {
+                                        borderColor: "DFD8C8",
+                                        borderLeftWidth: 1,
+                                        borderRightWidth: 1,
+                                    },
+                                ]}
+                            >
+                                {auth.currentUser.uid === uid && (
+                                    <TouchableOpacity style={styles.statsBox}
+                                                      onPress={() => navigation.navigate('Follower', {
+                                                          uid: uid,
+                                                          follower: currentUser.follower
+                                                      })}>
+                                        <Text>Follower</Text>
+                                        <Text>{user.follower.length}</Text>
+                                    </TouchableOpacity>
+                                )}
+                                {auth.currentUser.uid !== uid && (
+                                    <TouchableOpacity style={styles.statsBox}
+                                                      onPress={() => navigation.navigate('Follower', {
+                                                          uid: uid,
+                                                          follower: user.follower
+                                                      })}>
+                                        <Text>Follower</Text>
+                                        <Text>{user.follower.length}</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                            {auth.currentUser.uid === uid && (
+                                <TouchableOpacity style={styles.statsBox}
+                                                  onPress={() => navigation.navigate('Following', {
+                                                      uid: uid,
+                                                      following: currentUser.following
+                                                  })}>
+                                    <View style={styles.statsBox}>
+                                        <Text>Following</Text>
+                                        <Text>{user.following.length}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                            {auth.currentUser.uid !== uid && (
+                                <TouchableOpacity style={styles.statsBox}
+                                                  onPress={() => navigation.navigate('Following', {
+                                                      uid: uid,
+                                                      following: user.following
+                                                  })}>
+                                    <View style={styles.statsBox}>
+                                        <Text>Following</Text>
+                                        <Text>{user.following.length}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+
+
+                        </View>
+                    )}
+                </ScrollView>
+        </SafeAreaView>
+
+    )
 
 };
 
 export default Profile;
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	text: {
-		color: "#000000",
-	},
-	image: {
-		width: 200,
-		height: 200,
-	},
-	titleBar: {
-		flexDirection: "row",
-		justifyContent: "flex-end",
-	},
-	profileImage: {
-		width: 200,
-		height: 200,
-		borderRadius: 100,
-		overflow: "hidden",
-	},
-	chat: {
-		backgroundColor: "#41444B",
-		position: "absolute",
-		top: 20,
-		width: 40,
-		height: 40,
-		borderRadius: 20,
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	add: {
-		backgroundColor: "#E63F3F",
-		position: "absolute",
-		borderRadius: 40,
-		top: 135,
-		left: 150,
-	},
-	infoContainer: {
-		alignSelf: "center",
-		alignItems: "center",
-	},
-	statsContainer: {
-		flexDirection: "row",
-		alignSelf: "center",
-	},
-	statsBox: {
-		alignItems: "center",
-		flex: 1,
-	},
-	mediaImageContainer: {
-		width: 200,
-		height: 200,
-		borderRadius: 40,
-		overflow: "hidden",
-		marginHorizontal: 12,
-	},
-	recentItem: {
-		flexDirection: "row",
-		alignItems: "flex-start",
-	},
-	recentItemIndicator: {
-		backgroundColor: "#000000",
-		padding: 4,
-		height: 12,
-		width: 12,
-		borderRadius: 6,
-		marginTop: 3,
-		marginRight: 20,
-	},
-	recent: {
-		marginBottom: 6,
-		fontSize: 10,
-	},
-	Test: {
-		backgroundColor: "#999999",
-		borderBottomLeftRadius: 30,
-		borderBottomRightRadius: 30,
-		marginTop: -50,
-		height: 50,
-		opacity: 0.2,
-	},
-	imageText: {
-		color: "#FFFFFF",
-		alignSelf: "center",
-		textAlign: "center",
-		fontSize: 20,
-		bottom: 50,
-		width: 200,
-	},
+    container: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    text: {
+        color: "#000000",
+    },
+    image: {
+        width: 200,
+        height: 200,
+    },
+    titleBar: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+    },
+    profileImage: {
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+        overflow: "hidden",
+    },
+    chat: {
+        backgroundColor: "#41444B",
+        position: "absolute",
+        top: 20,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    add: {
+        backgroundColor: "#E63F3F",
+        position: "absolute",
+        borderRadius: 40,
+        top: 135,
+        left: 150,
+    },
+    infoContainer: {
+        alignSelf: "center",
+        alignItems: "center",
+    },
+    statsContainer: {
+        flexDirection: "row",
+        alignSelf: "center",
+    },
+    statsBox: {
+        alignItems: "center",
+        flex: 1,
+    },
+    mediaImageContainer: {
+        width: 200,
+        height: 200,
+        borderRadius: 40,
+        overflow: "hidden",
+        marginHorizontal: 12,
+    },
+    recentItem: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+    },
+    recentItemIndicator: {
+        backgroundColor: "#000000",
+        padding: 4,
+        height: 12,
+        width: 12,
+        borderRadius: 6,
+        marginTop: 3,
+        marginRight: 20,
+    },
+    recent: {
+        marginBottom: 6,
+        fontSize: 10,
+    },
+    Test: {
+        backgroundColor: "#999999",
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+        marginTop: -50,
+        height: 50,
+        opacity: 0.2,
+    },
+    imageText: {
+        color: "#FFFFFF",
+        alignSelf: "center",
+        textAlign: "center",
+        fontSize: 20,
+        bottom: 50,
+        width: 200,
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        alignItems: 'flex-start',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: Dimensions.get("window").width,
+        height: Dimensions.get("window").height / 2,
+        marginBottom: 0,
+        marginTop: "auto"
+    },
+    reportModalView: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        alignItems: 'flex-start',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: Dimensions.get("window").width,
+        height: Dimensions.get("window").height / 1.2,
+        marginBottom: 0,
+        marginTop: "auto"
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    buttonOpen: {
+        backgroundColor: '#F194FF',
+    },
+    buttonClose: {
+        backgroundColor: '#2196F3',
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    input: {
+        height: Dimensions.get("window").height / 6,
+        width: Dimensions.get("window").width - 40,
+        marginLeft: 20,
+        marginRight: 20,
+        borderWidth: 1,
+        padding: 10,
+    },
 });
