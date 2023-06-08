@@ -265,6 +265,7 @@ const Profile = ({route, navigation}) => {
         )
         setReportModal(false)
         setReportCategory([])
+        onChangeText('');
     }
 
     function blockUser() {
