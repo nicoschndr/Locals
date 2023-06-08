@@ -29,6 +29,7 @@ const Profile = ({route, navigation}) => {
     let flwng = [];
     let flw = [];
     let blockedUsers = [];
+    let friends = [];
 
     const windowWidth = Dimensions.get("window").width;
     const windowHeight = Dimensions.get("window").height;
@@ -265,6 +266,8 @@ const Profile = ({route, navigation}) => {
     }
 
     function blockUser() {
+        setUnfollow()
+        unFriendCurrentUser().then()
         currentUser.blockedUsers.forEach((e) => blockedUsers.push(e))
         blockedUsers.push(user.username)
         firestore
@@ -274,7 +277,72 @@ const Profile = ({route, navigation}) => {
                 blockedUsers: blockedUsers
             })
         setModalVisible(false)
+        getCurrentUserData()
         blockedUsers = []
+    }
+
+    function unblockUser() {
+        currentUser.blockedUsers.forEach((e) => blockedUsers.push(e))
+        const index = blockedUsers.indexOf(user.username)
+        blockedUsers.splice(index, 1);
+        firestore
+            .collection('users')
+            .doc(auth.currentUser.uid)
+            .update({
+                blockedUsers: blockedUsers
+            })
+        setModalVisible(false)
+        getCurrentUserData()
+        blockedUsers = []
+    }
+
+    async function unFriendCurrentUser() {
+        const usersRef = firebase.firestore().collection('users');
+
+        // Suchen des Dokuments mit dem gegebenen Benutzernamen
+        const friendQuerySnapshot = await usersRef.where('username', '==', user.username).get();
+        let friendId;
+        if (!friendQuerySnapshot.empty) {
+            const friendDoc = friendQuerySnapshot.docs[0];
+            friendId = friendDoc.id;
+        }
+
+        if (friendId) {
+            // Das Dokument wurde gefunden, aktualisiere das friendRequests-Objekt
+            const rejectUpdateData = {
+                [`friends.${currentUsername}`]: firebase.firestore.FieldValue.delete()
+            };
+
+            await usersRef.doc(friendId).update(rejectUpdateData);
+        } else {
+            // Das Dokument wurde nicht gefunden, handle den Fehler
+            console.error(`No document found with username: ${user.username}`);
+        }
+        await unFriendUser()
+    }
+
+    async function unFriendUser() {
+        const usersRef = firebase.firestore().collection('users');
+
+        // Suchen des Dokuments mit dem gegebenen Benutzernamen
+        const friendQuerySnapshot = await usersRef.where('username', '==', currentUsername).get();
+        let friendId;
+        if (!friendQuerySnapshot.empty) {
+            const friendDoc = friendQuerySnapshot.docs[0];
+            friendId = friendDoc.id;
+        }
+
+        if (friendId) {
+            // Das Dokument wurde gefunden, aktualisiere das friendRequests-Objekt
+            const rejectUpdateData = {
+                [`friends.${user.username}`]: firebase.firestore.FieldValue.delete()
+            };
+
+            await usersRef.doc(friendId).update(rejectUpdateData);
+        } else {
+            // Das Dokument wurde nicht gefunden, handle den Fehler
+            console.error(`No document found with username: ${currentUsername}`);
+        }
     }
 
     return (
@@ -323,9 +391,15 @@ const Profile = ({route, navigation}) => {
                             <TouchableOpacity onPress={() => changeModal()}
                                               style={{marginLeft: 20, marginTop: 20}}><Text>melden
                                 ...</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => blockUser()}
-                                              style={{marginLeft: 20, marginTop: 20}}><Text
-                                style={{color: 'rgba(255, 0, 0, .87)'}}>blockieren</Text></TouchableOpacity>
+                            {(currentUser.blockedUsers && !currentUser.blockedUsers.includes(user.username) &&
+                                <TouchableOpacity onPress={() => blockUser()}
+                                                  style={{marginLeft: 20, marginTop: 20}}><Text
+                                    style={{color: 'rgba(255, 0, 0, .87)'}}>blockieren</Text></TouchableOpacity>)}
+                            {(currentUser.blockedUsers && currentUser.blockedUsers.includes(user.username) &&
+                                <TouchableOpacity onPress={() => unblockUser()}
+                                                  style={{marginLeft: 20, marginTop: 20}}><Text
+                                    style={{color: 'rgba(255, 0, 0, .87)'}}>nicht mehr
+                                    blockieren</Text></TouchableOpacity>)}
                         </View>
                     </View>
                 </Modal>
@@ -539,7 +613,7 @@ const Profile = ({route, navigation}) => {
                             resizeMode="center"
                         />
                     </View>
-                    {uid !== firebase.auth().currentUser.uid && (
+                    {uid !== firebase.auth().currentUser.uid && currentUser.blockedUsers && !currentUser.blockedUsers.includes(user.username) && (
                         <>
                             <TouchableOpacity style={styles.chat}>
                                 <MaterialIcons name={"chat"} size={20} color={"#FFFFFF"}/>
@@ -568,7 +642,7 @@ const Profile = ({route, navigation}) => {
 
                 </View>
 
-                {user.follower && user.following && currentUser.follower && currentUser.following && user.username && (
+                {user.follower && user.following && currentUser.follower && currentUser.following && user.username && currentUser.blockedUsers && (
                     <View
                         style={[styles.infoContainer, {marginTop: windowHeight * 0.01}]}
                     >
@@ -578,26 +652,36 @@ const Profile = ({route, navigation}) => {
                         <Text style={[styles.text, {fontWeight: "200", fontSize: 14}]}>
                             @{user.username}
                         </Text>
-                        {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && (
+                        {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && !currentUser.blockedUsers.includes(user.username) && (
                             <TouchableOpacity style={{marginTop: 10}} onPress={setFollower}>
                                 <Text>Folgen</Text>
                             </TouchableOpacity>
                         )}
-                        {currentUser.following.includes(uid) === true && (
+                        {currentUser.following.includes(uid) === true && !currentUser.blockedUsers.includes(user.username) && (
                             <TouchableOpacity style={{marginTop: 10}} onPress={setUnfollow}>
                                 <Text>Nicht mehr Folgen</Text>
+                            </TouchableOpacity>
+                        )}
+                        {currentUser.blockedUsers.includes(user.username) && (
+                            <TouchableOpacity style={{marginTop: 10}} onPress={unblockUser}>
+                                <Text>Nicht mehr blockieren</Text>
                             </TouchableOpacity>
                         )}
                     </View>
                 )}
 
-                {user.follower && user.following && currentUser.follower && currentUser.following && (
+                {user.follower && user.following && currentUser.follower && currentUser.following && currentUser.blockedUsers && (
                     <View
                         style={[styles.statsContainer, {marginTop: windowHeight * 0.05}]}
                     >
                         <View style={styles.statsBox}>
                             <Text>Events</Text>
-                            <Text>{events.length}</Text>
+                            {(!currentUser.blockedUsers.includes(user.username) &&
+                                <Text>{events.length}</Text>
+                            )}
+                            {(currentUser.blockedUsers.includes(user.username) &&
+                                <Text>0</Text>
+                            )}
                         </View>
                         <View
                             style={[
@@ -626,7 +710,12 @@ const Profile = ({route, navigation}) => {
                                                       follower: user.follower
                                                   })}>
                                     <Text>Follower</Text>
-                                    <Text>{user.follower.length}</Text>
+                                    {(!currentUser.blockedUsers.includes(user.username) &&
+                                        <Text>{user.follower.length}</Text>
+                                    )}
+                                    {(currentUser.blockedUsers.includes(user.username) &&
+                                        <Text>0</Text>
+                                    )}
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -650,12 +739,15 @@ const Profile = ({route, navigation}) => {
                                               })}>
                                 <View style={styles.statsBox}>
                                     <Text>Following</Text>
-                                    <Text>{user.following.length}</Text>
+                                    {(!currentUser.blockedUsers.includes(user.username) &&
+                                        <Text>{user.following.length}</Text>
+                                    )}
+                                    {(currentUser.blockedUsers.includes(user.username) &&
+                                        <Text>0</Text>
+                                    )}
                                 </View>
                             </TouchableOpacity>
                         )}
-
-
                     </View>
                 )}
             </ScrollView>
@@ -770,14 +862,6 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         alignItems: 'flex-start',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
         width: Dimensions.get("window").width,
         height: Dimensions.get("window").height / 2,
         marginBottom: 0,
@@ -788,14 +872,6 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         alignItems: 'flex-start',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
         width: Dimensions.get("window").width,
         height: Dimensions.get("window").height / 1.2,
         marginBottom: 0,
