@@ -613,7 +613,7 @@ const Profile = ({route, navigation}) => {
                             resizeMode="center"
                         />
                     </View>
-                    {uid !== firebase.auth().currentUser.uid && currentUser.blockedUsers && !currentUser.blockedUsers.includes(user.username) && (
+                    {uid !== firebase.auth().currentUser.uid && currentUser.blockedUsers && user.blockedUsers && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
                         <>
                             <TouchableOpacity style={styles.chat}>
                                 <MaterialIcons name={"chat"} size={20} color={"#FFFFFF"}/>
@@ -642,7 +642,7 @@ const Profile = ({route, navigation}) => {
 
                 </View>
 
-                {user.follower && user.following && currentUser.follower && currentUser.following && user.username && currentUser.blockedUsers && (
+                {user.follower && user.following && currentUser.follower && currentUser.following && user.username && currentUser.blockedUsers && user.blockedUsers && (
                     <View
                         style={[styles.infoContainer, {marginTop: windowHeight * 0.01}]}
                     >
@@ -652,7 +652,7 @@ const Profile = ({route, navigation}) => {
                         <Text style={[styles.text, {fontWeight: "200", fontSize: 14}]}>
                             @{user.username}
                         </Text>
-                        {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && !currentUser.blockedUsers.includes(user.username) && (
+                        {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
                             <TouchableOpacity style={{marginTop: 10}} onPress={setFollower}>
                                 <Text>Folgen</Text>
                             </TouchableOpacity>
@@ -667,19 +667,22 @@ const Profile = ({route, navigation}) => {
                                 <Text>Nicht mehr blockieren</Text>
                             </TouchableOpacity>
                         )}
+                        {(user.blockedUsers.includes(currentUsername) &&
+                            <Text></Text>
+                        )}
                     </View>
                 )}
 
-                {user.follower && user.following && currentUser.follower && currentUser.following && currentUser.blockedUsers && (
+                {user.follower && user.following && currentUser.follower && currentUser.following && currentUser.blockedUsers && user.blockedUsers && (
                     <View
                         style={[styles.statsContainer, {marginTop: windowHeight * 0.05}]}
                     >
                         <View style={styles.statsBox}>
                             <Text>Events</Text>
-                            {(!currentUser.blockedUsers.includes(user.username) &&
+                            {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
                                 <Text>{events.length}</Text>
                             )}
-                            {(currentUser.blockedUsers.includes(user.username) &&
+                            {((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
                                 <Text>0</Text>
                             )}
                         </View>
@@ -710,10 +713,10 @@ const Profile = ({route, navigation}) => {
                                                       follower: user.follower
                                                   })}>
                                     <Text>Follower</Text>
-                                    {(!currentUser.blockedUsers.includes(user.username) &&
+                                    {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
                                         <Text>{user.follower.length}</Text>
                                     )}
-                                    {(currentUser.blockedUsers.includes(user.username) &&
+                                    {((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
                                         <Text>0</Text>
                                     )}
                                 </TouchableOpacity>
@@ -739,10 +742,10 @@ const Profile = ({route, navigation}) => {
                                               })}>
                                 <View style={styles.statsBox}>
                                     <Text>Following</Text>
-                                    {(!currentUser.blockedUsers.includes(user.username) &&
+                                    {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
                                         <Text>{user.following.length}</Text>
                                     )}
-                                    {(currentUser.blockedUsers.includes(user.username) &&
+                                    {((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
                                         <Text>0</Text>
                                     )}
                                 </View>
