@@ -7,13 +7,12 @@ import {
     SafeAreaView,
     ScrollView,
     TouchableOpacity,
-    Alert, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform,
+    Alert, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, Keyboard,
 } from "react-native";
 import React, {useEffect, useState} from "react";
 import {Ionicons, MaterialIcons} from "@expo/vector-icons";
 import {auth, firebase, firestore, storage} from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 
 const Profile = ({route, navigation}) => {
@@ -406,233 +405,247 @@ const Profile = ({route, navigation}) => {
                         </View>
                     </View>
                 </Modal>
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={reportModal}>
-                            <KeyboardAvoidingView style={{flex: 1, flexDirection: 'column', justifyContent: 'center'}}
-                                              behavior={Platform.OS === "ios" ? "padding" : "height" || Platform.OS === "android" ? "padding" : "height"}
-                                              keyboardVerticalOffset={150}
-                                              enabled>
-                            <TouchableOpacity style={{width: windowWidth, height: windowHeight}}
-                                              onPress={() => setReportModal(false)}>
-                            </TouchableOpacity>
-                            <View style={styles.centeredView}>
-                                <View style={styles.reportModalView}>
-                                    <Text style={{
-                                        alignSelf: "center",
-                                        fontWeight: "bold",
-                                        fontSize: 20,
-                                        borderBottomWidth: 1,
-                                        flexDirection: "row"
-                                    }}>melden</Text>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={reportModal}>
+                    <KeyboardAvoidingView style={{flex: 1, flexDirection: 'column', justifyContent: 'center'}}
+                                          behavior={Platform.OS === "ios" ? "padding" : "height" || Platform.OS === "android" ? "padding" : "height"}
+                                          keyboardVerticalOffset={150}
+                                          enabled>
+                        <TouchableOpacity style={{width: windowWidth, height: windowHeight}}
+                                          onPress={() => setReportModal(false)}>
+                        </TouchableOpacity>
+                        <View style={styles.centeredView}>
+                            <View style={styles.reportModalView}>
+                                <Text style={{
+                                    alignSelf: "center",
+                                    fontWeight: "bold",
+                                    fontSize: 20,
+                                    borderBottomWidth: 1,
+                                    flexDirection: "row"
+                                }}>melden</Text>
 
-                                    {reportCategory.includes('Belästigung') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Belästigung'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{marginLeft: 20, marginTop: 20}}><Text>Belästigung <Ionicons
+                                {reportCategory.includes('Belästigung') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Belästigung'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Belästigung <Ionicons
+                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
+                                )}
+                                {!reportCategory.includes('Belästigung') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Belästigung'
+                                    ])} style={{
+                                        marginLeft: 20,
+                                        marginTop: 20
+                                    }}><Text>Belästigung</Text></TouchableOpacity>
+                                )}
+
+                                {reportCategory.includes('Hassrede') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Hassrede'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Hassrede <Ionicons
+                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
+                                )}
+                                {!reportCategory.includes('Hassrede') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Hassrede'
+                                    ])}
+                                                      style={{
+                                                          marginLeft: 20,
+                                                          marginTop: 20
+                                                      }}><Text>Hassrede</Text></TouchableOpacity>
+                                )}
+
+                                {reportCategory.includes('Gewalt') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Gewalt'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Gewalt <Ionicons
+                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
+                                )}
+                                {!reportCategory.includes('Gewalt') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Gewalt'
+                                    ])} style={{
+                                        marginLeft: 20,
+                                        marginTop: 20
+                                    }}><Text>Gewalt</Text></TouchableOpacity>
+                                )}
+
+                                {reportCategory.includes('Spam') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Spam'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Spam <Ionicons
+                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
+                                )}
+                                {!reportCategory.includes('Spam') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Spam'
+                                    ])} style={{marginLeft: 20, marginTop: 20}}><Text>Spam</Text></TouchableOpacity>
+                                )}
+
+                                {reportCategory.includes('Betrug') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Betrug'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Betrug <Ionicons
+                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
+                                )}
+                                {!reportCategory.includes('Betrug') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Betrug'
+                                    ])} style={{
+                                        marginLeft: 20,
+                                        marginTop: 20
+                                    }}><Text>Betrug</Text></TouchableOpacity>
+                                )}
+
+                                {reportCategory.includes('Identitätsdiebstahl') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Identitätsdiebstahl'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{
+                                        marginLeft: 20,
+                                        marginTop: 20
+                                    }}><Text>Identitätsdiebstahl <Ionicons
+                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
+                                )}
+                                {!reportCategory.includes('Identitätsdiebstahl') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Identitätsdiebstahl'
+                                    ])} style={{
+                                        marginLeft: 20,
+                                        marginTop: 20
+                                    }}><Text>Identitätsdiebstahl</Text></TouchableOpacity>
+                                )}
+
+                                {reportCategory.includes('Nacktheit oder sexuelle Inhalte') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Nacktheit oder sexuelle Inhalte'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Nacktheit oder sexuelle
+                                        Inhalte <Ionicons
                                             name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Belästigung') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Belästigung'
-                                        ])} style={{
-                                            marginLeft: 20,
-                                            marginTop: 20
-                                        }}><Text>Belästigung</Text></TouchableOpacity>
-                                    )}
+                                )}
+                                {!reportCategory.includes('Nacktheit oder sexuelle Inhalte') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Nacktheit oder sexuelle Inhalte'
+                                    ])} style={{marginLeft: 20, marginTop: 20}}><Text>Nacktheit oder sexuelle
+                                        Inhalte</Text></TouchableOpacity>
+                                )}
 
-                                    {reportCategory.includes('Hassrede') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Hassrede'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{marginLeft: 20, marginTop: 20}}><Text>Hassrede <Ionicons
+                                {reportCategory.includes('Urheberrechtsverletzung') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Urheberrechtsverletzung'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{
+                                        marginLeft: 20,
+                                        marginTop: 20
+                                    }}><Text>Urheberrechtsverletzung <Ionicons
+                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
+                                )}
+                                {!reportCategory.includes('Urheberrechtsverletzung') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Urheberrechtsverletzung'
+                                    ])} style={{
+                                        marginLeft: 20,
+                                        marginTop: 20
+                                    }}><Text>Urheberrechtsverletzung</Text></TouchableOpacity>
+                                )}
+
+                                {reportCategory.includes('Falsche Informationen') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Falsche Informationen'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Falsche
+                                        Informationen <Ionicons
                                             name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Hassrede') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Hassrede'
-                                        ])}
-                                                          style={{marginLeft: 20, marginTop: 20}}><Text>Hassrede</Text></TouchableOpacity>
-                                    )}
+                                )}
+                                {!reportCategory.includes('Falsche Informationen') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Falsche Informationen'
+                                    ])} style={{marginLeft: 20, marginTop: 20}}><Text>Falsche
+                                        Informationen</Text></TouchableOpacity>
+                                )}
 
-                                    {reportCategory.includes('Gewalt') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Gewalt'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{marginLeft: 20, marginTop: 20}}><Text>Gewalt <Ionicons
+                                {reportCategory.includes('Verletzung der Privatsphäre') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Verletzung der Privatsphäre'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Verletzung der
+                                        Privatsphäre <Ionicons
                                             name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Gewalt') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Gewalt'
-                                        ])} style={{
-                                            marginLeft: 20,
-                                            marginTop: 20
-                                        }}><Text>Gewalt</Text></TouchableOpacity>
-                                    )}
+                                )}
+                                {!reportCategory.includes('Verletzung der Privatsphäre') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Verletzung der Privatsphäre'
+                                    ])} style={{marginLeft: 20, marginTop: 20}}><Text>Verletzung der
+                                        Privatsphäre</Text></TouchableOpacity>
+                                )}
 
-                                    {reportCategory.includes('Spam') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Spam'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{marginLeft: 20, marginTop: 20}}><Text>Spam <Ionicons
-                                            name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Spam') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Spam'
-                                        ])} style={{marginLeft: 20, marginTop: 20}}><Text>Spam</Text></TouchableOpacity>
-                                    )}
-
-                                    {reportCategory.includes('Betrug') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Betrug'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{marginLeft: 20, marginTop: 20}}><Text>Betrug <Ionicons
-                                            name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Betrug') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Betrug'
-                                        ])} style={{
-                                            marginLeft: 20,
-                                            marginTop: 20
-                                        }}><Text>Betrug</Text></TouchableOpacity>
-                                    )}
-
-                                    {reportCategory.includes('Identitätsdiebstahl') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Identitätsdiebstahl'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{
-                                            marginLeft: 20,
-                                            marginTop: 20
-                                        }}><Text>Identitätsdiebstahl <Ionicons
-                                            name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Identitätsdiebstahl') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Identitätsdiebstahl'
-                                        ])} style={{
-                                            marginLeft: 20,
-                                            marginTop: 20
-                                        }}><Text>Identitätsdiebstahl</Text></TouchableOpacity>
-                                    )}
-
-                                    {reportCategory.includes('Nacktheit oder sexuelle Inhalte') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Nacktheit oder sexuelle Inhalte'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{marginLeft: 20, marginTop: 20}}><Text>Nacktheit oder sexuelle
-                                            Inhalte <Ionicons
-                                                name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Nacktheit oder sexuelle Inhalte') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Nacktheit oder sexuelle Inhalte'
-                                        ])} style={{marginLeft: 20, marginTop: 20}}><Text>Nacktheit oder sexuelle
-                                            Inhalte</Text></TouchableOpacity>
-                                    )}
-
-                                    {reportCategory.includes('Urheberrechtsverletzung') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Urheberrechtsverletzung'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{
-                                            marginLeft: 20,
-                                            marginTop: 20
-                                        }}><Text>Urheberrechtsverletzung <Ionicons
-                                            name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Urheberrechtsverletzung') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Urheberrechtsverletzung'
-                                        ])} style={{
-                                            marginLeft: 20,
-                                            marginTop: 20
-                                        }}><Text>Urheberrechtsverletzung</Text></TouchableOpacity>
-                                    )}
-
-                                    {reportCategory.includes('Falsche Informationen') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Falsche Informationen'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{marginLeft: 20, marginTop: 20}}><Text>Falsche
-                                            Informationen <Ionicons
-                                                name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Falsche Informationen') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Falsche Informationen'
-                                        ])} style={{marginLeft: 20, marginTop: 20}}><Text>Falsche
-                                            Informationen</Text></TouchableOpacity>
-                                    )}
-
-                                    {reportCategory.includes('Verletzung der Privatsphäre') && (
-                                        <TouchableOpacity onPress={() => {
-                                            reportCategory.splice(reportCategory.indexOf('Verletzung der Privatsphäre'), 1);
-                                            setReportCategory([...reportCategory])
-                                        }
-                                        } style={{marginLeft: 20, marginTop: 20}}><Text>Verletzung der
-                                            Privatsphäre <Ionicons
-                                                name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                    )}
-                                    {!reportCategory.includes('Verletzung der Privatsphäre') && (
-                                        <TouchableOpacity onPress={() => setReportCategory([
-                                            ...reportCategory,
-                                            'Verletzung der Privatsphäre'
-                                        ])} style={{marginLeft: 20, marginTop: 20}}><Text>Verletzung der
-                                            Privatsphäre</Text></TouchableOpacity>
-                                    )}
-
-                                    <TouchableOpacity
-                                        style={{
-                                            marginLeft: 20,
-                                            marginTop: 20
-                                        }}><Text>Sonstiges:</Text></TouchableOpacity>
-                                    <TextInput
-                                        editable
-                                        multiline
-                                        onChangeText={onChangeText}
-                                        value={text}
-                                        style={styles.input}
-                                    >
-                                    </TextInput>
-                                    <LocalsButton style={{marginTop: 20, alignSelf: "center"}} title={"absenden"}
-                                                  onPress={reportUser}></LocalsButton>
-                                </View>
+                                <TouchableOpacity
+                                    style={{
+                                        marginLeft: 20,
+                                        marginTop: 20
+                                    }}><Text>Sonstiges:</Text></TouchableOpacity>
+                                <TextInput
+                                    editable
+                                    multiline
+                                    onChangeText={onChangeText}
+                                    value={text}
+                                    style={styles.input}
+                                >
+                                </TextInput>
+                                <LocalsButton style={{marginTop: 20, alignSelf: "center"}} title={"absenden"}
+                                              onPress={reportUser}></LocalsButton>
                             </View>
-                        </KeyboardAvoidingView>
-                    </Modal>
+                        </View>
+                    </KeyboardAvoidingView>
+                </Modal>
 
                 <View style={{alignSelf: "center"}}>
-                    <View style={styles.profileImage}>
-                        <Image
-                            source={{uri: user.imageUrl}}
-                            style={styles.image}
-                            resizeMode="center"
-                        />
-                    </View>
+                    {currentUser.blockedUsers && user.blockedUsers && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
+                        <View style={styles.profileImage}>
+                            <Image
+                                source={{uri: user.imageUrl}}
+                                style={styles.image}
+                                resizeMode="center"
+                            />
+                        </View>
+                    )}
+                    {currentUser.blockedUsers && user.blockedUsers && (currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) && (
+                        <View style={styles.profileImage}>
+                            <Image
+                                source={require('../../assets/blank_profile.png')}
+                                style={styles.image}
+                                resizeMode="center"
+                            />
+                        </View>
+                    )}
                     {uid !== firebase.auth().currentUser.uid && currentUser.blockedUsers && user.blockedUsers && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
                         <>
                             <TouchableOpacity style={styles.chat}>

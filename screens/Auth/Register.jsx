@@ -83,6 +83,8 @@ const Register = ({ navigation }) => {
 					friendRequests: {},
 					follower: [],
 					following: [],
+					blockedUsers: [],
+					reportedBy: {},
 				})
 					.then(() => {
 						setUploading(false);
