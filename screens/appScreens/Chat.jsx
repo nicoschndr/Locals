@@ -49,7 +49,11 @@ export default function Chat({ route }) {
 			chatRoomSnapshot.ref.onSnapshot((snapshot) => {
 				const data = snapshot.data();
 				if (data) {
-					setMessages(data.messages || []);
+					// Filter the messages based on the 'deletedBy' status
+					const filteredMessages = data.messages.filter((msg) => {
+						return !msg.deletedBy || !msg.deletedBy[currentUsername];
+					});
+					setMessages(filteredMessages || []);
 					setFriendIsTyping(data[`${friendUsername}_isTyping`] || false);
 					setDeletedBy(data.deletedBy || {}); // Hinzufügen dieser Linie
 					if (scrollViewRef.current) {
@@ -83,26 +87,29 @@ export default function Chat({ route }) {
 		const { contentSize } = event.nativeEvent;
 		setInputHeight(contentSize.height);
 	};
+
 	const deleteChat = async () => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
 		const chatRoomRef = firebase.firestore().collection('chatRooms').doc(sortedUsernames.join('_'));
 
-		let newDeletedBy = { ...deletedBy };
-		newDeletedBy[currentUsername] = true;
+		const chatRoomSnapshot = await chatRoomRef.get();
+		if (chatRoomSnapshot.exists) {
+			const currentMessages = chatRoomSnapshot.data().messages || [];
+			const updatedMessages = currentMessages.map((msg) => ({
+				...msg,
+				deletedBy: {
+					...msg.deletedBy,
+					[currentUsername]: true
+				}
+			}));
 
-		if (newDeletedBy[friendUsername]) { // Wenn der Chatpartner auch den Chat gelöscht hat
-			await chatRoomRef.delete().catch((error) => {
-				console.log('Error deleting chat:', error);
-			});
-		} else {
 			await chatRoomRef.update({
-				deletedBy: newDeletedBy
+				messages: updatedMessages,
 			}).catch((error) => {
 				console.log('Error setting deletedBy:', error);
 			});
 		}
 	};
-
 
 	const sendMessage = async () => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
@@ -116,31 +123,61 @@ export default function Chat({ route }) {
 			readStatus: false,
 		};
 
-		await chatRoomRef.update({
-			messages: [...messages, newMessage]
-		}).catch((error) => {
-			console.log('Error sending message:', error);
-		});
+		const chatRoomSnapshot = await chatRoomRef.get();
+		if (chatRoomSnapshot.exists) {
+			const currentMessages = chatRoomSnapshot.data().messages || [];
+			// Statt die aktuellen Nachrichten zu verwenden, aktualisieren wir das 'deletedBy' Feld erneut
+			const updatedMessages = currentMessages.map((msg) => {
+				if (msg.deletedBy && msg.deletedBy[currentUsername]) {
+					return {
+						...msg,
+						deletedBy: {
+							...msg.deletedBy,
+							[currentUsername]: true,
+						},
+					};
+				}
+				return msg;
+			});
+			await chatRoomRef.update({
+				messages: [...updatedMessages, newMessage],
+			}).catch((error) => {
+				console.log('Error sending message:', error);
+			});
+		}
 
 		setMessage('');
 		setInputHeight(0);
 		inputRef.current.clear();
 		inputRef.current.blur();
 	};
-
 	const markMessageAsRead = async (msg, index) => {
 		if (msg.sender !== currentUsername && !msg.readStatus) {
 			const sortedUsernames = [currentUsername, friendUsername].sort();
 			const chatRoomRef = firebase.firestore().collection('chatRooms').doc(sortedUsernames.join('_'));
 
-			const newMessages = [...messages];
-			newMessages[index].readStatus = true;
+			const chatRoomSnapshot = await chatRoomRef.get();
+			if (chatRoomSnapshot.exists) {
+				const currentMessages = chatRoomSnapshot.data().messages || [];
+				const newMessages = currentMessages.map((currentMsg, i) => {
+					if (i === index) {
+						return {
+							...currentMsg,
+							readStatus: true,
+							deletedBy: {
+								...currentMsg.deletedBy
+							}
+						};
+					}
+					return currentMsg;
+				});
 
-			await chatRoomRef.update({
-				messages: newMessages
-			}).catch((error) => {
-				console.log('Error updating read status:', error);
-			});
+				await chatRoomRef.update({
+					messages: newMessages
+				}).catch((error) => {
+					console.log('Error updating read status:', error);
+				});
+			}
 		}
 	};
 
