@@ -13,10 +13,22 @@ export default function Chat({ route }) {
 	const inputRef = useRef(null);
 	const [inputHeight, setInputHeight] = useState(0);
 	const scrollViewRef = useRef(null);
+	const [deletedBy, setDeletedBy] = useState({});
+
 
 	useEffect(() => {
-		navigation.setOptions({ headerTitle: friendUsername });
-	}, [friendUsername, navigation]);
+		navigation.setOptions({
+			headerTitle: friendUsername,
+			headerRight: () => (
+				<Button
+					onPress={deleteChat}
+					title="Chat löschen"
+					color="#ff0000"
+				/>
+			),
+		});
+	}, [friendUsername, navigation, deleteChat]);
+
 
 	useEffect(() => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
@@ -39,11 +51,13 @@ export default function Chat({ route }) {
 				if (data) {
 					setMessages(data.messages || []);
 					setFriendIsTyping(data[`${friendUsername}_isTyping`] || false);
+					setDeletedBy(data.deletedBy || {}); // Hinzufügen dieser Linie
 					if (scrollViewRef.current) {
 						scrollViewRef.current.scrollToEnd({ animated: true });
 					}
 				}
 			});
+
 		};
 
 		getChatRoom();
@@ -69,6 +83,26 @@ export default function Chat({ route }) {
 		const { contentSize } = event.nativeEvent;
 		setInputHeight(contentSize.height);
 	};
+	const deleteChat = async () => {
+		const sortedUsernames = [currentUsername, friendUsername].sort();
+		const chatRoomRef = firebase.firestore().collection('chatRooms').doc(sortedUsernames.join('_'));
+
+		let newDeletedBy = { ...deletedBy };
+		newDeletedBy[currentUsername] = true;
+
+		if (newDeletedBy[friendUsername]) { // Wenn der Chatpartner auch den Chat gelöscht hat
+			await chatRoomRef.delete().catch((error) => {
+				console.log('Error deleting chat:', error);
+			});
+		} else {
+			await chatRoomRef.update({
+				deletedBy: newDeletedBy
+			}).catch((error) => {
+				console.log('Error setting deletedBy:', error);
+			});
+		}
+	};
+
 
 	const sendMessage = async () => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
@@ -124,7 +158,6 @@ export default function Chat({ route }) {
 
 	return (
 		<View style={styles.container}>
-
 			<ScrollView
 				ref={scrollViewRef}
 				contentContainerStyle={styles.messageContainer}
