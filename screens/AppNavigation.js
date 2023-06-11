@@ -5,7 +5,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 
 // Import screen components
-import Template from "./appScreens/Template";
 import HomeScreen from "./appScreens/Home";
 import LiveMap from "./appScreens/LiveMap";
 import Settings from "./appScreens/Settings";
@@ -17,12 +16,14 @@ import FriendList from "./appScreens/FriendList";
 import Chat from "./appScreens/Chat";
 import EventDetails from "./appScreens/EventDetails";
 import EditPost from "./appScreens/EditPost";
+import Follower from "./appScreens/Follower";
 
 import { auth } from "../firebase";
 import { Dimensions } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Sidebar from "../components/Sidebar";
 import { HeaderBackButton } from "@react-navigation/stack";
+import Following from "./appScreens/Following";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -52,8 +53,11 @@ const MainStackNavigator = () => {
 			screenOptions={{ headerShown: false }}
 		>
 			<Stack.Screen name="Start" component={HomeScreen} />
+			<Stack.Screen name="Chat" component={Chat} options={{ headerShown: true }} />
 			<Stack.Screen name="Profile" component={Profile} />
 			<Stack.Screen name="EventDetails" component={EventDetails} />
+			<Stack.Screen name="Follower" component={Follower} />
+			<Stack.Screen name="Following" component={Following} />
 		</Stack.Navigator>
 	);
 };
@@ -77,6 +81,7 @@ function ProfileDrawerScreen() {
 			/>
 			<Drawer.Screen name="EventDetails" component={EventDetails} />
 			<Drawer.Screen name="EditPost" component={EditPost} />
+			<Drawer.Screen name="Settings" component={Settings} />
 		</Drawer.Navigator>
 	);
 }
@@ -155,12 +160,12 @@ function AppNavigation() {
 							null,
 						],
 					})}
-				>
 
-					<Tab.Screen name="Home" component={MainStackNavigator} />
+				>
+					<Tab.Screen options={{ unmountOnBlur: true }} name="Home" component={MainStackNavigator} />
 					<Tab.Screen name="LiveMap" component={LiveMap} />
 					<Tab.Screen name="PostEvent" component={PostEvent} />
-					<Tab.Screen name="Me" component={ProfileDrawerScreen} />
+					<Tab.Screen options={{ unmountOnBlur: true }} name="Me" component={ProfileDrawerScreen} />
 					<Tab.Screen name="Settings" component={Settings} />
 				</Tab.Navigator>
 			) : (
