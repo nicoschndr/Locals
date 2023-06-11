@@ -83,9 +83,9 @@ const PostEvent = ({ navigation }) => {
 
 			let location = await Location.getCurrentPositionAsync({});
 			const { latitude, longitude } = location.coords;
-			setLatitude(latitude);
-			setLongitude(longitude);
-			setAddress(`${latitude}, ${longitude}`);
+			// setLatitude(latitude);
+			// setLongitude(longitude);
+			// setAddress(`${latitude}, ${longitude}`);
 		} catch (error) {
 			console.log(error);
 		}
@@ -234,10 +234,8 @@ const PostEvent = ({ navigation }) => {
 							listViewDisplayed={false}
 							onPress={(data, details = null) => {
 								setAddress(details.formatted_address);
-								setGeopoint({
-									longitude: details.geometry.location.lng,
-									latitude: details.geometry.location.lat,
-								});
+								setLongitude(details.geometry.location.lng);
+								setLatitude(details.geometry.location.lat);
 							}}
 							query={{
 								key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",

@@ -53,6 +53,7 @@ const MainStackNavigator = () => {
 		>
 			<Stack.Screen name="Start" component={HomeScreen} />
 			<Stack.Screen name="Profile" component={Profile} />
+			<Stack.Screen name="EventDetails" component={EventDetails} />
 		</Stack.Navigator>
 	);
 };
@@ -155,6 +156,7 @@ function AppNavigation() {
 						],
 					})}
 				>
+
 					<Tab.Screen name="Home" component={MainStackNavigator} />
 					<Tab.Screen name="LiveMap" component={LiveMap} />
 					<Tab.Screen name="PostEvent" component={PostEvent} />
@@ -192,7 +194,9 @@ function AuthScreen() {
 					},
 					null,
 				],
+
 			})}
+
 		>
 			<Tab.Screen name="Login" component={Login} />
 			<Tab.Screen name="Register" component={Register} />

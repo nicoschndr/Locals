@@ -15,7 +15,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { firebase, firestore, storage } from "../../firebase";
 import { BackgroundImage } from "react-native-elements/dist/config";
 
-const Template = ({ route, navigation }) => {
+const Profile = ({ route, navigation }) => {
 	useEffect(() => {
 		getUserData();
 		getUserPosts();
@@ -37,6 +37,7 @@ const Template = ({ route, navigation }) => {
 	const [currentUsername, setCurrentUsername] = useState("");
 	const [currentFriends, setCurrentFriends] = useState({});
 	const [friendRequests, setFriendRequests] = useState([]);
+
 
 	React.useLayoutEffect(() => {
 		if (uid === firebase.auth().currentUser.uid) {
@@ -162,152 +163,152 @@ const Template = ({ route, navigation }) => {
 
 	return (
 		<View style={styles.container}>
-			<ImageBackground source={require('../../assets/BackGround(h).png')} resizeMode="cover">
-				<ScrollView showsVerticalScrollIndicator={false}>
-					{uid === firebase.auth().currentUser.uid && (
-						<TouchableOpacity
-							style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
-							onPress={navigation.openDrawer}
+			{/* <ImageBackground source={require('../../assets/BackGround(h).png')} resizeMode="cover"> */}
+			<ScrollView showsVerticalScrollIndicator={false}>
+				{uid === firebase.auth().currentUser.uid && (
+					<TouchableOpacity
+						style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
+						onPress={navigation.openDrawer}
+					>
+						<Ionicons
+							style={{ marginLeft: windowWidth - 50 }}
+							name={"reorder-three-outline"}
+							size={40}
 						>
-							<Ionicons
-								style={{ marginLeft: windowWidth - 50 }}
-								name={"reorder-three-outline"}
-								size={40}
-							>
-								{" "}
-							</Ionicons>
-						</TouchableOpacity>
+							{" "}
+						</Ionicons>
+					</TouchableOpacity>
+				)}
+
+				<View style={{ alignSelf: "center" }}>
+					<View style={styles.profileImage}>
+						<Image
+							source={{ uri: user.imageUrl }}
+							style={styles.image}
+							resizeMode="center"
+						/>
+					</View>
+					{uid !== firebase.auth().currentUser.uid && (
+						<>
+							<TouchableOpacity style={styles.chat}>
+								<MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
+							</TouchableOpacity>
+							{!currentFriends[user.username] &&
+								user.username !== currentUsername && (
+									<TouchableOpacity
+										style={styles.add}
+										onPress={() =>
+											sendFriendRequest(currentUsername, user.username)
+										}
+									>
+										{friendRequests.includes(currentUsername) ? (
+											<MaterialIcons
+												name={"schedule"}
+												size={60}
+												color={"#ffffff"}
+											/>
+										) : (
+											<MaterialIcons name={"add"} size={60} color={"#FFFFFF"} />
+										)}
+									</TouchableOpacity>
+								)}
+						</>
 					)}
+				</View>
 
-					<View style={{ alignSelf: "center" }}>
-						<View style={styles.profileImage}>
-							<Image
-								source={{ uri: user.imageUrl }}
-								style={styles.image}
-								resizeMode="center"
-							/>
-						</View>
-						{uid !== firebase.auth().currentUser.uid && (
-							<>
-								<TouchableOpacity style={styles.chat}>
-									<MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
-								</TouchableOpacity>
-								{!currentFriends[user.username] &&
-									user.username !== currentUsername && (
-										<TouchableOpacity
-											style={styles.add}
-											onPress={() =>
-												sendFriendRequest(currentUsername, user.username)
-											}
-										>
-											{friendRequests.includes(currentUsername) ? (
-												<MaterialIcons
-													name={"schedule"}
-													size={60}
-													color={"#ffffff"}
-												/>
-											) : (
-												<MaterialIcons name={"add"} size={60} color={"#FFFFFF"} />
-											)}
-										</TouchableOpacity>
-									)}
-							</>
-						)}
+				<View
+					style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
+				>
+					<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
+						{user.firstName} {user.lastName}
+					</Text>
+					<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
+						@{user.username}
+					</Text>
+				</View>
+
+				<View
+					style={[styles.statsContainer, { marginTop: windowHeight * 0.05 }]}
+				>
+					<View style={styles.statsBox}>
+						<Text>Events</Text>
+						<Text>0</Text>
 					</View>
+					<View
+						style={[
+							styles.statsBox,
+							{
+								borderColor: "DFD8C8",
+								borderLeftWidth: 1,
+								borderRightWidth: 1,
+							},
+						]}
+					>
+						<Text>Follower</Text>
+						<Text>0</Text>
+					</View>
+					<View style={styles.statsBox}>
+						<Text>Following</Text>
+						<Text>0</Text>
+					</View>
+				</View>
+
+				<View style={{ marginTop: windowHeight * 0.05 }}>
+					<ScrollView
+						horizontal={true}
+						showsVerticalScrollIndicator={false}
+						showsHorizontalScrollIndicator={false}
+					>
+						{events.map((event) => (
+							<TouchableOpacity
+								style={styles.mediaImageContainer}
+								key={event.id}
+								onPress={() => navigation.navigate("EventDetails", { event })}
+							>
+								<Image
+									source={{ uri: event.imageUrl }}
+									style={styles.image}
+									resizeMode="center"
+								/>
+								<Text style={styles.imageText}>{event.title}</Text>
+							</TouchableOpacity>
+						))}
+					</ScrollView>
+					<Text
+						style={[
+							styles.text,
+							styles.recent,
+							{
+								marginLeft: windowWidth * 0.15,
+								marginTop: windowHeight * 0.05,
+							},
+						]}
+					>
+						Recent Activity
+					</Text>
 
 					<View
-						style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
+						style={[
+							styles.recentItem,
+							{
+								marginBottom: windowHeight * 0.02,
+								marginLeft: windowWidth * 0.15,
+							},
+						]}
 					>
-						<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-							{user.firstName} {user.lastName}
-						</Text>
-						<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
-							@{user.username}
-						</Text>
-					</View>
-
-					<View
-						style={[styles.statsContainer, { marginTop: windowHeight * 0.05 }]}
-					>
-						<View style={styles.statsBox}>
-							<Text>Events</Text>
-							<Text>0</Text>
-						</View>
-						<View
-							style={[
-								styles.statsBox,
-								{
-									borderColor: "DFD8C8",
-									borderLeftWidth: 1,
-									borderRightWidth: 1,
-								},
-							]}
-						>
-							<Text>Follower</Text>
-							<Text>0</Text>
-						</View>
-						<View style={styles.statsBox}>
-							<Text>Following</Text>
-							<Text>0</Text>
+						<View style={styles.recentItemIndicator}></View>
+						<View>
+							<Text>{events.title}</Text>
 						</View>
 					</View>
-
-					<View style={{ marginTop: windowHeight * 0.05 }}>
-						<ScrollView
-							horizontal={true}
-							showsVerticalScrollIndicator={false}
-							showsHorizontalScrollIndicator={false}
-						>
-							{events.map((event) => (
-								<TouchableOpacity
-									style={styles.mediaImageContainer}
-									key={event.id}
-									onPress={() => navigation.navigate("EventDetails", { event })}
-								>
-									<Image
-										source={{ uri: event.imageUrl }}
-										style={styles.image}
-										resizeMode="center"
-									/>
-									<Text style={styles.imageText}>{event.title}</Text>
-								</TouchableOpacity>
-							))}
-						</ScrollView>
-						<Text
-							style={[
-								styles.text,
-								styles.recent,
-								{
-									marginLeft: windowWidth * 0.15,
-									marginTop: windowHeight * 0.05,
-								},
-							]}
-						>
-							Recent Activity
-						</Text>
-
-						<View
-							style={[
-								styles.recentItem,
-								{
-									marginBottom: windowHeight * 0.02,
-									marginLeft: windowWidth * 0.15,
-								},
-							]}
-						>
-							<View style={styles.recentItemIndicator}></View>
-							<View>
-								<Text>{events.title}</Text>
-							</View>
-						</View>
-					</View>
-				</ScrollView>
-			</ImageBackground>
+				</View>
+			</ScrollView>
+			{/* </ImageBackground> */}
 		</View >
 	);
 };
 
-export default Template;
+export default Profile;
 
 const styles = StyleSheet.create({
 	container: {
