@@ -575,8 +575,8 @@ const Livemap = () => {
 			</View>
 
 			<Modal visible={modalVisible} animationType="slide">
-				{/* <LocalsEventDetails event={selectedEvent} onBackPress={() => setModalVisible(false)} /> */}
-				<View style={styles.modalContainer}>
+				<LocalsEventDetails event={selectedEvent} onBackPress={() => setModalVisible(false)} />
+				{/* <View style={styles.modalContainer}>
 					{selectedEvent && !showComments && (
 						<ScrollView>
 							<View style={{ flex: 1, alignItems: "center" }}>
@@ -679,7 +679,7 @@ const Livemap = () => {
 					<TouchableOpacity onPress={() => setModalVisible(false)}>
 						<Text style={styles.closeButton}>Close</Text>
 					</TouchableOpacity>
-				</View>
+				</View> */}
 			</Modal>
 		</View>
 	);
