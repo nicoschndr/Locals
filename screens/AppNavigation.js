@@ -53,6 +53,7 @@ const MainStackNavigator = () => {
 			screenOptions={{ headerShown: false }}
 		>
 			<Stack.Screen name="Start" component={HomeScreen} />
+			<Stack.Screen name="Chat" component={Chat} options={{ headerShown: true }} />
 			<Stack.Screen name="Profile" component={Profile} />
 			<Stack.Screen name="Follower" component={Follower} />
 			<Stack.Screen name="Following" component={Following} />

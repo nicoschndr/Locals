@@ -55,7 +55,9 @@ const Profile = ({ route, navigation }) => {
 			});
 		}
 	}, [navigation, uid]);
-
+	const handleFriendClick = (friendUsername) => {
+		navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
+	}
 	function getUserData() {
 		firestore
 			.collection("users")
@@ -345,32 +347,33 @@ const Profile = ({ route, navigation }) => {
 							resizeMode="center"
 						/>
 					</View>
-					{uid !== firebase.auth().currentUser.uid && (
+					{uid !== firebase.auth().currentUser.uid && currentFriends[user.username] && (
 						<>
-							<TouchableOpacity style={styles.chat}>
+							<TouchableOpacity style={styles.chat} onPress={() => handleFriendClick(user.username)}>
 								<MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
 							</TouchableOpacity>
 							{!currentFriends[user.username] &&
-								user.username !== currentUsername && (
-									<TouchableOpacity
-										style={styles.add}
-										onPress={() =>
-											sendFriendRequest(currentUsername, user.username)
-										}
-									>
-										{friendRequests.includes(currentUsername) ? (
-											<MaterialIcons
-												name={"schedule"}
-												size={60}
-												color={"#ffffff"}
-											/>
-										) : (
-											<MaterialIcons name={"add"} size={60} color={"#FFFFFF"} />
-										)}
-									</TouchableOpacity>
-								)}
+							user.username !== currentUsername && (
+								<TouchableOpacity
+									style={styles.add}
+									onPress={() =>
+										sendFriendRequest(currentUsername, user.username)
+									}
+								>
+									{friendRequests.includes(currentUsername) ? (
+										<MaterialIcons
+											name={"schedule"}
+											size={60}
+											color={"#ffffff"}
+										/>
+									) : (
+										<MaterialIcons name={"add"} size={60} color={"#FFFFFF"} />
+									)}
+								</TouchableOpacity>
+							)}
 						</>
 					)}
+
 				</View>
 
 				{user.follower && user.following && currentUser.follower && currentUser.following && user.username && (
