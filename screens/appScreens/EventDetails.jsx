@@ -11,6 +11,7 @@ const EventDetails = ({ route, navigation }) => {
 	const { showModal, setShowModal } = useState(false);
 	const [user, setUser] = useState({});
 
+	//TODO: attend to event from `LiveMap.jsx` 
 
 	const deleteEvent = () => {
 		Alert.alert(
@@ -84,7 +85,7 @@ const EventDetails = ({ route, navigation }) => {
 	const openMaps = () => {
 		const scheme = Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" });
 		const latLng = `${event.latitude},${event.longitude}`;
-		const label = event.address.name;
+		const label = event.address;
 		const url = Platform.select({
 			ios: `${scheme}${label}@${latLng}`,
 			android: `${scheme}${latLng}(${label})`,
@@ -163,7 +164,7 @@ const EventDetails = ({ route, navigation }) => {
 				{event.advertised && (
 					<View style={{ alignItems: "center" }}>
 						<Ionicons
-							name="trash"
+							name="megaphone"
 							size={32}
 							color="grey"
 						/>

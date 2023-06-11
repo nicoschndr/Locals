@@ -20,9 +20,11 @@ import * as Location from "expo-location";
 import { auth, firebase } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import LocalsEventDetails from "../../components/LocalsEventDetails";
 
 const Marker = Animated.createAnimatedComponent(DefaultMarker);
 
+// TODO: auslagern in eigene Datei
 const Comment = ({
 	comment,
 	replies,
@@ -99,8 +101,8 @@ const Livemap = () => {
 	const [username, setUsername] = useState(null);
 	const [impressions, setImpressions] = useState({});
 	const [markerOpacity, setMarkerOpacity] = useState(new Animated.Value(0));
-	const [radius, setRadius] = useState(10);
-	const [sliderValue, setSliderValue] = useState(10);
+	const [radius, setRadius] = useState(100);
+	const [sliderValue, setSliderValue] = useState(100);
 	const [showRadius, setShowRadius] = useState(false);
 	const [isSliderActive, setIsSliderActive] = useState(false);
 
@@ -535,9 +537,10 @@ const Livemap = () => {
 								longitude: event.longitude,
 							}}
 							onPress={() => handleEventPress(event)}
-							style={{ opacity: markerOpacity }}
+							// style={{ opacity: markerOpacity }}
+							image={require("../../assets/IconMarker.png")}
 						>
-							<View
+							{/* <View
 								style={[
 									event.advertised
 										? styles.highlightedEventAdMarker
@@ -548,7 +551,7 @@ const Livemap = () => {
 											? styles.friendHighlightedMarker
 											: null,
 								]}
-							/>
+							/> */}
 						</Marker>
 					))}
 				</MapView>
@@ -558,7 +561,7 @@ const Livemap = () => {
 				<Slider
 					style={styles.slider}
 					minimumValue={1}
-					maximumValue={21250}
+					maximumValue={500}
 					step={1}
 					value={sliderValue}
 					onValueChange={(value) => {
@@ -572,6 +575,7 @@ const Livemap = () => {
 			</View>
 
 			<Modal visible={modalVisible} animationType="slide">
+				{/* <LocalsEventDetails event={selectedEvent} onBackPress={() => setModalVisible(false)} /> */}
 				<View style={styles.modalContainer}>
 					{selectedEvent && !showComments && (
 						<ScrollView>
@@ -750,10 +754,11 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 	},
 	modalContainer: {
-		marginTop: 30,
+		marginVertical: 30,
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
+
 	},
 	eventModalTitle: {
 		fontSize: 20,
