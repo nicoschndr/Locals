@@ -35,17 +35,16 @@ export default function Chatbot({ route }) {
 	const fetchAIResponse = async (input, events) => {
 		if (events.length !== 0) {
 			try {
-				const response = await fetch('https://api.openai.com/v1/completions', {
+				const message = `Das ist der Text: ${input}\nUnd das die gefundenen Events: ${events.map(event => event.title).join(", ")}\nGeneriere einen kurzen Text um die Events vorzuschlagen. Maximal 60 Tokens lang`
+				const response = await fetch('https://api.openai.com/v1/chat/completions', {
 					method: 'POST',
 					headers: {
 						'Authorization': 'Bearer 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', // Ersetzen Sie dies durch Ihren OpenAI API-Schlüssel
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({
-						prompt: `Das ist der Text: ${input}\nUnd das die gefundenen Events: ${events.map(event => event.title).join(", ")}\nGeneriere einen kurzen Text um die Events vorzuschlagen. Maximal 60 Tokens lang`,
-						max_tokens: 60,
-						model: "text-davinci-003",
-						temperature: 0
+						messages: [{'role': 'user', 'content': message}],
+						model: "gpt-3.5-turbo",
 					})
 				});
 
@@ -54,7 +53,7 @@ export default function Chatbot({ route }) {
 				}
 
 				const data = await response.json();
-				return data.choices[0].text;
+				return data.choices[0].message.content;
 			} catch (error) {
 				console.error('Error generating AI response:', error);
 				return "I'm sorry, there was an error generating the response. Can I help you with anything else?";
