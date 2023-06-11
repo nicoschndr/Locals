@@ -7,6 +7,7 @@ import {
 	Linking,
 	Modal,
 	Platform,
+	ScrollView,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -23,17 +24,23 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 const Marker = Animated.createAnimatedComponent(DefaultMarker);
 
 const Comment = ({
-	comment,
-	replies,
-	goToComment,
-	openReplyInput,
-	highlighted,
-	setHighlighted,
-}) => {
+					 comment,
+					 replies,
+					 goToComment,
+					 openReplyInput,
+					 highlighted,
+					 setHighlighted,
+					 likeComment,
+					 username,
+				 }) => {
+	const handleLikeComment = () => {
+		likeComment(comment.id);
+	};
+
 	return (
 		<TouchableOpacity
 			onPress={() => goToComment(comment.id)}
-			style={[styles.commentContainer]}
+			style={styles.commentContainer}
 		>
 			<Text style={styles.commentText}>
 				{comment.username}: {comment.commentText}
@@ -44,25 +51,42 @@ const Comment = ({
 			>
 				<Text style={styles.replyButtonText}>Reply</Text>
 			</TouchableOpacity>
-			{replies.map((reply) => (
-				<Comment
-					key={reply.id}
-					comment={reply}
-					replies={reply.replies}
-					goToComment={goToComment}
-					openReplyInput={openReplyInput}
-				/>
-			))}
+			<TouchableOpacity onPress={handleLikeComment}>
+				<View style={styles.likeContainer}>
+					<AntDesign
+						name="heart"
+						size={14}
+						color={comment.likes.includes(username) ? "red" : "gray"}
+					/>
+					<Text style={styles.likeCount}>{comment.likes.length}</Text>
+				</View>
+			</TouchableOpacity>
+
+			{replies.length > 0 && (
+				<View>
+					{replies.map((reply) => (
+						<Comment
+							key={reply.id}
+							comment={reply}
+							replies={reply.replies}
+							goToComment={goToComment}
+							openReplyInput={openReplyInput}
+							likeComment={likeComment}
+							username={username}
+						/>
+					))}
+				</View>
+			)}
 		</TouchableOpacity>
 	);
 };
+
 
 const Livemap = () => {
 	const [location, setLocation] = useState(null);
 	const [events, setEvents] = useState([]);
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedEvent, setSelectedEvent] = useState({ attendees: [] });
-	const { user } = auth.currentUser;
 	const [comments, setComments] = useState([]);
 	const [newCommentText, setNewCommentText] = useState("");
 	const [replyToComment, setReplyToComment] = useState(null);
@@ -303,6 +327,7 @@ const Livemap = () => {
 				commentText: newCommentText.toString(),
 				replyTo: replyToComment ? replyToComment : null,
 				timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+				likes: [],
 			};
 
 			await eventRef.collection("comments").add(commentData);
@@ -311,6 +336,34 @@ const Livemap = () => {
 		setReplyToComment(null);
 	};
 
+	const likeComment = async (commentId) => {
+		const user = firebase.auth().currentUser;
+		const username = await getUsername();
+
+		if (user && selectedEvent) {
+			const eventRef = firebase
+				.firestore()
+				.collection("events")
+				.doc(selectedEvent.id);
+			const commentRef = eventRef.collection("comments").doc(commentId);
+
+			const commentSnapshot = await commentRef.get();
+			const commentData = commentSnapshot.data();
+			const likedBy = commentData.likes || [];
+
+			if (likedBy.includes(username)) {
+				// Benutzer hat den Kommentar bereits geliked, daher entfernen
+				await commentRef.update({
+					likes: likedBy.filter((user) => user !== username),
+				});
+			} else {
+				// Benutzer hat den Kommentar noch nicht geliked, daher hinzufügen
+				await commentRef.update({
+					likes: [...likedBy, username],
+				});
+			}
+		}
+	};
 	useEffect(() => {
 		if (selectedEvent) {
 			const eventRef = firebase
@@ -398,8 +451,10 @@ const Livemap = () => {
 			replies={item.replies}
 			goToComment={goToComment}
 			openReplyInput={openReplyInput}
-			onLayout={(event) => onCommentLayout(event, item.id)}
+			likeComment={likeComment}
+			username={username} // Hier wird username übergeben
 		/>
+
 	);
 
 	const goToComment = (commentId) => {
@@ -432,9 +487,9 @@ const Livemap = () => {
 		const a =
 			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
 			Math.cos(deg2rad(lat1)) *
-				Math.cos(deg2rad(lat2)) *
-				Math.sin(dLon / 2) *
-				Math.sin(dLon / 2);
+			Math.cos(deg2rad(lat2)) *
+			Math.sin(dLon / 2) *
+			Math.sin(dLon / 2);
 		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		const d = R * c; // Entfernung in km
 		return d;
@@ -491,19 +546,11 @@ const Livemap = () => {
 									event.advertised
 										? null
 										: event.impressions >= IMPRESSION_THRESHOLD
-										? styles.friendHighlightedMarker
-										: null,
+											? styles.friendHighlightedMarker
+											: null,
 								]}
 							/>
 						</Marker>
-						// <Marker
-						// 	coordinate={{
-						// 		latitude: event.latitude,
-						// 		longitude: event.longitude,
-						// 	}}
-						// 	onPress={() => handleEventPress(event)}
-						// 	style={{ opacity: markerOpacity }}
-						// />
 					))}
 				</MapView>
 			)}
@@ -528,60 +575,69 @@ const Livemap = () => {
 			<Modal visible={modalVisible} animationType="slide">
 				<View style={styles.modalContainer}>
 					{selectedEvent && !showComments && (
-						<View style={{ flex: 1, alignItems: "center" }}>
-							<Image
-								style={styles.eventModalImage}
-								source={{ uri: selectedEvent.imageUrl }}
-							/>
-							<Text style={styles.eventModalTitle}>{selectedEvent.title}</Text>
-							<Text style={styles.eventModalText}>
-								Erstellt von: {selectedEvent.creator}
-							</Text>
-							<LocalsButton title={"Hin da!"} onPress={openMapsApp} />
-							<Text style={styles.eventModalText}>
-								Beschreibung: {selectedEvent.description}
-							</Text>
-							<Text style={styles.eventModalText}>
-								Wer ist eingeladen: {selectedEvent.gender}
-							</Text>
-							<Text style={styles.eventModalText}>
-								Kategorie: {selectedEvent.category}
-							</Text>
-
-							{selectedEvent.isAttending ? (
-								<LocalsButton
-									title={"Nicht teilnehmen"}
-									onPress={toggleAttendance}
+						<ScrollView>
+							<View style={{ flex: 1, alignItems: "center" }}>
+								<Image
+									style={styles.eventModalImage}
+									source={{ uri: selectedEvent.imageUrl }}
 								/>
-							) : (
-								<LocalsButton title={"Teilnehmen"} onPress={toggleAttendance} />
-							)}
+								{selectedEvent && selectedEvent.category && (
+									<View style={styles.categoryBubbleContainer}>
+										{selectedEvent.category
+											.filter((category) => category !== "") // Filtere leere Kategorien
+											.map((category) => (
+												<View key={category} style={styles.categoryBubble}>
+													<Text style={styles.categoryText}>{category}</Text>
+												</View>
+											))}
+									</View>
+								)}
+								<Text style={styles.eventModalTitle}>{selectedEvent.title}</Text>
+								<Text style={styles.eventModalText}>
+									Erstellt von: {selectedEvent.creator}
+								</Text>
+								<LocalsButton title={"Hin da!"} onPress={openMapsApp} />
+								<Text style={styles.eventModalText}>
+									Beschreibung: {selectedEvent.description}
+								</Text>
 
-							<Text style={styles.eventModalText}>
-								Freie Plätze: {selectedEvent.groupSize}
-							</Text>
-							{selectedEvent.likedBy &&
-							selectedEvent.likedBy.includes(username) ? (
-								<AntDesign
-									name="heart"
-									size={24}
-									color="red"
-									onPress={toggleEventLike}
-								/>
-							) : (
-								<AntDesign
-									name="heart"
-									size={24}
-									color="black"
-									onPress={toggleEventLike}
-								/>
-							)}
 
-							<Button
-								title="Kommentare anzeigen"
-								onPress={() => setShowComments(true)}
-							/>
-						</View>
+
+								{selectedEvent.isAttending ? (
+									<LocalsButton
+										title={"Nicht teilnehmen"}
+										onPress={toggleAttendance}
+									/>
+								) : (
+									<LocalsButton title={"Teilnehmen"} onPress={toggleAttendance} />
+								)}
+
+								<Text style={styles.eventModalText}>
+									Freie Plätze: {selectedEvent.groupSize}
+								</Text>
+								{selectedEvent.likedBy &&
+								selectedEvent.likedBy.includes(username) ? (
+									<AntDesign
+										name="heart"
+										size={24}
+										color="red"
+										onPress={toggleEventLike}
+									/>
+								) : (
+									<AntDesign
+										name="heart"
+										size={24}
+										color="black"
+										onPress={toggleEventLike}
+									/>
+								)}
+
+								<Button
+									title="Kommentare anzeigen"
+									onPress={() => setShowComments(true)}
+								/>
+							</View>
+						</ScrollView>
 					)}
 
 					{selectedEvent && showComments && (
@@ -695,6 +751,7 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 	},
 	modalContainer: {
+		marginTop: 30,
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
@@ -737,6 +794,7 @@ const styles = StyleSheet.create({
 	},
 
 	commentContainer: {
+		width: "100%", // Hinzugefügt
 		marginTop: 10,
 		borderLeftWidth: 1,
 		borderRadius: 10,
@@ -746,6 +804,7 @@ const styles = StyleSheet.create({
 		alignSelf: "flex-start",
 		backgroundColor: "darkgrey",
 	},
+
 	commentText: {
 		fontSize: 14,
 	},
@@ -783,6 +842,33 @@ const styles = StyleSheet.create({
 	replyButtonText: {
 		fontSize: 14,
 		color: "black",
+	},
+	categoryBubble: {
+		backgroundColor: "blue",
+		paddingHorizontal: 10,
+		paddingVertical: 5,
+		borderRadius: 10,
+		marginBottom: 10,
+		marginRight: 10
+	},
+	categoryText: {
+		color: "white",
+		fontSize: 14,
+	},
+	categoryBubbleContainer: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		justifyContent: "center",
+		marginBottom: 10,
+	},
+	likeContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+	},
+	likeCount: {
+		marginLeft: 5,
+		fontSize: 12,
+		color: "gray",
 	},
 });
 

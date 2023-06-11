@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from "react";
-import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
-import {NavigationContainer} from "@react-navigation/native";
-import {createStackNavigator} from "@react-navigation/stack";
-import {Ionicons} from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { Ionicons } from "@expo/vector-icons";
 
 // Import screen components
 import HomeScreen from "./appScreens/Home";
@@ -18,11 +18,11 @@ import EventDetails from "./appScreens/EventDetails";
 import EditPost from "./appScreens/EditPost";
 import Follower from "./appScreens/Follower";
 
-import {auth} from "../firebase";
-import {Dimensions} from "react-native";
-import {createDrawerNavigator} from "@react-navigation/drawer";
+import { auth } from "../firebase";
+import { Dimensions } from "react-native";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 import Sidebar from "../components/Sidebar";
-import {HeaderBackButton} from "@react-navigation/stack";
+import { HeaderBackButton } from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
 
@@ -35,12 +35,12 @@ function FriendStackNavigator() {
     return (
         <Stack.Navigator
             initialRouteName="FriendList"
-            screenOptions={{headerShown: false}}
+            screenOptions={{ headerShown: false }}
         >
-            <Stack.Screen name="Friends" component={FriendList}/>
+            <Stack.Screen name="Friends" component={FriendList} />
             <Stack.Screen
                 name="Chat"
-                options={{headerShown: true}}
+                options={{ headerShown: true }}
                 component={Chat}
             />
         </Stack.Navigator>
@@ -51,12 +51,13 @@ const MainStackNavigator = () => {
     return (
         <Stack.Navigator
             initialRouteName="Home"
-            screenOptions={{headerShown: false}}
+            screenOptions={{ headerShown: false }}
         >
-            <Stack.Screen name="Start" component={HomeScreen}/>
-            <Stack.Screen name="Profile" component={Profile}/>
-            <Stack.Screen name="Follower" component={Follower}/>
-            <Stack.Screen name="Following" component={Following}/>
+            <Stack.Screen name="Start" component={HomeScreen} />
+            <Stack.Screen name="Chat" component={Chat} options={{ headerShown: true }} />
+            <Stack.Screen name="Profile" component={Profile} />
+            <Stack.Screen name="Follower" component={Follower} />
+            <Stack.Screen name="Following" component={Following} />
         </Stack.Navigator>
     );
 };
@@ -67,26 +68,26 @@ function ProfileDrawerScreen() {
             initialRouteName="Profile"
             screenOptions={{
                 headerShown: false,
-                drawerStyle: {width: deviceWidth * 0.8},
+                drawerStyle: { width: deviceWidth * 0.8 },
                 swipeEdgeWidth: 0,
             }}
             drawerContent={(props) => <Sidebar {...props} />}
         >
-            <Drawer.Screen name="Profile" component={Profile}/>
+            <Drawer.Screen name="Profile" component={Profile} />
             <Drawer.Screen
                 name="FriendList"
                 component={FriendStackNavigator}
-                options={{headerShown: true}}
+                options={{ headerShown: true }}
             />
-            <Drawer.Screen name="EventDetails" component={EventDetails}/>
-            <Drawer.Screen name="EditPost" component={EditPost}/>
-            <Drawer.Screen name="Settings" component={Settings}/>
+            <Drawer.Screen name="EventDetails" component={EventDetails} />
+            <Drawer.Screen name="EditPost" component={EditPost} />
+            <Drawer.Screen name="Settings" component={Settings} />
             <Drawer.Screen options={{
-                drawerItemStyle: {display: 'none'}
-            }} name="Follower" component={Follower}/>
+                drawerItemStyle: { display: 'none' }
+            }} name="Follower" component={Follower} />
             <Drawer.Screen options={{
-                drawerItemStyle: {display: 'none'}
-            }} name="Following" component={Following}/>
+                drawerItemStyle: { display: 'none' }
+            }} name="Following" component={Following} />
         </Drawer.Navigator>
     );
 }
@@ -112,8 +113,8 @@ function AppNavigation() {
         <NavigationContainer>
             {user ? ( // Benutzer angemeldet
                 <Tab.Navigator
-                    screenOptions={({route}) => ({
-                        tabBarIcon: ({focused, color, size}) => {
+                    screenOptions={({ route }) => ({
+                        tabBarIcon: ({ focused, color, size }) => {
                             let iconName;
                             // HOME ICON
                             if (route.name === "Home") {
@@ -146,7 +147,7 @@ function AppNavigation() {
                                     size={size}
                                     color={color}
                                     style={{
-                                        transform: [{translateY: focused ? -5 : 0}],
+                                        transform: [{ translateY: focused ? -5 : 0 }],
                                     }}
                                 />
                             );
@@ -168,18 +169,18 @@ function AppNavigation() {
                     })}
 
                 >
-                    <Tab.Screen options={{unmountOnBlur: true}} name="Home" component={MainStackNavigator}/>
-                    <Tab.Screen name="LiveMap" component={LiveMap}/>
-                    <Tab.Screen name="PostEvent" component={PostEvent}/>
-                    <Tab.Screen options={{unmountOnBlur: true}} name="Me" component={ProfileDrawerScreen}/>
-                    <Tab.Screen name="Settings" component={Settings}/>
+                    <Tab.Screen options={{ unmountOnBlur: true }} name="Home" component={MainStackNavigator} />
+                    <Tab.Screen name="LiveMap" component={LiveMap} />
+                    <Tab.Screen name="PostEvent" component={PostEvent} />
+                    <Tab.Screen options={{ unmountOnBlur: true }} name="Me" component={ProfileDrawerScreen} />
+                    <Tab.Screen name="Settings" component={Settings} />
                 </Tab.Navigator>
             ) : (
                 <Stack.Navigator>
                     <Stack.Screen
                         name="Auth"
                         component={AuthScreen}
-                        options={{headerShown: false}}
+                        options={{ headerShown: false }}
                     />
                 </Stack.Navigator>
             )}
@@ -190,8 +191,8 @@ function AppNavigation() {
 function AuthScreen() {
     return (
         <Tab.Navigator
-            screenOptions={({route}) => ({
-                tabBarIcon: ({focused, color, size}) => {
+            screenOptions={({ route }) => ({
+                tabBarIcon: ({ focused, color, size }) => {
                 },
                 tabBarLabelStyle: {
                     fontSize: 12,
@@ -208,8 +209,8 @@ function AuthScreen() {
                 ],
             })}
         >
-            <Tab.Screen name="Login" component={Login}/>
-            <Tab.Screen name="Register" component={Register}/>
+            <Tab.Screen name="Login" component={Login} />
+            <Tab.Screen name="Register" component={Register} />
         </Tab.Navigator>
     );
 }

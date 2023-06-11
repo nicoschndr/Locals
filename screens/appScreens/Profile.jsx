@@ -65,7 +65,9 @@ const Profile = ({ route, navigation }) => {
 			});
 		}
 	}, [navigation, uid]);
-
+	const handleFriendClick = (friendUsername) => {
+		navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
+	}
 	function getUserData() {
 		firestore
 			.collection("users")
@@ -404,7 +406,7 @@ const Profile = ({ route, navigation }) => {
 										blockieren</Text></TouchableOpacity>)}
 						</View>
 					</View>
-				</Modal>
+				</Modal >
 				<Modal
 					animationType="slide"
 					transparent={true}
@@ -648,7 +650,7 @@ const Profile = ({ route, navigation }) => {
 					)}
 					{uid !== firebase.auth().currentUser.uid && currentUser.blockedUsers && user.blockedUsers && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
 						<>
-							<TouchableOpacity style={styles.chat}>
+							<TouchableOpacity style={styles.chat} onPress={() => handleFriendClick(user.username)}>
 								<MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
 							</TouchableOpacity>
 							{!currentFriends[user.username] &&
@@ -675,117 +677,121 @@ const Profile = ({ route, navigation }) => {
 
 				</View>
 
-				{user.follower && user.following && currentUser.follower && currentUser.following && user.username && currentUser.blockedUsers && user.blockedUsers && (
-					<View
-						style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
-					>
-						<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-							{user.firstName} {user.lastName}
-						</Text>
-						<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
-							@{user.username}
-						</Text>
-						{uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
-							<TouchableOpacity style={{ marginTop: 10 }} onPress={setFollower}>
-								<Text>Folgen</Text>
-							</TouchableOpacity>
-						)}
-						{currentUser.following.includes(uid) === true && !currentUser.blockedUsers.includes(user.username) && (
-							<TouchableOpacity style={{ marginTop: 10 }} onPress={setUnfollow}>
-								<Text>Nicht mehr Folgen</Text>
-							</TouchableOpacity>
-						)}
-						{currentUser.blockedUsers.includes(user.username) && (
-							<TouchableOpacity style={{ marginTop: 10 }} onPress={unblockUser}>
-								<Text>Nicht mehr blockieren</Text>
-							</TouchableOpacity>
-						)}
-						{(user.blockedUsers.includes(currentUsername) &&
-							<Text></Text>
-						)}
-					</View>
-				)}
-
-				{user.follower && user.following && currentUser.follower && currentUser.following && currentUser.blockedUsers && user.blockedUsers && (
-					<View
-						style={[styles.statsContainer, { marginTop: windowHeight * 0.05 }]}
-					>
-						<View style={styles.statsBox}>
-							<Text>Events</Text>
-							{(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
-								<Text>{events.length}</Text>
+				{
+					user.follower && user.following && currentUser.follower && currentUser.following && user.username && currentUser.blockedUsers && user.blockedUsers && (
+						<View
+							style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
+						>
+							<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
+								{user.firstName} {user.lastName}
+							</Text>
+							<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
+								@{user.username}
+							</Text>
+							{uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
+								<TouchableOpacity style={{ marginTop: 10 }} onPress={setFollower}>
+									<Text>Folgen</Text>
+								</TouchableOpacity>
 							)}
-							{((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
-								<Text>0</Text>
+							{currentUser.following.includes(uid) === true && !currentUser.blockedUsers.includes(user.username) && (
+								<TouchableOpacity style={{ marginTop: 10 }} onPress={setUnfollow}>
+									<Text>Nicht mehr Folgen</Text>
+								</TouchableOpacity>
+							)}
+							{currentUser.blockedUsers.includes(user.username) && (
+								<TouchableOpacity style={{ marginTop: 10 }} onPress={unblockUser}>
+									<Text>Nicht mehr blockieren</Text>
+								</TouchableOpacity>
+							)}
+							{(user.blockedUsers.includes(currentUsername) &&
+								<Text></Text>
 							)}
 						</View>
+					)
+				}
+
+				{
+					user.follower && user.following && currentUser.follower && currentUser.following && currentUser.blockedUsers && user.blockedUsers && (
 						<View
-							style={[
-								styles.statsBox,
-								{
-									borderColor: "DFD8C8",
-									borderLeftWidth: 1,
-									borderRightWidth: 1,
-								},
-							]}
+							style={[styles.statsContainer, { marginTop: windowHeight * 0.05 }]}
 						>
+							<View style={styles.statsBox}>
+								<Text>Events</Text>
+								{(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
+									<Text>{events.length}</Text>
+								)}
+								{((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
+									<Text>0</Text>
+								)}
+							</View>
+							<View
+								style={[
+									styles.statsBox,
+									{
+										borderColor: "DFD8C8",
+										borderLeftWidth: 1,
+										borderRightWidth: 1,
+									},
+								]}
+							>
+								{auth.currentUser.uid === uid && (
+									<TouchableOpacity style={styles.statsBox}
+										onPress={() => navigation.navigate('Follower', {
+											uid: uid,
+											follower: currentUser.follower
+										})}>
+										<Text>Follower</Text>
+										<Text>{user.follower.length}</Text>
+									</TouchableOpacity>
+								)}
+								{auth.currentUser.uid !== uid && (
+									<TouchableOpacity style={styles.statsBox}
+										onPress={() => navigation.navigate('Follower', {
+											uid: uid,
+											follower: user.follower
+										})}>
+										<Text>Follower</Text>
+										{(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
+											<Text>{user.follower.length}</Text>
+										)}
+										{((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
+											<Text>0</Text>
+										)}
+									</TouchableOpacity>
+								)}
+							</View>
 							{auth.currentUser.uid === uid && (
 								<TouchableOpacity style={styles.statsBox}
-									onPress={() => navigation.navigate('Follower', {
+									onPress={() => navigation.navigate('Following', {
 										uid: uid,
-										follower: currentUser.follower
+										following: currentUser.following
 									})}>
-									<Text>Follower</Text>
-									<Text>{user.follower.length}</Text>
+									<View style={styles.statsBox}>
+										<Text>Following</Text>
+										<Text>{user.following.length}</Text>
+									</View>
 								</TouchableOpacity>
 							)}
 							{auth.currentUser.uid !== uid && (
 								<TouchableOpacity style={styles.statsBox}
-									onPress={() => navigation.navigate('Follower', {
+									onPress={() => navigation.navigate('Following', {
 										uid: uid,
-										follower: user.follower
+										following: user.following
 									})}>
-									<Text>Follower</Text>
-									{(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
-										<Text>{user.follower.length}</Text>
-									)}
-									{((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
-										<Text>0</Text>
-									)}
+									<View style={styles.statsBox}>
+										<Text>Following</Text>
+										{(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
+											<Text>{user.following.length}</Text>
+										)}
+										{((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
+											<Text>0</Text>
+										)}
+									</View>
 								</TouchableOpacity>
 							)}
 						</View>
-						{auth.currentUser.uid === uid && (
-							<TouchableOpacity style={styles.statsBox}
-								onPress={() => navigation.navigate('Following', {
-									uid: uid,
-									following: currentUser.following
-								})}>
-								<View style={styles.statsBox}>
-									<Text>Following</Text>
-									<Text>{user.following.length}</Text>
-								</View>
-							</TouchableOpacity>
-						)}
-						{auth.currentUser.uid !== uid && (
-							<TouchableOpacity style={styles.statsBox}
-								onPress={() => navigation.navigate('Following', {
-									uid: uid,
-									following: user.following
-								})}>
-								<View style={styles.statsBox}>
-									<Text>Following</Text>
-									{(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
-										<Text>{user.following.length}</Text>
-									)}
-									{((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
-										<Text>0</Text>
-									)}
-								</View>
-							</TouchableOpacity>
-						)}
-					</View>
-				)}
+					)
+				}
 				<View style={{ marginTop: windowHeight * 0.05 }}>
 					<ScrollView
 						horizontal={true}
@@ -835,9 +841,9 @@ const Profile = ({ route, navigation }) => {
 						</View>
 					</View>
 				</View>
-			</ScrollView>
+			</ScrollView >
 
-		</SafeAreaView>
+		</SafeAreaView >
 
 	)
 
