@@ -10,7 +10,7 @@ interface LocalsEventDetailsProps {
 
 //TODO: attend to event from `LiveMap.jsx` 
 //TODO: like event from `LiveMap.jsx` 
-//
+//TODO: comment to event from `LiveMap.jsx`
 
 
 

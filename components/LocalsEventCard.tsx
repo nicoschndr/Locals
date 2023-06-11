@@ -38,9 +38,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
+        height: 100,
     },
     image: {
-        width: 100,
         height: 100,
     },
     detailsContainer: {
