@@ -645,12 +645,14 @@ const Livemap = () => {
 							setIsModalVisible(false);
 						}}
 						style={{ width: 200, height: 50, borderRadius: 10 }}
+						fontStyle={{ color: "red", fontWeight: "bold" }}
 					/>
 					<LocalsButton
 						variant="secondary"
 						title={"Close"}
 						onPress={() => setIsModalVisible(false)}
 						style={{ width: 200, height: 50, borderRadius: 10 }}
+						fontStyle={{ color: "black", fontWeight: "bold" }}
 					/>
 				</View>
 			</Modal >
