@@ -17,6 +17,7 @@ import Chat from "./appScreens/Chat";
 import EventDetails from "./appScreens/EventDetails";
 import EditPost from "./appScreens/EditPost";
 import Follower from "./appScreens/Follower";
+import Chatbot from "./appScreens/Chatbot";
 
 import { auth } from "../firebase";
 import { Dimensions } from "react-native";
@@ -58,6 +59,7 @@ const MainStackNavigator = () => {
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="Follower" component={Follower} />
             <Stack.Screen name="Following" component={Following} />
+
         </Stack.Navigator>
     );
 };
@@ -79,6 +81,7 @@ function ProfileDrawerScreen() {
                 component={FriendStackNavigator}
                 options={{ headerShown: true }}
             />
+            <Drawer.Screen name="Chatbot" component={Chatbot} />
             <Drawer.Screen name="EventDetails" component={EventDetails} />
             <Drawer.Screen name="EditPost" component={EditPost} />
             <Drawer.Screen name="Settings" component={Settings} />
