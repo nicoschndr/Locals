@@ -62,6 +62,9 @@ export default function Chatbot({ route }) {
 			return "Ich konnte keine Events in deiner Nähe zu deiner Anfrage finden :("
 		}
 	};
+	const openEventDetails = (event) => {
+		navigation.navigate('EventDetails', { event });
+	};
 
 	const extractKeywords = (text) => {
 		const keywords = ["sport", "culture", "music", "hiking"]; // Fügen Sie mehr Schlüsselwörter hinzu
@@ -209,10 +212,14 @@ export default function Chatbot({ route }) {
 								{message.events && message.events.length > 0 && (
 									<View style={styles.eventContainer}>
 										{message.events.map((event, eventIndex) => (
-											<View key={eventIndex} style={styles.eventItem}>
+											<TouchableOpacity
+												key={eventIndex}
+												style={styles.eventItem}
+												onPress={() => openEventDetails(event)}
+											>
 												<Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
 												<Text style={styles.eventTitle}>{event.title}</Text>
-											</View>
+											</TouchableOpacity>
 										))}
 									</View>
 								)}
