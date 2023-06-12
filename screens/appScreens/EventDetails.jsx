@@ -1,10 +1,10 @@
 import { View, Text, Modal, StyleSheet, Image, Actionsheet, ActionSheetIOS, Alert, TouchableOpacity, Linking } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { firestore } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
+import { auth, firebase, firestore } from "../../firebase";
 
 const EventDetails = ({ route, navigation }) => {
 	const { event } = route.params;
@@ -60,6 +60,9 @@ const EventDetails = ({ route, navigation }) => {
 
 	}, []);
 
+	// get current logged in user
+	const currentUser = auth.currentUser;
+
 	const showActionSheet = () => {
 		const options = ["Edit", "Delete", "Cancel"];
 		const destructiveButtonIndex = 1;
@@ -103,7 +106,7 @@ const EventDetails = ({ route, navigation }) => {
 		>
 			<Image
 				placeholder="Event Image"
-				source={{ uri: event.imageUrl }}
+				source={{ uri: event.imageUrl || "https://www.pngitem.com/pimgs/m/30-307416_profile-icon-png-image-free-download-searchpng-employee.png" }}
 				style={{ width: "100%", height: 400 }}
 			/>
 			<Ionicons
@@ -113,23 +116,27 @@ const EventDetails = ({ route, navigation }) => {
 				style={{ position: "absolute", top: 50, left: 20 }}
 				onPress={() => navigation.goBack()}
 			/>
-			<Ionicons
-				name="menu"
-				size={24}
-				color="white"
-				style={{ position: "absolute", top: 50, right: 20 }}
-				onPress={() => showActionSheet()}
-			/>
+			{event.userId === currentUser.uid && (
+				<Ionicons
+					name="menu"
+					size={24}
+					color="white"
+					style={{ position: "absolute", top: 50, right: 20 }}
+					onPress={() => showActionSheet()}
+				/>
+			)}
 			<View style={{ padding: 20 }}>
 				<View style={styles.titleContainer}>
 					<View style={{ flex: 1 }}>
 						<Text style={styles.date}>03.01.2024</Text>
 						<Text style={styles.title}>{event.title}</Text>
 					</View>
-					<Image
-						source={{ uri: user.imageUrl || "https://www.pngitem.com/pimgs/m/30-307416_profile-icon-png-image-free-download-searchpng-employee.png" }}
-						style={{ width: 42, height: 42, borderRadius: 50, }}
-					/>
+					{user && (
+						<Image
+							source={{ uri: user.imageUrl || "https://www.pngitem.com/pimgs/m/30-307416_profile-icon-png-image-free-download-searchpng-employee.png" }}
+							style={{ width: 42, height: 42, borderRadius: 50, }}
+						/>
+					)}
 				</View>
 			</View>
 			<View style={styles.infoContainer}>
@@ -140,7 +147,7 @@ const EventDetails = ({ route, navigation }) => {
 							size={32}
 							color="grey"
 						/>
-						<Text style={styles.item}>{event.category[1]}</Text>
+						<Text style={styles.item}>{event.category}</Text>
 					</View>
 				)}
 				<TouchableOpacity style={{ alignItems: "center" }} onPress={() => openMaps()}>

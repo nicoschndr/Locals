@@ -59,6 +59,9 @@ const MainStackNavigator = () => {
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="Follower" component={Follower} />
             <Stack.Screen name="Following" component={Following} />
+            <Stack.Screen name="PostEvent" component={PostEvent} />
+            <Stack.Screen name="EventDetails" component={EventDetails} />
+            <Stack.Screen name="EditPost" component={EditPost} />
         </Stack.Navigator>
     );
 };
@@ -173,9 +176,7 @@ function AppNavigation() {
                 >
                     <Tab.Screen options={{ unmountOnBlur: true }} name="Home" component={MainStackNavigator} />
                     <Tab.Screen name="LiveMap" component={LiveMap} />
-                    <Tab.Screen name="PostEvent" component={PostEvent} />
                     <Tab.Screen options={{ unmountOnBlur: true }} name="Me" component={ProfileDrawerScreen} />
-                    <Tab.Screen name="Settings" component={Settings} />
                 </Tab.Navigator>
             ) : (
                 <Stack.Navigator>

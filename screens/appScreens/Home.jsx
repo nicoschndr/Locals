@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, Refres
 import { firestore } from '../../firebase';
 
 import LocalsEventCard from '../../components/LocalsEventCard';
+import { Ionicons } from '@expo/vector-icons';
 
 const HomeScreen = ({ navigation }) => {
 	const [users, setUsers] = useState([]);
@@ -48,13 +49,26 @@ const HomeScreen = ({ navigation }) => {
 
 	return (
 		<View style={styles.container}>
-			<TextInput
-				style={styles.searchInput}
-				value={search}
-				placeholder="Search Events"
-				onChangeText={setSearch}
-			/>
+			<View style={{ flexDirection: 'row', justifyContent: "space-between", alignItems: 'center', justifyContent: 'center' }}>
+				<TextInput
+					style={styles.searchInput}
+					value={search}
+					placeholder="Search Events"
+					onChangeText={setSearch}
+				/>
+				{/* go to post event */}
 
+				<TouchableOpacity
+					style={styles.postButton}
+					onPress={() => navigation.navigate("PostEvent")}
+				>
+					<Ionicons
+						name="add-circle-outline"
+						size={36}
+						color="black"
+					/>
+				</TouchableOpacity>
+			</View>
 			<ScrollView
 				refreshControl={
 					<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
@@ -95,14 +109,15 @@ const styles = StyleSheet.create({
 	},
 	searchInput: {
 		height: 40,
+		width: '75%',
 		borderColor: '#000',
 		borderWidth: 1,
 		paddingLeft: 10,
+		borderRadius: 30,
 	},
-	userButton: {
-		backgroundColor: '#ddd',
-		marginTop: 10,
-		padding: 10,
+	postButton: {
+		marginLeft: 10,
+
 	}
 });
 

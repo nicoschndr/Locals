@@ -361,7 +361,7 @@ const Profile = ({ route, navigation }) => {
             <ScrollView showsVerticalScrollIndicator={false}>
                 {uid === firebase.auth().currentUser.uid && (
                     <TouchableOpacity
-                        style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
+                        style={styles.titleBar}
                         onPress={navigation.openDrawer}
                     >
                         <Ionicons

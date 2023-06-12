@@ -38,10 +38,10 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
-        height: 100,
     },
     image: {
         height: 100,
+        width: 100,
     },
     detailsContainer: {
         flex: 1,
