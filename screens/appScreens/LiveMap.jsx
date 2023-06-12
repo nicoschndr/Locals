@@ -1,38 +1,42 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
 	Animated,
-	Button,
 	FlatList,
-	Image,
 	Linking,
 	Modal,
 	Platform,
-	ScrollView,
 	StyleSheet,
 	Text,
-	TextInput,
+	ScrollView,
 	TouchableOpacity,
+	Button,
+	Image,
+	TextInput,
 	View,
 } from "react-native";
 import MapView, { Circle, Marker as DefaultMarker } from "react-native-maps";
 import Slider from "@react-native-community/slider";
 import * as Location from "expo-location";
 import { auth, firebase } from "../../firebase";
+import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import LocalsEventDetails from "../../components/LocalsEventDetails";
+
 import LocalsButton from "../../components/LocalsButton";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+
 
 const Marker = Animated.createAnimatedComponent(DefaultMarker);
 
+// TODO: auslagern in eigene Datei
 const Comment = ({
-					 comment,
-					 replies,
-					 goToComment,
-					 openReplyInput,
-					 highlighted,
-					 setHighlighted,
-					 likeComment,
-					 username,
-				 }) => {
+	comment,
+	replies,
+	goToComment,
+	openReplyInput,
+	highlighted,
+	setHighlighted,
+	likeComment,
+	username,
+}) => {
 	const handleLikeComment = () => {
 		likeComment(comment.id);
 	};
@@ -99,10 +103,22 @@ const Livemap = () => {
 	const [username, setUsername] = useState(null);
 	const [impressions, setImpressions] = useState({});
 	const [markerOpacity, setMarkerOpacity] = useState(new Animated.Value(0));
-	const [radius, setRadius] = useState(10);
-	const [sliderValue, setSliderValue] = useState(10);
+	const [radius, setRadius] = useState(100);
+	const [sliderValue, setSliderValue] = useState(100);
 	const [showRadius, setShowRadius] = useState(false);
 	const [isSliderActive, setIsSliderActive] = useState(false);
+
+	const [category, setCategory] = useState('');
+	const [isModalVisible, setIsModalVisible] = useState(false);
+
+	const [user, setUser] = useState({});
+
+
+
+	const handleCategorySelect = (value) => {
+		setCategory(value);
+		setIsModalVisible(false);
+	};
 
 	const IMPRESSION_THRESHOLD = 100;
 
@@ -480,6 +496,10 @@ const Livemap = () => {
 		});
 	};
 
+	function filterEventsByCategory(events, category) {
+		return events.filter((event) => event.category === category);
+	}
+
 	const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
 		const R = 6371; // Radius der Erde in Kilometern
 		const dLat = deg2rad(lat2 - lat1); // deg2rad unten
@@ -499,7 +519,36 @@ const Livemap = () => {
 		return deg * (Math.PI / 180);
 	};
 
-	const filteredEvents = filterEventsByRadius(events, radius);
+
+	const getUser = async () => {
+		const userRef = await firestore
+			.collection("users")
+			.doc(selectedEvent.userId)
+			.get();
+		setUser(userRef.data());
+	};
+
+	useEffect(() => {
+		getUser();
+
+	}, []);
+
+	const openMaps = () => {
+		const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
+		const latLng = `${selectedEvent.latitude},${selectedEvent.longitude}`;
+		const label = selectedEvent.address;
+		const url = Platform.select({
+			ios: `${scheme}${label}@${latLng}`,
+			android: `${scheme}${latLng}(${label})`,
+		});
+
+		Linking.openURL(url);
+	};
+
+	const filteredEventsByRadius = filterEventsByRadius(events, radius);
+
+	const filteredEvents = category ? events.filter((event) => event.category === category) : events;
+
 
 	return (
 		<View style={styles.container}>
@@ -512,9 +561,10 @@ const Livemap = () => {
 						latitudeDelta: 0.0922,
 						longitudeDelta: 0.0421,
 					}}
-					showsUserLocation={true}
-					showsMyLocationButton
+					showsUserLocation
 				>
+
+
 					{isSliderActive && (
 						<Circle
 							center={{
@@ -528,6 +578,8 @@ const Livemap = () => {
 						/>
 					)}
 
+
+
 					{filteredEvents.map((event) => (
 						<Marker
 							key={event.id}
@@ -536,9 +588,10 @@ const Livemap = () => {
 								longitude: event.longitude,
 							}}
 							onPress={() => handleEventPress(event)}
-							style={{ opacity: markerOpacity }}
+							// style={{ opacity: markerOpacity }}
+							image={require("../../assets/IconMarker.png")}
 						>
-							<View
+							{/* <View
 								style={[
 									event.advertised
 										? styles.highlightedEventAdMarker
@@ -549,17 +602,71 @@ const Livemap = () => {
 											? styles.friendHighlightedMarker
 											: null,
 								]}
-							/>
+							/> */}
 						</Marker>
 					))}
 				</MapView>
 			)}
 
+
+
+			{/* filter events by category modal */}
+			<Modal visible={isModalVisible} animationType="slide" >
+				<View style={{ margin: 100, justifyContent: "center", alignItems: "center" }}>
+					<Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 20 }}>Filter by category </Text>
+					<FlatList
+						data={events.map((event) => event.category)}
+						renderItem={({ item }) => (
+							<TouchableOpacity
+								onPress={() => {
+									setCategory(item);
+									setIsModalVisible(false);
+								}}
+							>
+								<Text
+									style={{
+										fontSize: 20,
+										fontWeight: "bold",
+										marginBottom: 20,
+										color: "blue"
+									}}
+								>{item}</Text>
+							</TouchableOpacity>
+						)}
+						keyExtractor={(item) => item}
+					/>
+
+					{/* remove filter */}
+					<LocalsButton
+						variant="secondary"
+						title={"Clear filter"}
+						onPress={() => {
+							setCategory(null);
+							setIsModalVisible(false);
+						}}
+						style={{ width: 200, height: 50, borderRadius: 10 }}
+					/>
+					<LocalsButton
+						variant="secondary"
+						title={"Close"}
+						onPress={() => setIsModalVisible(false)}
+						style={{ width: 200, height: 50, borderRadius: 10 }}
+					/>
+				</View>
+			</Modal >
+
 			<View style={styles.sliderContainer}>
+				{/* filter events by category modal button */}
+
+				<LocalsButton
+					title={"Filter by " + (category ? category : "category")}
+					onPress={() => setIsModalVisible(true)}
+					style={{ width: 200, height: 50, borderRadius: 10 }}
+				/>
 				<Slider
 					style={styles.slider}
 					minimumValue={1}
-					maximumValue={250}
+					maximumValue={500}
 					step={1}
 					value={sliderValue}
 					onValueChange={(value) => {
@@ -573,112 +680,155 @@ const Livemap = () => {
 			</View>
 
 			<Modal visible={modalVisible} animationType="slide">
-				<View style={styles.modalContainer}>
-					{selectedEvent && !showComments && (
-						<ScrollView>
-							<View style={{ flex: 1, alignItems: "center" }}>
-								<Image
-									style={styles.eventModalImage}
-									source={{ uri: selectedEvent.imageUrl }}
-								/>
-								{selectedEvent && selectedEvent.category && (
-									<View style={styles.categoryBubbleContainer}>
-										{selectedEvent.category
-											.filter((category) => category !== "") // Filtere leere Kategorien
-											.map((category) => (
-												<View key={category} style={styles.categoryBubble}>
-													<Text style={styles.categoryText}>{category}</Text>
-												</View>
-											))}
+				{/* <LocalsEventDetails event={selectedEvent} onBackPress={() => setModalVisible(false)} /> */}
+				{selectedEvent && !showComments && (
+					<ScrollView style={{ height: '100%', marginBottom: 40 }}>
+						<Image
+							style={{ width: '100%', height: 400 }}
+							source={{ uri: selectedEvent.imageUrl }}
+						/>
+						<Ionicons
+							name="chevron-down"
+							size={24}
+							color="white"
+							style={{ position: 'absolute', top: 50, left: 20 }}
+							onPress={() => setModalVisible(false)}
+						/>
+						<View style={{ padding: 20 }}>
+							<View style={styles.titleContainer}>
+								<View style={{ width: "100%" }}>
+									<Text style={styles.date}>03.01.2024</Text>
+
+									<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+
+										<Text style={styles.title}>{selectedEvent.title}</Text>
+
+										{selectedEvent.likedBy &&
+											selectedEvent.likedBy.includes(username) ? (
+											<Ionicons
+												name="heart"
+												size={24}
+												color="red"
+												onPress={toggleEventLike}
+											/>
+										) : (
+											<Ionicons
+												name="heart-outline"
+												size={24}
+												color="red"
+												onPress={toggleEventLike}
+											/>
+										)}
 									</View>
-								)}
-								<Text style={styles.eventModalTitle}>{selectedEvent.title}</Text>
-								<Text style={styles.eventModalText}>
-									Erstellt von: {selectedEvent.creator}
-								</Text>
-								<LocalsButton title={"Hin da!"} onPress={openMapsApp} />
-								<Text style={styles.eventModalText}>
-									Beschreibung: {selectedEvent.description}
-								</Text>
 
-
-
-								{selectedEvent.isAttending ? (
-									<LocalsButton
-										title={"Nicht teilnehmen"}
-										onPress={toggleAttendance}
-									/>
-								) : (
-									<LocalsButton title={"Teilnehmen"} onPress={toggleAttendance} />
-								)}
-
-								<Text style={styles.eventModalText}>
-									Freie Plätze: {selectedEvent.groupSize}
-								</Text>
-								{selectedEvent.likedBy &&
-								selectedEvent.likedBy.includes(username) ? (
-									<AntDesign
-										name="heart"
-										size={24}
-										color="red"
-										onPress={toggleEventLike}
-									/>
-								) : (
-									<AntDesign
-										name="heart"
-										size={24}
-										color="black"
-										onPress={toggleEventLike}
-									/>
-								)}
-
-								<Button
-									title="Kommentare anzeigen"
-									onPress={() => setShowComments(true)}
+								</View>
+								<Image
+									source={{ uri: user.imageUrl }}
+									style={{ width: 42, height: 42, borderRadius: 50, }}
 								/>
 							</View>
-						</ScrollView>
-					)}
-
-					{selectedEvent && showComments && (
-						<View style={{ flex: 1 }}>
-							<FlatList
-								ref={scrollViewRef}
-								data={comments}
-								renderItem={renderComment}
-								keyExtractor={(item) => item.id}
-							/>
-							<View style={styles.inputContainer}>
-								<TextInput
-									value={newCommentText}
-									onChangeText={setNewCommentText}
-									placeholder={
-										replyToComment
-											? `Antwort auf: ${replyToCommentText}`
-											: "Schreibe einen Kommentar"
-									}
-									style={styles.input}
-								/>
-								<TouchableOpacity
-									style={styles.sendButton}
-									onPress={addComment}
-								>
-									<Text style={styles.sendButtonText}>Senden</Text>
-								</TouchableOpacity>
-							</View>
-							<Button
-								title="Zurück zur Event-Ansicht"
-								onPress={() => setShowComments(false)}
-							/>
 						</View>
-					)}
+						<View style={styles.infoContainer}>
+							{selectedEvent.category && (
+								<View style={{ alignItems: "center" }}>
+									<Ionicons
+										name="list"
+										size={32}
+										color="grey"
+									/>
+									<Text style={styles.item}>{selectedEvent.category}</Text>
+								</View>
+							)}
+							<TouchableOpacity style={{ alignItems: "center" }} onPress={() => openMapsApp()}>
+								<Ionicons
+									name="compass"
+									size={32}
+									color="grey"
+								/>
+								<Text style={styles.item} numberOfLines={2}>{selectedEvent.address}</Text>
+							</TouchableOpacity>
+							{selectedEvent.groupSize && (
+								<View style={{ alignItems: "center" }}>
+									<Ionicons
+										name="people"
+										size={32}
+										color="grey"
+									/>
+									<Text style={styles.item}>{selectedEvent.groupSize}</Text>
+								</View>
+							)}
 
-					<TouchableOpacity onPress={() => setModalVisible(false)}>
-						<Text style={styles.closeButton}>Close</Text>
-					</TouchableOpacity>
-				</View>
+							<View style={{ alignItems: "center" }}>
+								<Ionicons
+									name="person-circle"
+									size={32}
+									color="grey"
+								/>
+								<Text style={styles.item}>{selectedEvent.creator}</Text>
+							</View>
+						</View>
+						{selectedEvent.description && (
+							<View style={{ padding: 20 }}>
+								<Text style={styles.header}>About</Text>
+								<Text style={{ color: "grey" }}>{selectedEvent.description}</Text>
+							</View>
+						)
+						}
+						<View style={{ padding: 20 }}>
+							{selectedEvent.isAttending ? (
+								<LocalsButton
+									title={"Nicht teilnehmen"}
+									onPress={toggleAttendance}
+								/>
+							) : (
+								<LocalsButton title={"Teilnehmen"} onPress={toggleAttendance} style={{ marginHorizontal: 24 }} />
+							)}
+						</View>
+						<Button
+							title="Kommentare anzeigen"
+							onPress={() => setShowComments(true)}
+						/>
+					</ScrollView>
+				)}
+
+				{selectedEvent && showComments && (
+					<View style={styles.commentsContainer}>
+						<Text style={styles.header}>Comments</Text>
+						{/* TODO: add comments from `LiveMap.jsx` */}
+						<Text style={{ color: "grey" }}>Comments will be here</Text>
+
+						<FlatList
+							ref={scrollViewRef}
+							data={comments}
+							renderItem={renderComment}
+							keyExtractor={(item) => item.id}
+						/>
+						<View style={styles.inputContainer}>
+							<TextInput
+								value={newCommentText}
+								onChangeText={setNewCommentText}
+								placeholder={
+									replyToComment
+										? `Antwort auf: ${replyToCommentText}`
+										: "Schreibe einen Kommentar"
+								}
+								style={styles.input}
+							/>
+							<TouchableOpacity
+								style={styles.sendButton}
+								onPress={addComment}
+							>
+								<Text style={styles.sendButtonText}>Senden</Text>
+							</TouchableOpacity>
+						</View>
+						<Button
+							title="Zurück zur Event-Ansicht"
+							onPress={() => setShowComments(false)}
+						/>
+					</View>
+				)}
 			</Modal>
-		</View>
+		</View >
 	);
 };
 
@@ -697,8 +847,13 @@ const styles = StyleSheet.create({
 	},
 	slider: {
 		width: "100%",
+		marginTop: 20,
 	},
-
+	infoContainer: {
+		paddingHorizontal: 24,
+		flexDirection: "row",
+		justifyContent: "space-between",
+	},
 	container: {
 		flex: 1,
 	},
@@ -750,12 +905,7 @@ const styles = StyleSheet.create({
 		marginTop: 4,
 		textAlign: "center",
 	},
-	modalContainer: {
-		marginTop: 30,
-		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
-	},
+
 	eventModalTitle: {
 		fontSize: 20,
 		fontWeight: "bold",
@@ -870,6 +1020,76 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		color: "gray",
 	},
+	date: {
+		fontSize: 16,
+		marginRight: 10,
+	},
+	description: {
+		fontSize: 16,
+		marginBottom: 20,
+	},
+	addressContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	addressTitle: {
+		fontSize: 16,
+		fontWeight: 'bold',
+	},
+	addressText: {
+		fontSize: 16,
+	},
+
+	/////
+	centeredView: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		marginTop: 22,
+	},
+	commentsContainer: {
+		padding: 20,
+		marginVertical: 40,
+	},
+	header: {
+		fontSize: 24,
+		fontWeight: "bold",
+		marginBottom: 10,
+	},
+	item: {
+		maxWidth: 100,
+		textAlign: "center",
+		marginTop: 5,
+		fontSize: 12,
+	},
+	infoContainer: {
+		paddingHorizontal: 24,
+		paddingVertical: 10,
+		flexDirection: "row",
+		justifyContent: "space-between",
+	},
+	modalView: {
+		margin: 20,
+		backgroundColor: "white",
+		borderRadius: 20,
+		padding: 35,
+		alignItems: "center",
+	},
+	modalText: {
+		marginBottom: 15,
+		textAlign: "center",
+	},
+	textStyle: {
+		fontWeight: "bold",
+		textAlign: "center",
+	},
+	title: {
+		fontSize: 32,
+		fontWeight: "bold",
+	},
+	titleContainer: {
+		flexDirection: "row", alignItems: "center", justifyContent: "space-between"
+	}
 });
 
 export default Livemap;

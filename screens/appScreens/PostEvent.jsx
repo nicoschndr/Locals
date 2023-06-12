@@ -83,9 +83,9 @@ const PostEvent = ({ navigation }) => {
 
 			let location = await Location.getCurrentPositionAsync({});
 			const { latitude, longitude } = location.coords;
-			setLatitude(latitude);
-			setLongitude(longitude);
-			setAddress(`${latitude}, ${longitude}`);
+			// setLatitude(latitude);
+			// setLongitude(longitude);
+			// setAddress(`${latitude}, ${longitude}`);
 		} catch (error) {
 			console.log(error);
 		}
@@ -144,6 +144,7 @@ const PostEvent = ({ navigation }) => {
 			.add({
 				creator: username,
 				title: title,
+				description: description,
 				address: address,
 				groupSize: groupSize,
 				latitude: latitude,
@@ -151,6 +152,8 @@ const PostEvent = ({ navigation }) => {
 				imageUrl: imageUrl,
 				advertised: advertised,
 				category: category,
+				date: date,
+				userId: auth.currentUser.uid,
 			})
 			.then(() => {
 				alert("Post created successfully");
@@ -167,10 +170,8 @@ const PostEvent = ({ navigation }) => {
 	}
 
 	function onDateSelected(event, value) {
+		setDate(value);
 		setDatePicker(false);
-		if (value) {
-			setDate(value);
-		}
 	}
 
 	async function getLocation() {
@@ -201,7 +202,7 @@ const PostEvent = ({ navigation }) => {
 					/>
 				</TouchableOpacity>
 
-				<View style={{ alignSelf: "center", marginBottom: 100 }}>
+				<View style={{ alignSelf: "center", marginBottom: 50 }}>
 					<View style={styles.postImage}>
 						<LocalsImagePicker
 							onImageTaken={(uri) => setImageUri(uri)}
@@ -233,10 +234,8 @@ const PostEvent = ({ navigation }) => {
 							listViewDisplayed={false}
 							onPress={(data, details = null) => {
 								setAddress(details.formatted_address);
-								setGeopoint({
-									longitude: details.geometry.location.lng,
-									latitude: details.geometry.location.lat,
-								});
+								setLongitude(details.geometry.location.lng);
+								setLatitude(details.geometry.location.lat);
 							}}
 							query={{
 								key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
