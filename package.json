@@ -50,6 +50,7 @@
 		"@babel/core": "^7.20.0",
 		"@types/react": "~18.0.27",
 		"@types/react-native": "^0.71.6",
+		"compromise": "^14.9.0",
 		"expo-av": "^13.2.1",
 		"expo-sensors": "^12.1.1",
 		"react-native-checkbox": "^2.0.0",
