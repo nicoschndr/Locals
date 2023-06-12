@@ -168,7 +168,7 @@ const EventDetails = ({ route, navigation }) => {
 						<Text style={styles.item}>{event.groupSize}</Text>
 					</View>
 				)}
-				{event.advertised && (
+				{/* {event.advertised && (
 					<View style={{ alignItems: "center" }}>
 						<Ionicons
 							name="megaphone"
@@ -177,7 +177,7 @@ const EventDetails = ({ route, navigation }) => {
 						/>
 						<Text style={styles.item}>advertised</Text>
 					</View>
-				)}
+				)} */}
 				<View style={{ alignItems: "center" }}>
 					<Ionicons
 						name="person-circle"

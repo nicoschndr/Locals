@@ -682,7 +682,7 @@ const Livemap = () => {
 			<Modal visible={modalVisible} animationType="slide">
 				{/* <LocalsEventDetails event={selectedEvent} onBackPress={() => setModalVisible(false)} /> */}
 				{selectedEvent && !showComments && (
-					<ScrollView style={{ height: '100%', marginBottom: 40 }}>
+					<ScrollView style={{ height: '100%' }}>
 						<Image
 							style={{ width: '100%', height: 400 }}
 							source={{ uri: selectedEvent.imageUrl }}
@@ -767,13 +767,6 @@ const Livemap = () => {
 								<Text style={styles.item}>{selectedEvent.creator}</Text>
 							</View>
 						</View>
-						{selectedEvent.description && (
-							<View style={{ padding: 20 }}>
-								<Text style={styles.header}>About</Text>
-								<Text style={{ color: "grey" }}>{selectedEvent.description}</Text>
-							</View>
-						)
-						}
 						<View style={{ padding: 20 }}>
 							{selectedEvent.isAttending ? (
 								<LocalsButton
@@ -784,10 +777,22 @@ const Livemap = () => {
 								<LocalsButton title={"Teilnehmen"} onPress={toggleAttendance} style={{ marginHorizontal: 24 }} />
 							)}
 						</View>
-						<Button
-							title="Kommentare anzeigen"
-							onPress={() => setShowComments(true)}
-						/>
+						{selectedEvent.description && (
+							<View style={{ padding: 20 }}>
+								<Text style={styles.header}>About</Text>
+								<Text style={{ color: "grey" }}>{selectedEvent.description}</Text>
+							</View>
+						)
+						}
+						<View style={styles.commentsContainer}>
+							<Text style={styles.header}>Comments</Text>
+							<LocalsButton
+								variant="secondary"
+								title="Kommentare anzeigen"
+								onPress={() => setShowComments(true)}
+								fontStyle={{ color: "dodgerblue" }}
+							/>
+						</View>
 					</ScrollView>
 				)}
 
@@ -1049,7 +1054,7 @@ const styles = StyleSheet.create({
 	},
 	commentsContainer: {
 		padding: 20,
-		marginVertical: 40,
+		marginBottom: 20
 	},
 	header: {
 		fontSize: 24,
