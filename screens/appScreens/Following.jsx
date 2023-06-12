@@ -159,12 +159,12 @@ const Following = ({route: {params}}) => {
                                        style={{width: 40, height: 40, borderRadius: 50}}></Image>
                                 <Text style={{marginLeft: 10, fontWeight: "bold"}}>{following.username}{"\n"}<Text style={{fontWeight: "normal"}}>{following.firstName + " " + following.lastName}</Text></Text>
                                 {currentUser.following.includes(following.uid) && user.email === auth.currentUser.email && (
-                                <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => unfollow({following})}>
+                                <TouchableOpacity style={[styles.followButton, {marginRight:10, marginLeft:"auto", alignSelf:"center"}]} onPress={() => unfollow({following})}>
                                     <Text>gefolgt</Text>
                                 </TouchableOpacity>
                             )}
                                 {!currentUser.following.includes(following.uid) && user.email === auth.currentUser.email && (
-                                    <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => follow({following})}>
+                                    <TouchableOpacity style={[styles.followButton, {marginRight:10, marginLeft:"auto", alignSelf:"center"}]} onPress={() => follow({following})}>
                                         <Text>folgen</Text>
                                     </TouchableOpacity>
                                 )}
@@ -179,4 +179,11 @@ const Following = ({route: {params}}) => {
 
 export default Following;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    followButton: {
+        borderWidth: 1,
+        paddingLeft: 5,
+        paddingRight: 5,
+        borderRadius: 5,
+    }
+})

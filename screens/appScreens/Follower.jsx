@@ -148,12 +148,12 @@ const Follower = ({route: {params}}) => {
                                        style={{width: 40, height: 40, borderRadius: 50}}></Image>
                                 <Text style={{marginLeft: 10, fontWeight: "bold"}}>{follower.username}{"\n"}<Text style={{fontWeight: "normal"}}>{follower.firstName + " " + follower.lastName}</Text></Text>
                                 {currentUser.follower.includes(follower.uid) && user.email === auth.currentUser.email && (
-                                    <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => deleteFollower({follower})}>
+                                    <TouchableOpacity style={[styles.followButton, {marginRight:10, marginLeft:"auto", alignSelf:"center"}]} onPress={() => deleteFollower({follower})}>
                                         <Text>entfernen</Text>
                                     </TouchableOpacity>
                                 )}
                                 {!currentUser.follower.includes(follower.uid) && user.email === auth.currentUser.email && (
-                                    <TouchableOpacity style={{marginRight:10, marginLeft:"auto", alignSelf:"center"}} onPress={() => notDeleteFollower({follower})}>
+                                    <TouchableOpacity style={[styles.followButton, {marginRight:10, marginLeft:"auto", alignSelf:"center"}]} onPress={() => notDeleteFollower({follower})}>
                                         <Text>rückgängig</Text>
                                     </TouchableOpacity>
                                 )}
@@ -168,4 +168,11 @@ const Follower = ({route: {params}}) => {
 
 export default Follower;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    followButton: {
+        borderWidth: 1,
+        paddingLeft: 5,
+        paddingRight: 5,
+        borderRadius: 5,
+    }
+})
