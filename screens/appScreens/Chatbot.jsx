@@ -217,8 +217,11 @@ export default function Chatbot({ route }) {
 												style={styles.eventItem}
 												onPress={() => openEventDetails(event)}
 											>
-												<Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
-												<Text style={styles.eventTitle}>{event.title}</Text>
+												<View>
+													<Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
+													<Text style={styles.eventTitle}>{event.title}</Text>
+												</View>
+
 											</TouchableOpacity>
 										))}
 									</View>
@@ -291,15 +294,19 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		marginBottom: 5,
+		backgroundColor: 'rgba(255,255,255,0.5)',
+		justifyContent: "center",
+		borderRadius: "5"
 	},
 	eventImage: {
-		width: 50,
-		height: 50,
+		width: 100,
+		height: 100,
 		marginRight: 10,
 		borderRadius: 5,
 	},
 	eventTitle: {
 		fontSize: 14,
+		textAlign: "center"
 	},
 	inputContainer: {
 		flexDirection: 'row',
