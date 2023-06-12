@@ -35,7 +35,7 @@ export default function Chatbot({ route }) {
 	const fetchAIResponse = async (input, events) => {
 		if (events.length !== 0) {
 			try {
-				const message = `Das ist der Text: ${input}\nUnd das die gefundenen Events: ${events.map(event => event.title).join(", ")}\nGeneriere einen kurzen Text um die Events vorzuschlagen. Maximal 60 Tokens lang`
+				const message = `Das ist der Text: ${input}\nUnd das die gefundenen Events: ${events.map(event => event.title).join(", ")}\nGeneriere einen kurzen Text um die Events vorzuschlagen.`
 				const response = await fetch('https://api.openai.com/v1/chat/completions', {
 					method: 'POST',
 					headers: {
