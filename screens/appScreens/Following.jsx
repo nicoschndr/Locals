@@ -198,9 +198,10 @@ export default Following;
 
 const styles = StyleSheet.create({
     followButton: {
-        borderWidth: 1,
         paddingLeft: 5,
         paddingRight: 5,
         borderRadius: 5,
+        backgroundColor: '#bebebe',
+        borderColor: '#bebebe'
     }
 })
