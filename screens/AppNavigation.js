@@ -73,7 +73,7 @@ function ProfileDrawerScreen() {
             }}
             drawerContent={(props) => <Sidebar {...props} />}
         >
-            <Drawer.Screen name="Profile" component={Profile} />
+            <Drawer.Screen options={{ unmountOnBlur: true }} name="Profile" component={Profile} />
             <Drawer.Screen
                 name="FriendList"
                 component={FriendStackNavigator}
@@ -83,10 +83,10 @@ function ProfileDrawerScreen() {
             <Drawer.Screen name="EditPost" component={EditPost} />
             <Drawer.Screen name="Settings" component={Settings} />
             <Drawer.Screen options={{
-                drawerItemStyle: { display: 'none' }
+                drawerItemStyle: { display: 'none' }, unmountOnBlur: true
             }} name="Follower" component={Follower} />
             <Drawer.Screen options={{
-                drawerItemStyle: { display: 'none' }
+                drawerItemStyle: { display: 'none' }, unmountOnBlur: true
             }} name="Following" component={Following} />
         </Drawer.Navigator>
     );

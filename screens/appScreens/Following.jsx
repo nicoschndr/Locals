@@ -11,7 +11,7 @@ const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 
-const Following = ({route: {params}}) => {
+const Following = ({route: {params}, navigation}) => {
     useEffect(() => {
         getUserData();
         getCurrentUserData();
@@ -49,7 +49,7 @@ const Following = ({route: {params}}) => {
     }
 
     function getFollowingData() {
-        if(followingIDs.length > 0) {
+        if (followingIDs.length > 0) {
             firestore
                 .collection('users')
                 .where(firebase.firestore.FieldPath.documentId(), 'in', followingIDs)
@@ -64,7 +64,7 @@ const Following = ({route: {params}}) => {
         }
     }
 
-    function follow(userToFollow){
+    function follow(userToFollow) {
         userToFollow.following.follower.forEach((r) => fllwr.push(r))
         firestore
             .collection("users")
@@ -90,7 +90,7 @@ const Following = ({route: {params}}) => {
         fllwng = [];
     }
 
-    function unfollow(userToUnfollow){
+    function unfollow(userToUnfollow) {
         userToUnfollow.following.follower.forEach((r) => fllwr.push(r))
         const index = fllwr.indexOf(auth.currentUser.uid.toString())
         fllwr.splice(index, 1)
@@ -122,14 +122,14 @@ const Following = ({route: {params}}) => {
         fllwng = [];
     }
 
-    const navigation = useNavigation();
+    const uNavigation = useNavigation();
 
     return (
         <ScrollView>
             <View
                 style={[styles.titleBar, {marginTop: windowHeight * 0.05, flexDirection: "row", borderBottomWidth: 1}]}>
                 <TouchableOpacity
-                    onPress={() => navigation.goBack()}
+                    onPress={() => uNavigation.goBack()}
                 >
                     <Ionicons
 
@@ -155,16 +155,33 @@ const Following = ({route: {params}}) => {
                     {followingUsers.map((following) => (
                         <View>
                             <View style={{flexDirection: "row", marginTop: 10, marginLeft: 10}}>
-                                <Image source={{uri: following.imageUrl}}
-                                       style={{width: 40, height: 40, borderRadius: 50}}></Image>
-                                <Text style={{marginLeft: 10, fontWeight: "bold"}}>{following.username}{"\n"}<Text style={{fontWeight: "normal"}}>{following.firstName + " " + following.lastName}</Text></Text>
+                                <TouchableOpacity key={following.uid} onPress={() => {
+                                    navigation.goBack();
+                                    navigation.navigate('Profile', {uid: following.uid})
+                                }}>
+                                    <Image source={{uri: following.imageUrl}}
+                                           style={{width: 40, height: 40, borderRadius: 50}}></Image></TouchableOpacity>
+                                <TouchableOpacity key={following.uid} onPress={() => {
+                                    navigation.goBack();
+                                    navigation.navigate('Profile', {uid: following.uid})
+                                }}>
+                                    <Text style={{marginLeft: 10, fontWeight: "bold"}}>{following.username}{"\n"}<Text
+                                        style={{fontWeight: "normal"}}>{following.firstName + " " + following.lastName}</Text></Text></TouchableOpacity>
                                 {currentUser.following.includes(following.uid) && user.email === auth.currentUser.email && (
-                                <TouchableOpacity style={[styles.followButton, {marginRight:10, marginLeft:"auto", alignSelf:"center"}]} onPress={() => unfollow({following})}>
-                                    <Text>gefolgt</Text>
-                                </TouchableOpacity>
-                            )}
+                                    <TouchableOpacity style={[styles.followButton, {
+                                        marginRight: 10,
+                                        marginLeft: "auto",
+                                        alignSelf: "center"
+                                    }]} onPress={() => unfollow({following})}>
+                                        <Text>gefolgt</Text>
+                                    </TouchableOpacity>
+                                )}
                                 {!currentUser.following.includes(following.uid) && user.email === auth.currentUser.email && (
-                                    <TouchableOpacity style={[styles.followButton, {marginRight:10, marginLeft:"auto", alignSelf:"center"}]} onPress={() => follow({following})}>
+                                    <TouchableOpacity style={[styles.followButton, {
+                                        marginRight: 10,
+                                        marginLeft: "auto",
+                                        alignSelf: "center"
+                                    }]} onPress={() => follow({following})}>
                                         <Text>folgen</Text>
                                     </TouchableOpacity>
                                 )}

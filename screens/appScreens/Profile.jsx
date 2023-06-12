@@ -13,6 +13,7 @@ import React, {useEffect, useState} from "react";
 import {Ionicons, MaterialIcons} from "@expo/vector-icons";
 import {auth, firebase, firestore, storage} from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
+import {useFocusEffect} from "@react-navigation/native";
 
 
 const Profile = ({route, navigation}) => {
@@ -49,6 +50,7 @@ const Profile = ({route, navigation}) => {
     const [text, onChangeText] = React.useState('');
     const [number, onChangeNumber] = React.useState('');
     const [reportCategory, setReportCategory] = useState([])
+    const [shouldHide, setShouldHide] = React.useState(false);
 
     React.useLayoutEffect(() => {
         if (uid === firebase.auth().currentUser.uid) {
@@ -258,6 +260,9 @@ const Profile = ({route, navigation}) => {
     }
 
     function reportUser() {
+        if(reportCategory.includes('Nutzer blockieren')){
+            blockUser()
+        }
         firestore
             .collection('users')
             .doc(uid)
@@ -434,7 +439,7 @@ const Profile = ({route, navigation}) => {
                                         reportCategory.splice(reportCategory.indexOf('Belästigung'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Belästigung <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Belästigung <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Belästigung') && (
@@ -443,7 +448,7 @@ const Profile = ({route, navigation}) => {
                                         'Belästigung'
                                     ])} style={{
                                         marginLeft: 20,
-                                        marginTop: 20
+                                        marginTop: 15
                                     }}><Text>Belästigung</Text></TouchableOpacity>
                                 )}
 
@@ -452,7 +457,7 @@ const Profile = ({route, navigation}) => {
                                         reportCategory.splice(reportCategory.indexOf('Hassrede'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Hassrede <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Hassrede <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Hassrede') && (
@@ -462,7 +467,7 @@ const Profile = ({route, navigation}) => {
                                     ])}
                                                       style={{
                                                           marginLeft: 20,
-                                                          marginTop: 20
+                                                          marginTop: 15
                                                       }}><Text>Hassrede</Text></TouchableOpacity>
                                 )}
 
@@ -471,7 +476,7 @@ const Profile = ({route, navigation}) => {
                                         reportCategory.splice(reportCategory.indexOf('Gewalt'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Gewalt <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Gewalt <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Gewalt') && (
@@ -480,7 +485,7 @@ const Profile = ({route, navigation}) => {
                                         'Gewalt'
                                     ])} style={{
                                         marginLeft: 20,
-                                        marginTop: 20
+                                        marginTop: 15
                                     }}><Text>Gewalt</Text></TouchableOpacity>
                                 )}
 
@@ -489,14 +494,14 @@ const Profile = ({route, navigation}) => {
                                         reportCategory.splice(reportCategory.indexOf('Spam'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Spam <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Spam <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Spam') && (
                                     <TouchableOpacity onPress={() => setReportCategory([
                                         ...reportCategory,
                                         'Spam'
-                                    ])} style={{marginLeft: 20, marginTop: 20}}><Text>Spam</Text></TouchableOpacity>
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Spam</Text></TouchableOpacity>
                                 )}
 
                                 {reportCategory.includes('Betrug') && (
@@ -504,7 +509,7 @@ const Profile = ({route, navigation}) => {
                                         reportCategory.splice(reportCategory.indexOf('Betrug'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Betrug <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Betrug <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Betrug') && (
@@ -513,7 +518,7 @@ const Profile = ({route, navigation}) => {
                                         'Betrug'
                                     ])} style={{
                                         marginLeft: 20,
-                                        marginTop: 20
+                                        marginTop: 15
                                     }}><Text>Betrug</Text></TouchableOpacity>
                                 )}
 
@@ -524,7 +529,7 @@ const Profile = ({route, navigation}) => {
                                     }
                                     } style={{
                                         marginLeft: 20,
-                                        marginTop: 20
+                                        marginTop: 15
                                     }}><Text>Identitätsdiebstahl <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
@@ -534,7 +539,7 @@ const Profile = ({route, navigation}) => {
                                         'Identitätsdiebstahl'
                                     ])} style={{
                                         marginLeft: 20,
-                                        marginTop: 20
+                                        marginTop: 15
                                     }}><Text>Identitätsdiebstahl</Text></TouchableOpacity>
                                 )}
 
@@ -543,7 +548,7 @@ const Profile = ({route, navigation}) => {
                                         reportCategory.splice(reportCategory.indexOf('Nacktheit oder sexuelle Inhalte'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Nacktheit oder sexuelle
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Nacktheit oder sexuelle
                                         Inhalte <Ionicons
                                             name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
@@ -551,7 +556,7 @@ const Profile = ({route, navigation}) => {
                                     <TouchableOpacity onPress={() => setReportCategory([
                                         ...reportCategory,
                                         'Nacktheit oder sexuelle Inhalte'
-                                    ])} style={{marginLeft: 20, marginTop: 20}}><Text>Nacktheit oder sexuelle
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Nacktheit oder sexuelle
                                         Inhalte</Text></TouchableOpacity>
                                 )}
 
@@ -562,7 +567,7 @@ const Profile = ({route, navigation}) => {
                                     }
                                     } style={{
                                         marginLeft: 20,
-                                        marginTop: 20
+                                        marginTop: 15
                                     }}><Text>Urheberrechtsverletzung <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
@@ -572,7 +577,7 @@ const Profile = ({route, navigation}) => {
                                         'Urheberrechtsverletzung'
                                     ])} style={{
                                         marginLeft: 20,
-                                        marginTop: 20
+                                        marginTop: 15
                                     }}><Text>Urheberrechtsverletzung</Text></TouchableOpacity>
                                 )}
 
@@ -581,7 +586,7 @@ const Profile = ({route, navigation}) => {
                                         reportCategory.splice(reportCategory.indexOf('Falsche Informationen'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Falsche
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Falsche
                                         Informationen <Ionicons
                                             name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
@@ -589,7 +594,7 @@ const Profile = ({route, navigation}) => {
                                     <TouchableOpacity onPress={() => setReportCategory([
                                         ...reportCategory,
                                         'Falsche Informationen'
-                                    ])} style={{marginLeft: 20, marginTop: 20}}><Text>Falsche
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Falsche
                                         Informationen</Text></TouchableOpacity>
                                 )}
 
@@ -598,7 +603,7 @@ const Profile = ({route, navigation}) => {
                                         reportCategory.splice(reportCategory.indexOf('Verletzung der Privatsphäre'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{marginLeft: 20, marginTop: 20}}><Text>Verletzung der
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Verletzung der
                                         Privatsphäre <Ionicons
                                             name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
@@ -606,14 +611,29 @@ const Profile = ({route, navigation}) => {
                                     <TouchableOpacity onPress={() => setReportCategory([
                                         ...reportCategory,
                                         'Verletzung der Privatsphäre'
-                                    ])} style={{marginLeft: 20, marginTop: 20}}><Text>Verletzung der
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Verletzung der
                                         Privatsphäre</Text></TouchableOpacity>
+                                )}
+
+                                {reportCategory.includes('Nutzer blockieren') && (
+                                    <TouchableOpacity onPress={() => {
+                                        reportCategory.splice(reportCategory.indexOf('Nutzer blockieren'), 1);
+                                        setReportCategory([...reportCategory])
+                                    }
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text style={{color: 'rgba(255, 0, 0, .87)'}}>Nutzer blockieren <Ionicons
+                                            name="checkmark"></Ionicons></Text></TouchableOpacity>
+                                )}
+                                {!reportCategory.includes('Nutzer blockieren') && (
+                                    <TouchableOpacity onPress={() => setReportCategory([
+                                        ...reportCategory,
+                                        'Nutzer blockieren'
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text style={{color: 'rgba(255, 0, 0, .87)'}}>Nutzer blockieren</Text></TouchableOpacity>
                                 )}
 
                                 <TouchableOpacity
                                     style={{
                                         marginLeft: 20,
-                                        marginTop: 20
+                                        marginTop: 15
                                     }}><Text>Sonstiges:</Text></TouchableOpacity>
                                 <TextInput
                                     editable
@@ -737,20 +757,20 @@ const Profile = ({route, navigation}) => {
                             >
                                 {auth.currentUser.uid === uid && (
                                     <TouchableOpacity style={styles.statsBox}
-                                                      onPress={() => navigation.navigate('Follower', {
+                                                      onPress={() => {navigation.goBack(); navigation.navigate('Follower', {
                                                           uid: uid,
                                                           follower: currentUser.follower
-                                                      })}>
+                                                      })}}>
                                         <Text>Follower</Text>
                                         <Text>{user.follower.length}</Text>
                                     </TouchableOpacity>
                                 )}
                                 {auth.currentUser.uid !== uid && (
                                     <TouchableOpacity style={styles.statsBox}
-                                                      onPress={() => navigation.navigate('Follower', {
+                                                      onPress={() => {navigation.goBack() ;navigation.navigate('Follower', {
                                                           uid: uid,
                                                           follower: user.follower
-                                                      })}>
+                                                      })}}>
                                         <Text>Follower</Text>
                                         {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
                                             <Text>{user.follower.length}</Text>
@@ -763,10 +783,10 @@ const Profile = ({route, navigation}) => {
                             </View>
                             {auth.currentUser.uid === uid && (
                                 <TouchableOpacity style={styles.statsBox}
-                                                  onPress={() => navigation.navigate('Following', {
+                                                  onPress= {() => {navigation.goBack(); navigation.navigate('Following', {
                                                       uid: uid,
                                                       following: currentUser.following
-                                                  })}>
+                                                  })}}>
                                     <View style={styles.statsBox}>
                                         <Text>Following</Text>
                                         <Text>{user.following.length}</Text>
@@ -775,10 +795,10 @@ const Profile = ({route, navigation}) => {
                             )}
                             {auth.currentUser.uid !== uid && (
                                 <TouchableOpacity style={styles.statsBox}
-                                                  onPress={() => navigation.navigate('Following', {
+                                                  onPress={() => {navigation.goBack(); navigation.navigate('Following', {
                                                       uid: uid,
                                                       following: user.following
-                                                  })}>
+                                                  })}}>
                                     <View style={styles.statsBox}>
                                         <Text>Following</Text>
                                         {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&

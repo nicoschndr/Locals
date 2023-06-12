@@ -6,22 +6,20 @@ import { auth, firebase, firestore } from "../firebase";
 
 const Sidebar = props => {
 
+    const [currentUser, setCurrentUser] = useState({});
+
     useEffect(() => {
-        getRelevantUserData();
+        getCurrentUserData();
     }, []);
 
-    function getRelevantUserData() {
+    function getCurrentUserData() {
         firestore
             .collection("users")
-            .doc(uid)
+            .doc(auth.currentUser.uid)
             .get()
-            .then((snapshot) => setUser(
-                {
-                    firstName: snapshot.data().firstName,
-                    imageUrl: snapshot.data().imageUrl,
-                    lastName: snapshot.data().lastName,
-                }
-            ));
+            .then((snapshot) => {
+                setCurrentUser(snapshot.data());
+            })
     }
 
     const logout = () => {
@@ -44,13 +42,15 @@ const Sidebar = props => {
     return (
         <ScrollView>
             <ImageBackground source={require("../assets/backgroundSidebar.png")} style={{ paddingTop: 48, padding: 16 }}>
-                <Image source={user.imageUrl ? { uri: user.imageUrl } : null} style={styles.image}></Image>
-                <Text style={styles.name}>{user.firstName} {user.lastName}</Text>
+                <Image source={currentUser.imageUrl ? { uri: currentUser.imageUrl } : null} style={styles.image}></Image>
+                <Text style={styles.name}>{currentUser.firstName} {currentUser.lastName}</Text>
 
-                <View style={{ flexDirection: "row" }}>
-                    <Text style={styles.followers}>0 Followers</Text>
-                    <Ionicons name="md-people" size={16} color="rgba(255,255,255, 0.8)"></Ionicons>
-                </View>
+                {currentUser.follower && (
+                    <View style={{flexDirection: "row"}}>
+                        <Text style={styles.followers}>{currentUser.follower.length} Followers</Text>
+                        <Ionicons name="md-people" size={16} color="rgba(255,255,255, 0.8)"></Ionicons>
+                    </View>
+                )}
             </ImageBackground>
 
             <View style={styles.container}>
