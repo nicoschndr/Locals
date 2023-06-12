@@ -19,7 +19,7 @@ export default function Chatbot({ route }) {
 			text: userInput,
 			user: true,
 		};
-		const keywords = extractKeywords(userInput);
+		const keywords = await extractKeywords(userInput);
 		const nearbyEvents = filterEventsByRadiusAndKeywords(events, radius, keywords);
 		const aiResponse = await fetchAIResponse(userInput, nearbyEvents);
 		const aiMessage = {
@@ -35,7 +35,7 @@ export default function Chatbot({ route }) {
 	const fetchAIResponse = async (input, events) => {
 		if (events.length !== 0) {
 			try {
-				const message = `Das ist der Text: ${input}\nUnd das die gefundenen Events: ${events.map(event => event.title).join(", ")}\nGeneriere einen kurzen Text um die Events vorzuschlagen.`
+				const message = `Das ist der Text: ${input}\nUnd das die gefundenen Events: ${events.map(event => event.title).join(", ")}\nGeneriere einen kurzen Text um die Events vorzuschlagen. Schreibe nur kurze und wichtige Sätze`
 				const response = await fetch('https://api.openai.com/v1/chat/completions', {
 					method: 'POST',
 					headers: {
@@ -59,17 +59,96 @@ export default function Chatbot({ route }) {
 				return "I'm sorry, there was an error generating the response. Can I help you with anything else?";
 			}
 		} else {
-			return "Ich konnte keine Events in deiner Nähe zu deiner Anfrage finden :("
+			try {
+				const message = `Das ist der Text: ${input}\n Schreibe dem Nutzer, dass leider keine Events gefunden werden können. Falls er fragt sag ihm, dass er nach events für sport, kultur, party, konzerten und kultur suchen kann. Beantworte keine Fragen, die abseits von Events sind und nichts mit Events zutun haben. In solchen Fällen sag, dass du das nicht weißt`
+				const response = await fetch('https://api.openai.com/v1/chat/completions', {
+					method: 'POST',
+					headers: {
+						'Authorization': 'Bearer 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', // Ersetzen Sie dies durch Ihren OpenAI API-Schlüssel
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						messages: [{'role': 'user', 'content': message}],
+						model: "gpt-3.5-turbo",
+					})
+				});
+
+				if (!response.ok) {
+					throw new Error('Error generating AI response');
+				}
+
+				const data = await response.json();
+				return data.choices[0].message.content;
+			} catch (error) {
+				console.error('Error generating AI response:', error);
+				return "I'm sorry, there was an error generating the response. Can I help you with anything else?";
+			}
 		}
 	};
 	const openEventDetails = (event) => {
 		navigation.navigate('EventDetails', { event });
 	};
 
-	const extractKeywords = (text) => {
-		const keywords = ["sport", "culture", "music", "hiking"]; // Fügen Sie mehr Schlüsselwörter hinzu
-		return keywords.filter(keyword => text.toLowerCase().includes(keyword));
+	const keywordsTranslations = {
+		"sport": "sport",
+		"kultur": "culture",
+		"party": "party",
+		"konzert": "concert"
+		// Fügen Sie weitere Übersetzungen hinzu
 	};
+/*
+	const extractKeywords = (text) => {
+		const keywords = Object.keys(keywordsTranslations); // Die deutschen Schlüsselwörter
+		const foundKeywords = keywords.filter(keyword => text.toLowerCase().includes(keyword));
+		console.log(foundKeywords.map(keyword => keywordsTranslations[keyword]))
+		return foundKeywords.map(keyword => keywordsTranslations[keyword]); // Übersetzung zu englischen Schlüsselwörtern
+	};
+
+ */
+
+	const aiKeywords = async (text) => {
+		try {
+			const message = `Das ist der Text: ${text}\n Suche innerhalb des Textes, nach was der user sucht. 
+			Er kann nach mehreren Sachen suchen. Die Keywords sind: sport, culture, party und concert. 
+			Beachte, dass der Text deutsch ist, der ausgabewert aber englisch.
+			Gebe als Antwort nur die keywords zurück die in dem Text ein match haben. 
+			Ich brauche wirklich nur die keywords von dir, sonst nichts. Separiere die Keyword mit einem Komma`
+			const response = await fetch('https://api.openai.com/v1/chat/completions', {
+				method: 'POST',
+				headers: {
+					'Authorization': 'Bearer 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', // Ersetzen Sie dies durch Ihren OpenAI API-Schlüssel
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					messages: [{'role': 'user', 'content': message}],
+					model: "gpt-3.5-turbo",
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('Error generating AI response');
+			}
+
+			const data = await response.json();
+			// Assuming the response is an array of keywords
+			console.log(data.choices[0].message.content.split(', '))
+			return data.choices[0].message.content.split(', '); // Splitting the response by commas to get an array of keywords
+		} catch (error) {
+			console.error('Error generating AI response:', error);
+			return [];
+		}
+	}
+
+	const extractKeywords =  async (text) => {
+		const matches = await aiKeywords(text)
+		console.log(matches)
+		const keywords = Object.keys(keywordsTranslations); // Die deutschen Schlüsselwörter
+		const foundKeywords = keywords.filter(keyword => text.toLowerCase().includes(keyword));
+		console.log(foundKeywords.map(keyword => keywordsTranslations[keyword]))
+		return matches; // Übersetzung zu englischen Schlüsselwörtern
+	};
+
+
 
 	const getEventsByKeywords = async (keywords) => {
 		let events = [];
@@ -103,7 +182,6 @@ export default function Chatbot({ route }) {
 
 				const filteredEvents = filterEventsByRadius(eventsData, radius);
 				setEvents(filteredEvents);
-				console.log(filteredEvents)
 
 			});
 		};
@@ -122,11 +200,11 @@ export default function Chatbot({ route }) {
 				event.latitude,
 				event.longitude
 			);
-			console.log('Event Distance:', eventDistance);
-			console.log('Radius:', radius);
+			//console.log('Event Distance:', eventDistance);
+			//console.log('Radius:', radius);
 			const numericRadius = parseFloat(radius);
 			const re = eventDistance <= numericRadius
-			console.log(re)
+			//console.log(re)
 			return eventDistance <= numericRadius;
 		});
 	};
@@ -331,7 +409,7 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		alignItems: 'center',
-		backgroundColor: '#DDDDDD',
+		backgroundColor: 'rgba(255,255,255,0.3)',
 		padding: 10,
 	},
 	iconContainer: {
@@ -344,7 +422,8 @@ const styles = StyleSheet.create({
 	},
 	aiMessage: {
 		alignSelf: 'flex-start',
-		backgroundColor: '#505050',
+		backgroundColor: '#e1e1e1',
 		borderBottomLeftRadius: 0,
+		color: "white"
 	},
 });

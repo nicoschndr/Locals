@@ -1067,12 +1067,6 @@ const styles = StyleSheet.create({
 		marginTop: 5,
 		fontSize: 12,
 	},
-	infoContainer: {
-		paddingHorizontal: 24,
-		paddingVertical: 10,
-		flexDirection: "row",
-		justifyContent: "space-between",
-	},
 	modalView: {
 		margin: 20,
 		backgroundColor: "white",
