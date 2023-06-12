@@ -303,10 +303,12 @@ const PostEvent = ({ navigation }) => {
 					<Text>Group Size</Text>
 					<TextInput
 						style={styles.inputText}
-						value={groupSize}
-						onChangeText={(groupSize) => setGroupSize(groupSize)}
+						value={groupSize.toString()}
+						onChangeText={(groupSize) => setGroupSize(parseInt(groupSize))}
+						keyboardType="numeric"
 					/>
 				</View>
+
 
 				<View style={styles.inputContainer}>
 					<Text>Description</Text>
