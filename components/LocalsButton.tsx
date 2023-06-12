@@ -5,7 +5,7 @@ export interface TemplateButtonProps {
 	title: string;
 	onPress: () => void;
 	style?: StyleProp<ViewStyle>;
-	variant?: "primary" | "secondary";
+	variant?: "primary" | "secondary"
 }
 
 const TemplateButton: React.FC<TemplateButtonProps> = ({
