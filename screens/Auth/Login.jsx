@@ -1,4 +1,4 @@
-import { View, Text, KeyboardAvoidingView, StyleSheet } from "react-native";
+import { View, Text, KeyboardAvoidingView, StyleSheet, Image, ImageBackground } from "react-native";
 import React, { useState, useEffect } from "react";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import LocalsButton from "../../components/LocalsButton";
@@ -52,30 +52,48 @@ const Login = () => {
 	};
 
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior="padding">
-			<Text style={styles.title}>Login</Text>
-			<View style={styles.inputContainer}>
-				<LocalsTextInput
-					placeholder="E-Mail oder Benutzername"
-					autoFocus
-					autoCapitalize="none"
-					value={emailOrUsername}
-					onChangeText={(text) => setEmailOrUsername(text)}
-					style={styles.email}
-				/>
-				<LocalsTextInput
-					placeholder="Passwort"
-					secureTextEntry
-					value={password}
-					onChangeText={(password) => setPassword(password)}
-					style={styles.password}
-				/>
-				<LocalsButton
-					title="Anmelden"
-					onPress={login}
-					style={styles.loginBtn}
-				/>
-			</View>
+		<KeyboardAvoidingView behavior="padding">
+			<ImageBackground
+				source={require("../../assets/BackGround(h).png")}
+				style={{ width: '100%', height: '100%' }}
+			>
+				<View style={styles.container}>
+					<Image
+						// assets/Logo.png
+						source={require("../../assets/Logo(White).png")}
+						style={styles.logo}
+					/>
+					<View style={styles.inputContainer}>
+						<LocalsTextInput
+							placeholder="E-Mail oder Benutzername"
+							autoFocus
+							autoCapitalize="none"
+							value={emailOrUsername}
+							onChangeText={(text) => setEmailOrUsername(text)}
+							style={styles.email}
+						/>
+						<LocalsTextInput
+							placeholder="Passwort"
+							secureTextEntry
+							value={password}
+							onChangeText={(password) => setPassword(password)}
+							style={styles.password}
+						/>
+						<LocalsButton
+							title="Sign In"
+							onPress={login}
+							style={styles.loginBtn}
+						/>
+						<LocalsButton
+							title="Sign Up"
+							variant="secondary"
+							onPress={() => navigation.navigate("Register")}
+							style={styles.signUpBtn}
+							fontStyle={{ color: "#ec404b" }}
+						/>
+					</View>
+				</View>
+			</ImageBackground>
 		</KeyboardAvoidingView>
 	);
 };
@@ -93,6 +111,9 @@ const styles = StyleSheet.create({
 		width: "80%",
 	},
 	loginBtn: {
+		marginTop: 20,
+	},
+	signUpBtn: {
 		marginTop: 10,
 	},
 	password: {
@@ -102,5 +123,10 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		fontWeight: "bold",
 		marginBottom: 16,
+	},
+	logo: {
+		height: 120,
+		marginVertical: 40,
+		resizeMode: "contain",
 	},
 });
