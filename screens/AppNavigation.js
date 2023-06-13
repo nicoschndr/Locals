@@ -17,6 +17,7 @@ import Chat from "./appScreens/Chat";
 import EventDetails from "./appScreens/EventDetails";
 import EditPost from "./appScreens/EditPost";
 import Follower from "./appScreens/Follower";
+import Chatbot from "./appScreens/Chatbot";
 
 import { auth } from "../firebase";
 import { Dimensions } from "react-native";
@@ -58,7 +59,9 @@ const MainStackNavigator = () => {
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="Follower" component={Follower} />
             <Stack.Screen name="Following" component={Following} />
-            <Drawer.Screen name="EventDetails" component={EventDetails} />
+            <Stack.Screen name="PostEvent" component={PostEvent} />
+            <Stack.Screen name="EventDetails" component={EventDetails} />
+            <Stack.Screen name="EditPost" component={EditPost} />
         </Stack.Navigator>
     );
 };
@@ -74,20 +77,21 @@ function ProfileDrawerScreen() {
             }}
             drawerContent={(props) => <Sidebar {...props} />}
         >
-            <Drawer.Screen name="Profile" component={Profile} />
+            <Drawer.Screen options={{ unmountOnBlur: true }} name="Profile" component={Profile} />
             <Drawer.Screen
                 name="FriendList"
                 component={FriendStackNavigator}
                 options={{ headerShown: true }}
             />
+            <Drawer.Screen name="Chatbot" component={Chatbot} />
             <Drawer.Screen name="EventDetails" component={EventDetails} />
             <Drawer.Screen name="EditPost" component={EditPost} />
             <Drawer.Screen name="Settings" component={Settings} />
             <Drawer.Screen options={{
-                drawerItemStyle: { display: 'none' }
+                drawerItemStyle: { display: 'none' }, unmountOnBlur: true
             }} name="Follower" component={Follower} />
             <Drawer.Screen options={{
-                drawerItemStyle: { display: 'none' }
+                drawerItemStyle: { display: 'none' }, unmountOnBlur: true
             }} name="Following" component={Following} />
         </Drawer.Navigator>
     );
@@ -172,9 +176,7 @@ function AppNavigation() {
                 >
                     <Tab.Screen options={{ unmountOnBlur: true }} name="Home" component={MainStackNavigator} />
                     <Tab.Screen name="LiveMap" component={LiveMap} />
-                    <Tab.Screen name="PostEvent" component={PostEvent} />
                     <Tab.Screen options={{ unmountOnBlur: true }} name="Me" component={ProfileDrawerScreen} />
-                    <Tab.Screen name="Settings" component={Settings} />
                 </Tab.Navigator>
             ) : (
                 <Stack.Navigator>

@@ -66,6 +66,15 @@ const LocalsEventDetails: React.FC<LocalsEventDetailsProps> = ({ event, onBackPr
                 </View>
             </View>
             <View style={styles.infoContainer}>
+                {selectedEvent.isAttending ? (
+                    <LocalsButton
+                        title={"Nicht teilnehmen"}
+                        onPress={toggleAttendance}
+                    />
+                ) : (
+                    <LocalsButton title={"Teilnehmen"} onPress={toggleAttendance} />
+                )}
+
                 {event.category && (
                     <View style={{ alignItems: "center" }}>
                         <Ionicons
