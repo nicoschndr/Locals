@@ -157,32 +157,41 @@ const Login = ({ navigation }) => {
 							style={styles.password}
 						/>
 						<Divider style={styles.divider} />
-						<CheckBox
-							title="Passwort anzeigen"
-							checked={showPassword}
-							onPress={() => setShowPassword(!showPassword)}
-							containerStyle={{
-								backgroundColor: "transparent",
-								borderWidth: 0,
-								marginLeft: 0,
-								padding: 0,
-								marginBottom: 12,
+						<View
+							style={{
+								flexDirection: "row",
+								justifyContent: "space-between",
+								marginBottom: 20,
 							}}
-							textStyle={{
-								color: "#fff",
-								fontSize: 10,
-								fontWeight: "normal",
-								marginLeft: 4,
-							}}
-							checkedColor="#ec404b"
-							size={20}
-						/>
-						<TouchableOpacity
-							style={styles.forgotPassword}
-							onPress={() => resetPassword()}
 						>
-							<Text style={styles.forgotPasswordText}>Passwort vergessen?</Text>
-						</TouchableOpacity>
+							<CheckBox
+								title="Passwort anzeigen"
+								checked={showPassword}
+								onPress={() => setShowPassword(!showPassword)}
+								containerStyle={{
+									backgroundColor: "transparent",
+									borderWidth: 0,
+									marginLeft: 0,
+									padding: 0,
+								}}
+								textStyle={{
+									color: "#fff",
+									fontSize: 10,
+									fontWeight: "normal",
+									marginLeft: 4,
+								}}
+								checkedColor="#ec404b"
+								size={20}
+							/>
+							<TouchableOpacity
+								style={styles.forgotPassword}
+								onPress={() => resetPassword()}
+							>
+								<Text style={styles.forgotPasswordText}>
+									Passwort vergessen?
+								</Text>
+							</TouchableOpacity>
+						</View>
 						<LocalsButton
 							title="Sign In"
 							onPress={login}
@@ -276,9 +285,7 @@ const styles = StyleSheet.create({
 		height: StyleSheet.hairlineWidth,
 	},
 	forgotPassword: {
-		marginTop: 38,
 		alignSelf: "center",
-		marginBottom: 20,
 	},
 	forgotPasswordText: {
 		color: "white",
