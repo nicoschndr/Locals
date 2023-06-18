@@ -205,7 +205,7 @@ const Login = ({ navigation }) => {
 							fontStyle={{ color: "#ec404b" }}
 						/>
 						<View style={styles.google}>
-							<Text style={{ color: "#fff" }}>or</Text>
+							<Text style={{ color: "#fff" }}>oder</Text>
 							{/* google singup */}
 							<TouchableOpacity
 								style={styles.googleIcon}
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
 	google: {
 		justifyContent: "center",
 		alignItems: "center",
-		marginTop: 20,
+		marginTop: 38,
 	},
 	googleIcon: {
 		backgroundColor: "#fff",
