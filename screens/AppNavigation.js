@@ -193,7 +193,7 @@ function AppNavigation() {
 
 function AuthScreen() {
     return (
-        <Tab.Navigator
+        <Stack.Navigator
             screenOptions={({ route }) => ({
                 tabBarIcon: ({ focused, color, size }) => {
                 },
@@ -212,9 +212,9 @@ function AuthScreen() {
                 ],
             })}
         >
-            <Tab.Screen name="Login" component={Login} />
-            <Tab.Screen name="Register" component={Register} />
-        </Tab.Navigator>
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Register" component={Register} />
+        </Stack.Navigator>
     );
 }
 

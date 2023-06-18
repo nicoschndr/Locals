@@ -10,6 +10,7 @@ import {
 	TextInput,
 	TouchableOpacity,
 	KeyboardAvoidingView,
+	ActivityIndicator,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { CheckBox } from "react-native-elements";
@@ -217,7 +218,7 @@ const PostEvent = ({ navigation }) => {
 						style={styles.inputText}
 						value={title}
 						onChangeText={(title) => setTitle(title)}
-					// is mendatory
+						// is mendatory
 					/>
 				</View>
 
@@ -309,7 +310,6 @@ const PostEvent = ({ navigation }) => {
 					/>
 				</View>
 
-
 				<View style={styles.inputContainer}>
 					<Text>Description</Text>
 					<TextInput
@@ -391,6 +391,7 @@ const PostEvent = ({ navigation }) => {
 							<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
 						</TouchableOpacity>
 					)}
+					{uploading && <ActivityIndicator size="large" color="#fff" />}
 				</View>
 			</ScrollView>
 		</KeyboardAvoidingView>
