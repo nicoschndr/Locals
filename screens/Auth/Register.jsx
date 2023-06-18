@@ -320,7 +320,7 @@ const Register = ({ navigation }) => {
 					</View>
 					{!uploading && (
 						<LocalsButton
-							title="Register"
+							title="Registrieren"
 							onPress={register}
 							style={styles.loginBtn}
 						/>

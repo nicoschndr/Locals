@@ -193,12 +193,12 @@ const Login = ({ navigation }) => {
 							</TouchableOpacity>
 						</View>
 						<LocalsButton
-							title="Sign In"
+							title="Anmelden"
 							onPress={login}
 							style={styles.loginBtn}
 						/>
 						<LocalsButton
-							title="Sign Up"
+							title="Registrieren"
 							variant="secondary"
 							onPress={() => navigation.navigate("Register")}
 							style={styles.signUpBtn}
