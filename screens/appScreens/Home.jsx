@@ -261,6 +261,33 @@ const HomeScreen = ({ navigation }) => {
 							/>
 						))}
 					</ScrollView>
+					{/* in der nähe vertical scrollView */}
+					<Text
+						style={{
+							fontSize: 24,
+							fontWeight: "bold",
+							marginBottom: 8,
+							marginLeft: 24,
+						}}
+					>
+						In deiner Nähe
+					</Text>
+					<ScrollView style={{ padding: 24 }}>
+						{events.map((event) => (
+							<LocalsEventCard
+								key={event.id}
+								title={event.title}
+								date={event.date
+									?.toDate()
+									?.toLocaleDateString("de-DE", shortDate)}
+								location={event.address}
+								// image={event.imageUrl}
+								category={event.title}
+								onPress={() => navigation.navigate("EventDetails", { event })}
+								style={{ marginBottom: 24 }}
+							/>
+						))}
+					</ScrollView>
 				</View>
 			</ScrollView>
 		</View>

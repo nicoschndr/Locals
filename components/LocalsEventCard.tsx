@@ -52,7 +52,7 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 			backgroundStyle={[
 				props.slim && { width: 280 },
 				props.small && {
-					height: 130,
+					height: 100,
 					width: 150,
 					alignContent: "center",
 				},
@@ -60,7 +60,7 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 			largeTitleTextStyle={[
 				props.slim && { width: 260 },
 				props.small && {
-					height: 130,
+					height: 100,
 					width: 150,
 					// backgroundColor: "red",
 				},
