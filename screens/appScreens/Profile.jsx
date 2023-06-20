@@ -957,12 +957,7 @@ const Profile = ({ route, navigation }) => {
 					currentUser.following &&
 					currentUser.blockedUsers &&
 					user.blockedUsers && (
-						<View
-							style={[
-								styles.statsContainer,
-								{ marginTop: windowHeight * 0.05 },
-							]}
-						>
+						<View style={[styles.statsContainer, { marginTop: 24 }]}>
 							<View style={styles.statsBox}>
 								<Text>Events</Text>
 								{!currentUser.blockedUsers.includes(user.username) &&
@@ -1065,12 +1060,15 @@ const Profile = ({ route, navigation }) => {
 							)}
 						</View>
 					)}
-				<View style={{ marginTop: windowHeight * 0.05 }}>
+				<View>
 					<ScrollView
 						horizontal={true}
 						showsVerticalScrollIndicator={false}
 						showsHorizontalScrollIndicator={false}
-						style={{ paddingHorizontal: 24 }}
+						style={{
+							paddingHorizontal: 24,
+							paddingVertical: 24,
+						}}
 					>
 						{events.map((event) => (
 							<LocalsEventCard
@@ -1094,7 +1092,6 @@ const Profile = ({ route, navigation }) => {
 							styles.recent,
 							{
 								marginLeft: windowWidth * 0.15,
-								marginTop: windowHeight * 0.05,
 							},
 						]}
 					>
