@@ -1071,7 +1071,10 @@ const Profile = ({ route, navigation }) => {
 								onPress={() => navigation.navigate("EventDetails", { event })}
 							>
 								<Image
-									source={{ uri: event.imageUrl }}
+									// source={{ uri: event.imageUrl }}
+									source={{
+										uri: "https://source.unsplash.com/random/?city,nature",
+									}}
 									style={styles.image}
 									resizeMode="center"
 								/>

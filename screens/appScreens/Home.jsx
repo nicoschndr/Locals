@@ -14,6 +14,10 @@ import { firestore } from "../../firebase";
 import LocalsEventCard from "../../components/LocalsEventCard";
 import { Ionicons } from "@expo/vector-icons";
 
+import { AppleCard } from "react-native-apple-card-views";
+import AppleHeader from "react-native-apple-header";
+import { Divider, SocialIcon } from "react-native-elements";
+
 const HomeScreen = ({ navigation }) => {
 	const [users, setUsers] = useState([]);
 	const [search, setSearch] = useState("");
@@ -23,7 +27,7 @@ const HomeScreen = ({ navigation }) => {
 
 	useEffect(() => {
 		getUsers();
-		getAllEvents();
+		getActiveEvents();
 	}, []);
 
 	function getUsers() {
@@ -40,17 +44,36 @@ const HomeScreen = ({ navigation }) => {
 	}
 
 	const getAllEvents = () => {
-		firestore.collection("events").onSnapshot((snapshot) => {
-			const events = snapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-			}));
-			setEvents(events);
-		});
+		firestore
+			.collection("events")
+			.orderBy("date", "asc")
+			.onSnapshot((snapshot) => {
+				const events = snapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+				setEvents(events);
+			});
 	};
+
+	const getActiveEvents = () => {
+		firestore
+			.collection("events")
+			//where date >= today
+			.where("date", ">=", new Date())
+			.orderBy("date", "asc")
+			.onSnapshot((snapshot) => {
+				const events = snapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+				setEvents(events);
+			});
+	};
+
 	const handleRefresh = () => {
 		setRefreshing(true);
-		getAllEvents();
+		getActiveEvents();
 		setRefreshing(false);
 	};
 
@@ -71,33 +94,76 @@ const HomeScreen = ({ navigation }) => {
 
 	const FilteredEvents = filterEvents(events, search);
 
+	const options = {
+		weekday: "long",
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	};
+
+	const shortDate = {
+		year: "numeric",
+		month: "numeric",
+		day: "numeric",
+	};
+	const today = new Date().toLocaleDateString("de-DE", options);
+
 	return (
 		<View style={styles.container}>
-			<View style={styles.header}>
+			{/* <View style={styles.header}>
 				<Image source={require("../../assets/Logo.png")} style={styles.logo} />
-				<View style={{ flexDirection: "row", alignItems: "center" }}>
-					{!showSearch ? (
-						<TouchableOpacity
-							style={styles.searchButton}
-							onPress={() => setShowSearch(!showSearch)}
-						>
-							<Ionicons
-								name="search-outline"
-								size={28}
-								color="black"
-								// make icon bold
-								style={{ fontWeight: "bold" }}
-							/>
-						</TouchableOpacity>
-					) : (
-						<TextInput
-							style={styles.searchInput}
-							value={search}
-							placeholder="Search Events"
-							onChangeText={setSearch}
-							onSubmitEditing={() => setShowSearch(!showSearch)}
-						/>
-					)}
+				
+				</View>
+			</View> */}
+			<View style={styles.header}>
+				{/* <Image source={require("../../assets/Logo.png")} style={styles.logo} /> */}
+
+				<AppleHeader
+					largeTitle="Explore"
+					largeTitleFontColor="black"
+					borderColor="white"
+					dateTitle={today}
+				/>
+				<View
+					style={{
+						marginRight: 16,
+						alignItems: "center",
+						flexDirection: "row",
+						justifyContent: "space-between",
+						alignSelf: "center",
+					}}
+				>
+					<View style={{ flexDirection: "row", alignItems: "center" }}>
+						{showSearch && (
+							// close search
+							<TouchableOpacity
+								style={styles.searchButton}
+								onPress={() => setShowSearch(!showSearch)}
+							>
+								<Ionicons
+									name="close-outline"
+									size={28}
+									color="black"
+									// make icon bold
+									style={{ fontWeight: "bold" }}
+								/>
+							</TouchableOpacity>
+						)}
+						{!showSearch && (
+							<TouchableOpacity
+								style={styles.searchButton}
+								onPress={() => setShowSearch(!showSearch)}
+							>
+								<Ionicons
+									name="search-outline"
+									size={28}
+									color="black"
+									// make icon bold
+									style={{ fontWeight: "bold" }}
+								/>
+							</TouchableOpacity>
+						)}
+					</View>
 
 					<TouchableOpacity
 						style={styles.postButton}
@@ -107,22 +173,89 @@ const HomeScreen = ({ navigation }) => {
 					</TouchableOpacity>
 				</View>
 			</View>
-			<ScrollView
-				refreshControl={
-					<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-				}
-				style={{ marginTop: 24, marginHorizontal: 24 }}
-			>
-				{FilteredEvents.map((event) => (
-					<LocalsEventCard
-						key={event.id}
-						title={event.title}
-						date={event.date?.toDate()?.toLocaleDateString()}
-						location={event.address}
-						image={event.imageUrl}
-						onPress={() => navigation.navigate("EventDetails", { event })}
+
+			{showSearch && (
+				<View
+					style={{
+						alignItems: "center",
+						marginHorizontal: 24,
+					}}
+				>
+					<TextInput
+						style={styles.searchInput}
+						value={search}
+						placeholder="Search Events"
+						onChangeText={setSearch}
+						onSubmitEditing={() => setShowSearch(!showSearch)}
 					/>
-				))}
+				</View>
+			)}
+			{/* <Divider
+				style={{
+					backgroundColor: "black",
+					height: StyleSheet.hairlineWidth,
+				}}
+			/> */}
+			<ScrollView>
+				<ScrollView
+					refreshControl={
+						<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+					}
+					contentContainerStyle={{
+						margin: 24,
+						marginTop: 12,
+					}}
+					horizontal
+				>
+					{FilteredEvents.map((event) => (
+						<LocalsEventCard
+							key={event.id}
+							title={event.title}
+							date={event.date
+								?.toDate()
+								?.toLocaleDateString("de-DE", shortDate)}
+							location={event.address}
+							// image={event.imageUrl}
+							category={event.title}
+							onPress={() => navigation.navigate("EventDetails", { event })}
+							style={{ marginRight: 24 }}
+							slim
+						/>
+					))}
+				</ScrollView>
+				{/* categories */}
+				<View>
+					<Text
+						style={{
+							fontSize: 24,
+							fontWeight: "bold",
+							marginBottom: 8,
+							marginLeft: 24,
+						}}
+					>
+						Categories
+					</Text>
+					<ScrollView
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={{
+							flexDirection: "row",
+							alignItems: "center",
+							margin: 24,
+						}}
+					>
+						{events.map((event) => (
+							<LocalsEventCard
+								key={event.id}
+								title={event.category}
+								category={event.category}
+								onPress={() => navigation.navigate("Category", { event })}
+								style={{ marginRight: 24 }}
+								small
+							/>
+						))}
+					</ScrollView>
+				</View>
 			</ScrollView>
 		</View>
 	);
@@ -131,22 +264,23 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#fff",
+		marginBottom: 85,
 	},
 	header: {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		marginTop: 48,
-		marginHorizontal: 24,
+		marginTop: 58,
+		marginHorizontal: 8,
 	},
 	searchInput: {
 		height: 30,
-		width: "75%",
+		width: "100%",
 		borderColor: "#000",
 		borderWidth: 1,
 		paddingLeft: 10,
 		borderRadius: 30,
+		backgroundColor: "#fff",
 	},
 	postButton: {
 		marginLeft: 10,
@@ -159,7 +293,7 @@ const styles = StyleSheet.create({
 		// adjust styling for logo
 		width: 100,
 		resizeMode: "contain",
-		left: -10,
+		left: 10,
 	},
 });
 

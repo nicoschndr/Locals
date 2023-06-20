@@ -1,26 +1,71 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import {
+	View,
+	Text,
+	Image,
+	StyleSheet,
+	TouchableOpacity,
+	ImageSourcePropType,
+} from "react-native";
+import { AppleCard } from "react-native-apple-card-views";
 
 interface LocalsEventCardProps {
 	title: string;
 	date: string;
 	location: string;
 	image: string;
+	style: any;
 	onPress: () => void;
+	small: boolean;
+	slim: boolean;
+	category?: string;
 }
 
 const LocalsEventCard = (props: LocalsEventCardProps) => {
+	const image = props.category
+		? {
+				uri: "https://source.unsplash.com/random/?" + props.category,
+		  }
+		: ({
+				uri: props.image || "https://source.unsplash.com/random/?city,night",
+		  } as ImageSourcePropType);
+
 	return (
-		<TouchableOpacity style={styles.container} onPress={props.onPress}>
-			<Image source={{ uri: props.image }} style={styles.image} />
-			<View style={styles.detailsContainer}>
-				<Text style={styles.title}>{props.title}</Text>
-				{props.date && <Text style={styles.date}>{props.date}</Text>}
-				{props.location && (
-					<Text style={styles.location}>{props.location}</Text>
-				)}
-			</View>
-		</TouchableOpacity>
+		// <TouchableOpacity style={styles.container} onPress={props.onPress}>
+		// 	<Image source={{ uri: props.image }} style={styles.image} />
+		// 	<View style={styles.detailsContainer}>
+		// 		<Text style={styles.title}>{props.title}</Text>
+		// 		{props.date && <Text style={styles.date}>{props.date}</Text>}
+		// 		{props.location && (
+		// 			<Text style={styles.location}>{props.location}</Text>
+		// 		)}
+		// 	</View>
+		// </TouchableOpacity>
+
+		<AppleCard
+			source={image}
+			largeTitle={props.title}
+			smallTitle={props.date}
+			footnote={props.location}
+			onPress={props.onPress}
+			style={props.style}
+			backgroundStyle={[
+				props.slim && { width: 280 },
+				props.small && {
+					height: 130,
+					width: 150,
+					alignContent: "center",
+				},
+			]}
+			largeTitleTextStyle={[
+				props.slim && { width: 260 },
+				props.small && {
+					height: 130,
+					width: 150,
+					// backgroundColor: "red",
+				},
+			]}
+		/>
 	);
 };
 

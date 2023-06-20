@@ -240,8 +240,6 @@ const PostEvent = ({ navigation }) => {
 							}}
 							query={{
 								key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
-								language: "de",
-								components: "country:de",
 							}}
 							styles={{
 								textInput: styles.addressInput,
@@ -409,6 +407,7 @@ const styles = StyleSheet.create({
 	container: {
 		alignItems: "center",
 		justifyContent: "center",
+		marginBottom: 85,
 	},
 	titleBar: {
 		flexDirection: "row",
