@@ -202,11 +202,12 @@ const HomeScreen = ({ navigation }) => {
 					height: StyleSheet.hairlineWidth,
 				}}
 			/> */}
-			<ScrollView>
+			<ScrollView
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+				}
+			>
 				<ScrollView
-					refreshControl={
-						<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-					}
 					contentContainerStyle={{
 						margin: 24,
 						marginTop: 12,

@@ -687,7 +687,11 @@ const Livemap = () => {
 					<ScrollView style={{ height: "100%" }}>
 						<Image
 							style={{ width: "100%", height: 400 }}
-							source={{ uri: selectedEvent.imageUrl }}
+							// source={{ uri: selectedEvent.imageUrl }}
+							source={{
+								uri:
+									"https://source.unsplash.com/random/?" + selectedEvent.title,
+							}}
 						/>
 						<Ionicons
 							name="chevron-down"

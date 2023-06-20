@@ -112,8 +112,8 @@ const EventDetails = ({ route, navigation }) => {
 				placeholder="Event Image"
 				source={{
 					uri:
-						event.imageUrl ||
-						"https://www.pngitem.com/pimgs/m/30-307416_profile-icon-png-image-free-download-searchpng-employee.png",
+						// event.imageUrl ||
+						"https://source.unsplash.com/random/?" + event.title,
 				}}
 				style={{ width: "100%", height: 400 }}
 			/>

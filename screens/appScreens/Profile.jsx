@@ -20,6 +20,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { auth, firebase, firestore, storage } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import { useFocusEffect } from "@react-navigation/native";
+import LocalsEventCard from "../../components/LocalsEventCard";
 
 const Profile = ({ route, navigation }) => {
 	useEffect(() => {
@@ -354,6 +355,12 @@ const Profile = ({ route, navigation }) => {
 			console.error(`No document found with username: ${currentUsername}`);
 		}
 	}
+
+	const shortDate = {
+		year: "numeric",
+		month: "numeric",
+		day: "numeric",
+	};
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -1063,23 +1070,22 @@ const Profile = ({ route, navigation }) => {
 						horizontal={true}
 						showsVerticalScrollIndicator={false}
 						showsHorizontalScrollIndicator={false}
+						style={{ paddingHorizontal: 24 }}
 					>
 						{events.map((event) => (
-							<TouchableOpacity
-								style={styles.mediaImageContainer}
+							<LocalsEventCard
 								key={event.id}
+								title={event.title}
+								date={event.date
+									?.toDate()
+									?.toLocaleDateString("de-DE", shortDate)}
+								location={event.address}
+								// image={event.imageUrl}
+								category={event.title}
 								onPress={() => navigation.navigate("EventDetails", { event })}
-							>
-								<Image
-									// source={{ uri: event.imageUrl }}
-									source={{
-										uri: "https://source.unsplash.com/random/?city,nature",
-									}}
-									style={styles.image}
-									resizeMode="center"
-								/>
-								<Text style={styles.imageText}>{event.title}</Text>
-							</TouchableOpacity>
+								style={{ marginRight: 24 }}
+								profile
+							/>
 						))}
 					</ScrollView>
 					<Text
@@ -1122,6 +1128,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
+		marginBottom: 85,
 	},
 	text: {
 		color: "#000000",

@@ -19,6 +19,7 @@ interface LocalsEventCardProps {
 	small: boolean;
 	slim: boolean;
 	category?: string;
+	profile?: boolean;
 }
 
 const LocalsEventCard = (props: LocalsEventCardProps) => {
@@ -56,6 +57,10 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 					width: 150,
 					alignContent: "center",
 				},
+				props.profile && {
+					width: 280,
+					height: 280,
+				},
 			]}
 			largeTitleTextStyle={[
 				props.slim && { width: 260 },
@@ -63,6 +68,10 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 					height: 100,
 					width: 150,
 					// backgroundColor: "red",
+				},
+				props.profile && {
+					width: 250,
+					height: 280,
 				},
 			]}
 		/>
