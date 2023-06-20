@@ -239,7 +239,7 @@ const HomeScreen = ({ navigation }) => {
 							marginLeft: 24,
 						}}
 					>
-						Categories
+						Kategorien
 					</Text>
 					<ScrollView
 						horizontal
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
 		marginHorizontal: 8,
 	},
 	searchInput: {
-		height: 30,
+		height: 40,
 		width: "100%",
 		borderColor: "#000",
 		borderWidth: 1,

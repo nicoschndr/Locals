@@ -148,7 +148,7 @@ function AppNavigation() {
 								iconName = focused ? "create" : "create-outline";
 							}
 							// LIVE MAP ICON
-							if (route.name === "LiveMap") {
+							if (route.name === "Map") {
 								iconName = focused ? "map" : "map-outline";
 							}
 							// PROFILE ICON
@@ -186,7 +186,7 @@ function AppNavigation() {
 						name="Home"
 						component={MainStackNavigator}
 					/>
-					<Tab.Screen name="LiveMap" component={LiveMap} />
+					<Tab.Screen name="Map" component={LiveMap} />
 					<Tab.Screen
 						options={{ unmountOnBlur: true }}
 						name="Me"
