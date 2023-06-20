@@ -77,10 +77,12 @@ function ProfileDrawerScreen() {
 			initialRouteName="Profile"
 			screenOptions={{
 				headerShown: false,
-				drawerStyle: { width: deviceWidth * 0.8 },
+				drawerStyle: { width: deviceWidth * 0.5 },
 				swipeEdgeWidth: 0,
+				drawerPosition: "right",
 			}}
 			drawerContent={(props) => <Sidebar {...props} />}
+			// open drawer on right side
 		>
 			<Drawer.Screen
 				options={{ unmountOnBlur: true }}
