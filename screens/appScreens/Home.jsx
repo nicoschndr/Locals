@@ -171,6 +171,12 @@ const HomeScreen = ({ navigation }) => {
 					>
 						<Ionicons name="add-circle-outline" size={28} color="black" />
 					</TouchableOpacity>
+					<TouchableOpacity
+						style={styles.postButton}
+						onPress={() => navigation.navigate("Chatbot")}
+					>
+						<Ionicons name="chatbox-ellipses-outline" size={28} color="black" />
+					</TouchableOpacity>
 				</View>
 			</View>
 

@@ -60,6 +60,7 @@ const MainStackNavigator = () => {
 				component={Chat}
 				options={{ headerShown: true }}
 			/>
+			<Stack.Screen name="Chatbot" component={Chatbot} />
 			<Stack.Screen name="Profile" component={Profile} />
 			<Stack.Screen name="Follower" component={Follower} />
 			<Stack.Screen name="Following" component={Following} />
@@ -91,7 +92,6 @@ function ProfileDrawerScreen() {
 				component={FriendStackNavigator}
 				options={{ headerShown: true }}
 			/>
-			<Drawer.Screen name="Chatbot" component={Chatbot} />
 			<Drawer.Screen name="EventDetails" component={EventDetails} />
 			<Drawer.Screen name="EditPost" component={EditPost} />
 			<Drawer.Screen name="Settings" component={Settings} />
