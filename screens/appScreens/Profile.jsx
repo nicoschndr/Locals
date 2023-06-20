@@ -7,6 +7,7 @@ import {
 	SafeAreaView,
 	ScrollView,
 	TouchableOpacity,
+	StatusBar,
 	Alert,
 	Modal,
 	Pressable,
@@ -364,6 +365,7 @@ const Profile = ({ route, navigation }) => {
 
 	return (
 		<SafeAreaView style={styles.container}>
+			<StatusBar barStyle="dark-content" />
 			<ScrollView showsVerticalScrollIndicator={false}>
 				{uid === firebase.auth().currentUser.uid && (
 					<TouchableOpacity

@@ -8,6 +8,7 @@ import {
 	StyleSheet,
 	Image,
 	RefreshControl,
+	StatusBar,
 } from "react-native";
 import { firestore } from "../../firebase";
 
@@ -110,6 +111,7 @@ const HomeScreen = ({ navigation }) => {
 
 	return (
 		<View style={styles.container}>
+			<StatusBar barStyle="dark-content" />
 			{/* <View style={styles.header}>
 				<Image source={require("../../assets/Logo.png")} style={styles.logo} />
 				
