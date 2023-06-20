@@ -7,9 +7,11 @@ import { auth, firebase, firestore } from "../firebase";
 const Sidebar = props => {
 
     const [currentUser, setCurrentUser] = useState({});
+    const [friendRequests, setFriendRequests] = useState([]);
 
     useEffect(() => {
         getCurrentUserData();
+        getOpenFriendRequests();
     }, []);
 
     function getCurrentUserData() {
@@ -20,6 +22,20 @@ const Sidebar = props => {
             .then((snapshot) => {
                 setCurrentUser(snapshot.data());
             })
+    }
+    function getOpenFriendRequests() {
+        firestore
+            .collection("users")
+            .doc(uid)
+            .get()
+            .then((snapshot) => {
+                const userData = snapshot.data();
+                const friendRequests = Object.keys(userData.friendRequests || {});
+                setFriendRequests(friendRequests); // Aktualisiere den Zustand mit den offenen Freundesanfragen
+            })
+            .catch((error) => {
+                console.error("Fehler beim Abrufen der Freundschaftsanfragen:", error);
+            });
     }
 
     const logout = () => {

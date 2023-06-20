@@ -9,14 +9,15 @@ import {
     TouchableOpacity,
     Alert, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, Keyboard,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { auth, firebase, firestore, storage } from "../../firebase";
+import React, {useEffect, useState} from "react";
+import {Ionicons, MaterialIcons} from "@expo/vector-icons";
+import {auth, firebase, firestore, storage} from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
-import { useFocusEffect } from "@react-navigation/native";
+import {useFocusEffect} from "@react-navigation/native";
+import {Badge} from "react-native-elements";
 
 
-const Profile = ({ route, navigation }) => {
+const Profile = ({route, navigation}) => {
     useEffect(() => {
         getUserData();
         getCurrentUserData();
@@ -57,7 +58,7 @@ const Profile = ({ route, navigation }) => {
             navigation.setOptions({
                 headerRight: () => (
                     <TouchableOpacity onPress={goToFriendList}>
-                        <Ionicons name={"people"} size={25} style={{ marginRight: 15 }} />
+                        <Ionicons name={"people"} size={25} style={{marginRight: 15}}/>
                     </TouchableOpacity>
                 ),
             });
@@ -68,7 +69,7 @@ const Profile = ({ route, navigation }) => {
         }
     }, [navigation, uid]);
     const handleFriendClick = (friendUsername) => {
-        navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
+        navigation.navigate('Chat', {friendUsername: friendUsername, currentUsername: currentUsername});
     }
 
     function getUserData() {
@@ -204,8 +205,8 @@ const Profile = ({ route, navigation }) => {
             .update({
                 follower: flw
             }).then(
-                setFollowing
-            )
+            setFollowing
+        )
         flw = [];
     }
 
@@ -233,8 +234,8 @@ const Profile = ({ route, navigation }) => {
             .update({
                 follower: flw
             }).then(
-                setUnfollowing
-            )
+            setUnfollowing
+        )
         flw = [];
     }
 
@@ -267,7 +268,7 @@ const Profile = ({ route, navigation }) => {
             .collection('users')
             .doc(uid)
             .update({
-                [`reportedBy.${currentUsername}`]: { Time: new Date(), Category: reportCategory, Text: text }
+                [`reportedBy.${currentUsername}`]: {Time: new Date(), Category: reportCategory, Text: text}
             }).then(
         )
         setReportModal(false)
@@ -365,22 +366,26 @@ const Profile = ({ route, navigation }) => {
                         onPress={navigation.openDrawer}
                     >
                         <Ionicons
-                            style={{ marginLeft: windowWidth - 50 }}
+                            style={{marginLeft: windowWidth - 50}}
                             name={"reorder-three-outline"}
                             size={40}
                         >
                             {" "}
                         </Ionicons>
+                        {friendRequests && friendRequests.length > 0 && (
+                            <Badge value={friendRequests.length} status='error'
+                                   containerStyle={{position: 'absolute', top: 5, right: 35}}></Badge>
+                        )}
                     </TouchableOpacity>
                 )}
 
                 {uid !== firebase.auth().currentUser.uid && (
                     <TouchableOpacity
-                        style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
+                        style={[styles.titleBar, {marginTop: windowHeight * 0.05}]}
                         onPress={() => setModalVisible(true)}
                     >
                         <Ionicons
-                            style={{ marginLeft: windowWidth - 50 }}
+                            style={{marginLeft: windowWidth - 50}}
                             name={"ellipsis-vertical"}
                             size={40}
                         >
@@ -393,23 +398,23 @@ const Profile = ({ route, navigation }) => {
                     animationType="slide"
                     transparent={true}
                     visible={modalVisible}>
-                    <TouchableOpacity style={{ width: windowWidth, height: windowHeight }}
-                        onPress={() => setModalVisible(false)}>
+                    <TouchableOpacity style={{width: windowWidth, height: windowHeight}}
+                                      onPress={() => setModalVisible(false)}>
                     </TouchableOpacity>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <TouchableOpacity onPress={() => changeModal()}
-                                style={{ marginLeft: 20, marginTop: 20 }}><Text>melden
-                                    ...</Text></TouchableOpacity>
+                                              style={{marginLeft: 20, marginTop: 20}}><Text>melden
+                                ...</Text></TouchableOpacity>
                             {(currentUser.blockedUsers && !currentUser.blockedUsers.includes(user.username) &&
                                 <TouchableOpacity onPress={() => blockUser()}
-                                    style={{ marginLeft: 20, marginTop: 20 }}><Text
-                                        style={{ color: 'rgba(255, 0, 0, .87)' }}>blockieren</Text></TouchableOpacity>)}
+                                                  style={{marginLeft: 20, marginTop: 20}}><Text
+                                    style={{color: 'rgba(255, 0, 0, .87)'}}>blockieren</Text></TouchableOpacity>)}
                             {(currentUser.blockedUsers && currentUser.blockedUsers.includes(user.username) &&
                                 <TouchableOpacity onPress={() => unblockUser()}
-                                    style={{ marginLeft: 20, marginTop: 20 }}><Text
-                                        style={{ color: 'rgba(255, 0, 0, .87)' }}>nicht mehr
-                                        blockieren</Text></TouchableOpacity>)}
+                                                  style={{marginLeft: 20, marginTop: 20}}><Text
+                                    style={{color: 'rgba(255, 0, 0, .87)'}}>nicht mehr
+                                    blockieren</Text></TouchableOpacity>)}
                         </View>
                     </View>
                 </Modal>
@@ -417,12 +422,12 @@ const Profile = ({ route, navigation }) => {
                     animationType="slide"
                     transparent={true}
                     visible={reportModal}>
-                    <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}
-                        behavior={Platform.OS === "ios" ? "padding" : "height" || Platform.OS === "android" ? "padding" : "height"}
-                        keyboardVerticalOffset={150}
-                        enabled>
-                        <TouchableOpacity style={{ width: windowWidth, height: windowHeight }}
-                            onPress={() => setReportModal(false)}>
+                    <KeyboardAvoidingView style={{flex: 1, flexDirection: 'column', justifyContent: 'center'}}
+                                          behavior={Platform.OS === "ios" ? "padding" : "height" || Platform.OS === "android" ? "padding" : "height"}
+                                          keyboardVerticalOffset={150}
+                                          enabled>
+                        <TouchableOpacity style={{width: windowWidth, height: windowHeight}}
+                                          onPress={() => setReportModal(false)}>
                         </TouchableOpacity>
                         <View style={styles.centeredView}>
                             <View style={styles.reportModalView}>
@@ -439,7 +444,7 @@ const Profile = ({ route, navigation }) => {
                                         reportCategory.splice(reportCategory.indexOf('Belästigung'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{ marginLeft: 20, marginTop: 15 }}><Text>Belästigung <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Belästigung <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Belästigung') && (
@@ -457,7 +462,7 @@ const Profile = ({ route, navigation }) => {
                                         reportCategory.splice(reportCategory.indexOf('Hassrede'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{ marginLeft: 20, marginTop: 15 }}><Text>Hassrede <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Hassrede <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Hassrede') && (
@@ -465,10 +470,10 @@ const Profile = ({ route, navigation }) => {
                                         ...reportCategory,
                                         'Hassrede'
                                     ])}
-                                        style={{
-                                            marginLeft: 20,
-                                            marginTop: 15
-                                        }}><Text>Hassrede</Text></TouchableOpacity>
+                                                      style={{
+                                                          marginLeft: 20,
+                                                          marginTop: 15
+                                                      }}><Text>Hassrede</Text></TouchableOpacity>
                                 )}
 
                                 {reportCategory.includes('Gewalt') && (
@@ -476,7 +481,7 @@ const Profile = ({ route, navigation }) => {
                                         reportCategory.splice(reportCategory.indexOf('Gewalt'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{ marginLeft: 20, marginTop: 15 }}><Text>Gewalt <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Gewalt <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Gewalt') && (
@@ -494,14 +499,14 @@ const Profile = ({ route, navigation }) => {
                                         reportCategory.splice(reportCategory.indexOf('Spam'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{ marginLeft: 20, marginTop: 15 }}><Text>Spam <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Spam <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Spam') && (
                                     <TouchableOpacity onPress={() => setReportCategory([
                                         ...reportCategory,
                                         'Spam'
-                                    ])} style={{ marginLeft: 20, marginTop: 15 }}><Text>Spam</Text></TouchableOpacity>
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Spam</Text></TouchableOpacity>
                                 )}
 
                                 {reportCategory.includes('Betrug') && (
@@ -509,7 +514,7 @@ const Profile = ({ route, navigation }) => {
                                         reportCategory.splice(reportCategory.indexOf('Betrug'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{ marginLeft: 20, marginTop: 15 }}><Text>Betrug <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Betrug <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Betrug') && (
@@ -548,7 +553,7 @@ const Profile = ({ route, navigation }) => {
                                         reportCategory.splice(reportCategory.indexOf('Nacktheit oder sexuelle Inhalte'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{ marginLeft: 20, marginTop: 15 }}><Text>Nacktheit oder sexuelle
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Nacktheit oder sexuelle
                                         Inhalte <Ionicons
                                             name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
@@ -556,7 +561,7 @@ const Profile = ({ route, navigation }) => {
                                     <TouchableOpacity onPress={() => setReportCategory([
                                         ...reportCategory,
                                         'Nacktheit oder sexuelle Inhalte'
-                                    ])} style={{ marginLeft: 20, marginTop: 15 }}><Text>Nacktheit oder sexuelle
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Nacktheit oder sexuelle
                                         Inhalte</Text></TouchableOpacity>
                                 )}
 
@@ -586,7 +591,7 @@ const Profile = ({ route, navigation }) => {
                                         reportCategory.splice(reportCategory.indexOf('Falsche Informationen'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{ marginLeft: 20, marginTop: 15 }}><Text>Falsche
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Falsche
                                         Informationen <Ionicons
                                             name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
@@ -594,7 +599,7 @@ const Profile = ({ route, navigation }) => {
                                     <TouchableOpacity onPress={() => setReportCategory([
                                         ...reportCategory,
                                         'Falsche Informationen'
-                                    ])} style={{ marginLeft: 20, marginTop: 15 }}><Text>Falsche
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Falsche
                                         Informationen</Text></TouchableOpacity>
                                 )}
 
@@ -603,7 +608,7 @@ const Profile = ({ route, navigation }) => {
                                         reportCategory.splice(reportCategory.indexOf('Verletzung der Privatsphäre'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{ marginLeft: 20, marginTop: 15 }}><Text>Verletzung der
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Verletzung der
                                         Privatsphäre <Ionicons
                                             name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
@@ -611,7 +616,7 @@ const Profile = ({ route, navigation }) => {
                                     <TouchableOpacity onPress={() => setReportCategory([
                                         ...reportCategory,
                                         'Verletzung der Privatsphäre'
-                                    ])} style={{ marginLeft: 20, marginTop: 15 }}><Text>Verletzung der
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Verletzung der
                                         Privatsphäre</Text></TouchableOpacity>
                                 )}
 
@@ -620,14 +625,17 @@ const Profile = ({ route, navigation }) => {
                                         reportCategory.splice(reportCategory.indexOf('Nutzer blockieren'), 1);
                                         setReportCategory([...reportCategory])
                                     }
-                                    } style={{ marginLeft: 20, marginTop: 15 }}><Text style={{ color: 'rgba(255, 0, 0, .87)' }}>Nutzer blockieren <Ionicons
+                                    } style={{marginLeft: 20, marginTop: 15}}><Text
+                                        style={{color: 'rgba(255, 0, 0, .87)'}}>Nutzer blockieren <Ionicons
                                         name="checkmark"></Ionicons></Text></TouchableOpacity>
                                 )}
                                 {!reportCategory.includes('Nutzer blockieren') && (
                                     <TouchableOpacity onPress={() => setReportCategory([
                                         ...reportCategory,
                                         'Nutzer blockieren'
-                                    ])} style={{ marginLeft: 20, marginTop: 15 }}><Text style={{ color: 'rgba(255, 0, 0, .87)' }}>Nutzer blockieren</Text></TouchableOpacity>
+                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text
+                                        style={{color: 'rgba(255, 0, 0, .87)'}}>Nutzer
+                                        blockieren</Text></TouchableOpacity>
                                 )}
 
                                 <TouchableOpacity
@@ -643,18 +651,18 @@ const Profile = ({ route, navigation }) => {
                                     style={styles.input}
                                 >
                                 </TextInput>
-                                <LocalsButton style={{ marginTop: 20, alignSelf: "center" }} title={"absenden"}
-                                    onPress={reportUser}></LocalsButton>
+                                <LocalsButton style={{marginTop: 20, alignSelf: "center"}} title={"absenden"}
+                                              onPress={reportUser}></LocalsButton>
                             </View>
                         </View>
                     </KeyboardAvoidingView>
                 </Modal>
 
-                <View style={{ alignSelf: "center" }}>
+                <View style={{alignSelf: "center"}}>
                     {currentUser.blockedUsers && user.blockedUsers && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
                         <View style={styles.profileImage}>
                             <Image
-                                source={{ uri: user.imageUrl }}
+                                source={{uri: user.imageUrl}}
                                 style={styles.image}
                                 resizeMode="center"
                             />
@@ -672,7 +680,7 @@ const Profile = ({ route, navigation }) => {
                     {uid !== firebase.auth().currentUser.uid && currentUser.blockedUsers && user.blockedUsers && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
                         <>
                             <TouchableOpacity style={styles.chat} onPress={() => handleFriendClick(user.username)}>
-                                <MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
+                                <MaterialIcons name={"chat"} size={20} color={"#FFFFFF"}/>
                             </TouchableOpacity>
                             {!currentFriends[user.username] &&
                                 user.username !== currentUsername && (
@@ -689,7 +697,7 @@ const Profile = ({ route, navigation }) => {
                                                 color={"#ffffff"}
                                             />
                                         ) : (
-                                            <MaterialIcons name={"add"} size={60} color={"#FFFFFF"} />
+                                            <MaterialIcons name={"add"} size={60} color={"#FFFFFF"}/>
                                         )}
                                     </TouchableOpacity>
                                 )}
@@ -701,26 +709,26 @@ const Profile = ({ route, navigation }) => {
                 {
                     user.follower && user.following && currentUser.follower && currentUser.following && user.username && currentUser.blockedUsers && user.blockedUsers && (
                         <View
-                            style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
+                            style={[styles.infoContainer, {marginTop: windowHeight * 0.01}]}
                         >
-                            <Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
+                            <Text style={[styles.text, {fontWeight: "200", fontSize: 36}]}>
                                 {user.firstName} {user.lastName}
                             </Text>
-                            <Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
+                            <Text style={[styles.text, {fontWeight: "200", fontSize: 14}]}>
                                 @{user.username}
                             </Text>
                             {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
-                                <TouchableOpacity style={{ marginTop: 10 }} onPress={setFollower}>
+                                <TouchableOpacity style={{marginTop: 10}} onPress={setFollower}>
                                     <Text style={styles.followButton}>Folgen</Text>
                                 </TouchableOpacity>
                             )}
                             {currentUser.following.includes(uid) === true && !currentUser.blockedUsers.includes(user.username) && (
-                                <TouchableOpacity style={{ marginTop: 10 }} onPress={setUnfollow}>
+                                <TouchableOpacity style={{marginTop: 10}} onPress={setUnfollow}>
                                     <Text style={styles.followButton}>Nicht mehr Folgen</Text>
                                 </TouchableOpacity>
                             )}
                             {currentUser.blockedUsers.includes(user.username) && (
-                                <TouchableOpacity style={{ marginTop: 10 }} onPress={unblockUser}>
+                                <TouchableOpacity style={{marginTop: 10}} onPress={unblockUser}>
                                     <Text style={styles.followButton}>Nicht mehr blockieren</Text>
                                 </TouchableOpacity>
                             )}
@@ -734,7 +742,7 @@ const Profile = ({ route, navigation }) => {
                 {
                     user.follower && user.following && currentUser.follower && currentUser.following && currentUser.blockedUsers && user.blockedUsers && (
                         <View
-                            style={[styles.statsContainer, { marginTop: windowHeight * 0.05 }]}
+                            style={[styles.statsContainer, {marginTop: windowHeight * 0.05}]}
                         >
                             <View style={styles.statsBox}>
                                 <Text>Events</Text>
@@ -757,24 +765,26 @@ const Profile = ({ route, navigation }) => {
                             >
                                 {auth.currentUser.uid === uid && (
                                     <TouchableOpacity style={styles.statsBox}
-                                        onPress={() => {
-                                            navigation.goBack(); navigation.navigate('Follower', {
-                                                uid: uid,
-                                                follower: currentUser.follower
-                                            })
-                                        }}>
+                                                      onPress={() => {
+                                                          navigation.goBack();
+                                                          navigation.navigate('Follower', {
+                                                              uid: uid,
+                                                              follower: currentUser.follower
+                                                          })
+                                                      }}>
                                         <Text>Follower</Text>
                                         <Text>{user.follower.length}</Text>
                                     </TouchableOpacity>
                                 )}
                                 {auth.currentUser.uid !== uid && (
                                     <TouchableOpacity style={styles.statsBox}
-                                        onPress={() => {
-                                            navigation.goBack(); navigation.navigate('Follower', {
-                                                uid: uid,
-                                                follower: user.follower
-                                            })
-                                        }}>
+                                                      onPress={() => {
+                                                          navigation.goBack();
+                                                          navigation.navigate('Follower', {
+                                                              uid: uid,
+                                                              follower: user.follower
+                                                          })
+                                                      }}>
                                         <Text>Follower</Text>
                                         {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
                                             <Text>{user.follower.length}</Text>
@@ -787,12 +797,13 @@ const Profile = ({ route, navigation }) => {
                             </View>
                             {auth.currentUser.uid === uid && (
                                 <TouchableOpacity style={styles.statsBox}
-                                    onPress={() => {
-                                        navigation.goBack(); navigation.navigate('Following', {
-                                            uid: uid,
-                                            following: currentUser.following
-                                        })
-                                    }}>
+                                                  onPress={() => {
+                                                      navigation.goBack();
+                                                      navigation.navigate('Following', {
+                                                          uid: uid,
+                                                          following: currentUser.following
+                                                      })
+                                                  }}>
                                     <View style={styles.statsBox}>
                                         <Text>Following</Text>
                                         <Text>{user.following.length}</Text>
@@ -801,12 +812,13 @@ const Profile = ({ route, navigation }) => {
                             )}
                             {auth.currentUser.uid !== uid && (
                                 <TouchableOpacity style={styles.statsBox}
-                                    onPress={() => {
-                                        navigation.goBack(); navigation.navigate('Following', {
-                                            uid: uid,
-                                            following: user.following
-                                        })
-                                    }}>
+                                                  onPress={() => {
+                                                      navigation.goBack();
+                                                      navigation.navigate('Following', {
+                                                          uid: uid,
+                                                          following: user.following
+                                                      })
+                                                  }}>
                                     <View style={styles.statsBox}>
                                         <Text>Following</Text>
                                         {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
@@ -821,7 +833,7 @@ const Profile = ({ route, navigation }) => {
                         </View>
                     )
                 }
-                <View style={{ marginTop: windowHeight * 0.05 }}>
+                <View style={{marginTop: windowHeight * 0.05}}>
                     <ScrollView
                         horizontal={true}
                         showsVerticalScrollIndicator={false}
@@ -831,10 +843,10 @@ const Profile = ({ route, navigation }) => {
                             <TouchableOpacity
                                 style={styles.mediaImageContainer}
                                 key={event.id}
-                                onPress={() => navigation.navigate("EventDetails", { event })}
+                                onPress={() => navigation.navigate("EventDetails", {event})}
                             >
                                 <Image
-                                    source={{ uri: event.imageUrl }}
+                                    source={{uri: event.imageUrl}}
                                     style={styles.image}
                                     resizeMode="center"
                                 />
@@ -896,6 +908,7 @@ const styles = StyleSheet.create({
     titleBar: {
         flexDirection: "row",
         justifyContent: "flex-end",
+        marginTop: 35
     },
     profileImage: {
         width: 200,
