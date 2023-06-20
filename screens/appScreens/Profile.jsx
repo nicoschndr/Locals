@@ -52,6 +52,7 @@ const Profile = ({route, navigation}) => {
     const [number, onChangeNumber] = React.useState('');
     const [reportCategory, setReportCategory] = useState([])
     const [shouldHide, setShouldHide] = React.useState(false);
+    const [followerDiff, setFollowerDiff] = useState(0)
 
     React.useLayoutEffect(() => {
         if (uid === firebase.auth().currentUser.uid) {
@@ -90,6 +91,7 @@ const Profile = ({route, navigation}) => {
             .get()
             .then((snapshot) => {
                 setCurrentUser(snapshot.data());
+                checkFollowerDiff(snapshot.data());
             });
     }
 
@@ -354,6 +356,18 @@ const Profile = ({route, navigation}) => {
             // Das Dokument wurde nicht gefunden, handle den Fehler
             console.error(`No document found with username: ${currentUsername}`);
         }
+    }
+    function checkFollowerDiff(userData){
+        setFollowerDiff(userData.follower.length - userData.followerWhenClicked)
+    }
+
+    function pushFollowerWhenClicked(fwc) {
+        firestore
+            .collection('users')
+            .doc(auth.currentUser.uid)
+            .update({
+                followerWhenClicked: fwc
+            })
     }
 
     return (
@@ -766,14 +780,18 @@ const Profile = ({route, navigation}) => {
                                 {auth.currentUser.uid === uid && (
                                     <TouchableOpacity style={styles.statsBox}
                                                       onPress={() => {
+                                                          pushFollowerWhenClicked(user.follower.length)
                                                           navigation.goBack();
                                                           navigation.navigate('Follower', {
                                                               uid: uid,
                                                               follower: currentUser.follower
                                                           })
                                                       }}>
-                                        <Text>Follower</Text>
+                                        <Text>Follower </Text>
                                         <Text>{user.follower.length}</Text>
+                                        {followerDiff > 0 && followerDiff && (
+                                            <Badge containerStyle={{position:"absolute", top: -5, right: -15}} status='error' value={followerDiff}></Badge>
+                                        )}
                                     </TouchableOpacity>
                                 )}
                                 {auth.currentUser.uid !== uid && (
