@@ -21,6 +21,22 @@ const Login = ({ navigation }) => {
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 
+	useEffect(() => {
+		const unsubscribe = auth.onAuthStateChanged((user) => {
+			if (user) {
+				// Der Benutzer ist angemeldet
+				// Hier können Sie den Benutzer zu einer bestimmten Seite weiterleiten
+				navigation.navigate('Home');
+			} else {
+				// Der Benutzer ist abgemeldet
+				// Hier können Sie den Benutzer zu Ihrer Login-Seite weiterleiten
+				navigation.navigate('Login');
+			}
+		});
+
+		// Aufräumen
+		return unsubscribe;
+	}, []);
 	const login = () => {
 		// Überprüfen, ob die Eingabe eine E-Mail-Adresse ist
 		const isEmail = /\S+@\S+\.\S+/.test(emailOrUsername);
