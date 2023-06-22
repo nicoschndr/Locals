@@ -264,7 +264,9 @@ const HomeScreen = ({ navigation }) => {
 					>
 						In deiner Nähe
 					</Text>
-					<ScrollView style={{ padding: 24 }}>
+					<ScrollView
+						contentContainerStyle={{ margin: 24, alignSelf: "center" }}
+					>
 						{events.map((event) => (
 							<LocalsEventCard
 								key={event.id}
