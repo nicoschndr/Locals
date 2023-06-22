@@ -154,7 +154,7 @@ function AppNavigation() {
 								iconName = focused ? "map" : "map-outline";
 							}
 							// PROFILE ICON
-							if (route.name === "Me") {
+							if (route.name === "Profile") {
 								iconName = focused ? "person" : "person-outline";
 							}
 							// FRIENDLIST ICON
@@ -191,7 +191,7 @@ function AppNavigation() {
 					<Tab.Screen name="Map" component={LiveMap} />
 					<Tab.Screen
 						options={{ unmountOnBlur: true }}
-						name="Me"
+						name="Profile"
 						component={ProfileDrawerScreen}
 					/>
 				</Tab.Navigator>

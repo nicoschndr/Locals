@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
 	View,
 	Text,
@@ -8,6 +8,7 @@ import {
 	ImageSourcePropType,
 } from "react-native";
 import { AppleCard } from "react-native-apple-card-views";
+import FastImage, { Source } from "react-native-fast-image";
 
 interface LocalsEventCardProps {
 	title: string;
@@ -26,23 +27,21 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 	const image = props.category
 		? {
 				uri: "https://source.unsplash.com/random/?" + props.category,
+				cache: FastImage.cacheControl.cacheOnly,
+				priority: FastImage.priority.high,
 		  }
 		: ({
 				uri: props.image || "https://source.unsplash.com/random/?city,night",
-		  } as ImageSourcePropType);
+				cache: FastImage.cacheControl.cacheOnly,
+				priority: FastImage.priority.high,
+		  } as unknown as ImageSourcePropType & { cache: Source["cache"] });
+
+	// Prefetching the image on component mount
+	useEffect(() => {
+		Image.prefetch(image.uri);
+	}, []);
 
 	return (
-		// <TouchableOpacity style={styles.container} onPress={props.onPress}>
-		// 	<Image source={{ uri: props.image }} style={styles.image} />
-		// 	<View style={styles.detailsContainer}>
-		// 		<Text style={styles.title}>{props.title}</Text>
-		// 		{props.date && <Text style={styles.date}>{props.date}</Text>}
-		// 		{props.location && (
-		// 			<Text style={styles.location}>{props.location}</Text>
-		// 		)}
-		// 	</View>
-		// </TouchableOpacity>
-
 		<AppleCard
 			source={image}
 			largeTitle={props.title}
@@ -74,7 +73,13 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 					height: 240,
 				},
 			]}
-		/>
+		>
+			<FastImage
+				source={image}
+				style={styles.image}
+				resizeMode={FastImage.resizeMode.cover}
+			/>
+		</AppleCard>
 	);
 };
 
@@ -96,7 +101,6 @@ const styles = StyleSheet.create({
 	image: {
 		height: 100,
 		width: 100,
-		resizeMode: "cover",
 	},
 	detailsContainer: {
 		flex: 1,

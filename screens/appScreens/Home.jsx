@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import {
 	View,
 	Text,
@@ -18,17 +18,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { AppleCard } from "react-native-apple-card-views";
 import AppleHeader from "react-native-apple-header";
 import { Divider, SocialIcon } from "react-native-elements";
+import FirestoreContext from "../../context/FirestoreContext";
 
 const HomeScreen = ({ navigation }) => {
 	const [users, setUsers] = useState([]);
 	const [search, setSearch] = useState("");
-	const [events, setEvents] = useState([""]);
 	const [refreshing, setRefreshing] = useState(false);
 	const [showSearch, setShowSearch] = useState(false);
 
+	const { events } = useContext(FirestoreContext);
+
 	useEffect(() => {
 		getUsers();
-		getActiveEvents();
 	}, []);
 
 	function getUsers() {
@@ -44,37 +45,26 @@ const HomeScreen = ({ navigation }) => {
 			});
 	}
 
-	const getAllEvents = () => {
-		firestore
-			.collection("events")
-			.orderBy("date", "asc")
-			.onSnapshot((snapshot) => {
-				const events = snapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				}));
-				setEvents(events);
-			});
-	};
-
-	const getActiveEvents = () => {
-		firestore
-			.collection("events")
-			//where date >= today
-			.where("date", ">=", new Date())
-			.orderBy("date", "asc")
-			.onSnapshot((snapshot) => {
-				const events = snapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				}));
-				setEvents(events);
-			});
-	};
+	// const getActiveEvents = useMemo(() => {
+	// 	return () => {
+	// 		firestore
+	// 			.collection("events")
+	// 			//where date >= today
+	// 			.where("date", ">=", new Date())
+	// 			.orderBy("date", "asc")
+	// 			.onSnapshot((snapshot) => {
+	// 				const events = snapshot.docs.map((doc) => ({
+	// 					id: doc.id,
+	// 					...doc.data(),
+	// 				}));
+	// 				setEvents(events);
+	// 			});
+	// 	};
+	// }, []);
 
 	const handleRefresh = () => {
 		setRefreshing(true);
-		getActiveEvents();
+		// getActiveEvents();
 		setRefreshing(false);
 	};
 
@@ -212,7 +202,6 @@ const HomeScreen = ({ navigation }) => {
 				<ScrollView
 					contentContainerStyle={{
 						margin: 24,
-						marginTop: 12,
 					}}
 					horizontal
 				>
@@ -317,6 +306,7 @@ const styles = StyleSheet.create({
 		paddingLeft: 10,
 		borderRadius: 30,
 		backgroundColor: "#fff",
+		marginBottom: 12,
 	},
 	postButton: {
 		marginLeft: 10,

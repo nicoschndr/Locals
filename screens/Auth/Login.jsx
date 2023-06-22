@@ -30,7 +30,6 @@ const Login = ({ navigation }) => {
 			auth
 				.signInWithEmailAndPassword(emailOrUsername, password)
 				.then(() => {
-					alert("Erfolgreich angemeldet!");
 					setEmailOrUsername("");
 					setPassword("");
 				})
@@ -53,7 +52,6 @@ const Login = ({ navigation }) => {
 					}
 				})
 				.then(() => {
-					alert("Erfolgreich angemeldet!");
 					setEmailOrUsername("");
 					setPassword("");
 				})
@@ -142,7 +140,6 @@ const Login = ({ navigation }) => {
 					<View style={styles.inputContainer}>
 						<Text style={styles.inputTitle}>E-Mail</Text>
 						<LocalsTextInput
-							autoFocus
 							autoCapitalize="none"
 							value={emailOrUsername}
 							onChangeText={(text) => setEmailOrUsername(text)}

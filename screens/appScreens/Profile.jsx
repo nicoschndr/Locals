@@ -16,18 +16,20 @@ import {
 	Platform,
 	Keyboard,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { auth, firebase, firestore, storage } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import { useFocusEffect } from "@react-navigation/native";
 import LocalsEventCard from "../../components/LocalsEventCard";
+import FastImage from "react-native-fast-image";
+
+import FirestoreContext from "../../context/FirestoreContext";
 
 const Profile = ({ route, navigation }) => {
 	useEffect(() => {
 		getUserData();
 		getCurrentUserData();
-		getUserPosts();
 	}, []);
 
 	const goToFriendList = () => {
@@ -46,7 +48,7 @@ const Profile = ({ route, navigation }) => {
 	const uid = route.params?.uid || firebase.auth().currentUser.uid;
 	const [user, setUser] = useState({});
 	const [currentUser, setCurrentUser] = useState({});
-	const [events, setEvents] = useState([]);
+
 	const [currentUsername, setCurrentUsername] = useState("");
 	const [currentFriends, setCurrentFriends] = useState({});
 	const [friendRequests, setFriendRequests] = useState([]);
@@ -58,6 +60,8 @@ const Profile = ({ route, navigation }) => {
 	const [number, onChangeNumber] = React.useState("");
 	const [reportCategory, setReportCategory] = useState([]);
 	const [shouldHide, setShouldHide] = React.useState(false);
+
+	const { events } = useContext(FirestoreContext);
 
 	React.useLayoutEffect(() => {
 		if (uid === firebase.auth().currentUser.uid) {
@@ -169,23 +173,23 @@ const Profile = ({ route, navigation }) => {
 		sendFriendRequest(senderUsername, receiverUsername);
 	}
 
-	function getUserPosts() {
-		firestore
-			.collection("events")
-			//where("creator", "==", uid  or user.username
-			.where("creator", "==", user.username || uid)
-			.onSnapshot((snapshot) => {
-				const posts = snapshot.docs.map((doc) => ({
-					id: doc.id,
-					...doc.data(),
-				}));
-				setEvents(posts);
-			});
-	}
+	// function getUserPosts() {
+	// 	firestore
+	// 		.collection("events")
+	// 		//where("creator", "==", uid  or user.username
+	// 		.where("creator", "==", user.username || uid)
+	// 		.onSnapshot((snapshot) => {
+	// 			const posts = snapshot.docs.map((doc) => ({
+	// 				id: doc.id,
+	// 				...doc.data(),
+	// 			}));
+	// 			setEvents(posts);
+	// 		});
+	// }
 
 	useEffect(() => {
 		const user = firebase.auth().currentUser;
-		getUserPosts();
+		// getUserPosts();
 		if (user) {
 			const userDocRef = firebase.firestore().collection("users").doc(user.uid);
 
