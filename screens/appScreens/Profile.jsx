@@ -7,7 +7,7 @@ import {
     SafeAreaView,
     ScrollView,
     TouchableOpacity,
-    Alert, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, Keyboard,
+    Alert, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, Keyboard, RefreshControl,
 } from "react-native";
 import React, {useEffect, useState} from "react";
 import {Ionicons, MaterialIcons} from "@expo/vector-icons";
@@ -18,10 +18,17 @@ import {Badge} from "react-native-elements";
 
 
 const Profile = ({route, navigation}) => {
+
     useEffect(() => {
         getUserData();
         getCurrentUserData();
     }, []);
+
+
+        useFocusEffect(() => {
+            getChats();
+        }, []);
+
 
     const goToFriendList = () => {
         navigation.navigate("FriendList");
@@ -31,18 +38,20 @@ const Profile = ({route, navigation}) => {
     let flw = [];
     let blockedUsers = [];
     let friends = [];
+    let messages = [];
 
     const windowWidth = Dimensions.get("window").width;
     const windowHeight = Dimensions.get("window").height;
     const platform = Platform.OS;
 
-    const uid = route.params?.uid || firebase.auth().currentUser.uid;
+    const uid = route.params?.uid || auth.currentUser.uid;
     const [user, setUser] = useState({});
     const [currentUser, setCurrentUser] = useState({});
     const [events, setEvents] = useState([]);
     const [currentUsername, setCurrentUsername] = useState("");
     const [currentFriends, setCurrentFriends] = useState({});
     const [friendRequests, setFriendRequests] = useState([]);
+    const [chats, setChats] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [reportModal, setReportModal] = useState(false);
     const [followerSize, setFollowerSize] = useState("");
@@ -52,6 +61,7 @@ const Profile = ({route, navigation}) => {
     const [reportCategory, setReportCategory] = useState([])
     const [shouldHide, setShouldHide] = React.useState(false);
     const [followerDiff, setFollowerDiff] = useState(0)
+    const [unreadMessages, setUnreadMessages] = useState(null);
 
     React.useLayoutEffect(() => {
         if (uid === firebase.auth().currentUser.uid) {
@@ -73,6 +83,7 @@ const Profile = ({route, navigation}) => {
     }
 
     function getUserData() {
+        setUser([])
         firestore
             .collection("users")
             .doc(uid)
@@ -93,8 +104,30 @@ const Profile = ({route, navigation}) => {
                 checkFollowerDiff(currentUserData);
                 setCurrentFriends(currentUserData.friends);
                 setFriendRequests(Object.keys(currentUserData.friendRequests));
+                //getChats(currentUserData.username);
             })
     }
+
+    const getChats = async () =>  {
+        try {
+            const chatRef = firebase.firestore().collection('chatRooms')
+
+            const userChats = chatRef
+                .where(`${currentUsername}_isTyping`, '==', false)
+                .onSnapshot((snapshot) => {
+                    const chats = snapshot.docs.map((doc) => ({
+                        ...doc.data()
+                    }));
+                    chats.forEach((c) => c.messages.map((e) => messages.push(e)))
+                    setUnreadMessages(messages.filter((e) => e.sender !== currentUser.username && e.readStatus === false).length)
+                    messages.splice(1, messages.length)
+                    console.log(unreadMessages)
+                });
+        }catch (e){
+            console.log(e)
+        }
+    }
+
 
     function getCurrentUserFriends(username) {
         firestore
@@ -371,6 +404,7 @@ const Profile = ({route, navigation}) => {
             })
     }
 
+
     return (
 
         <SafeAreaView style={styles.container}>
@@ -387,8 +421,8 @@ const Profile = ({route, navigation}) => {
                         >
                             {" "}
                         </Ionicons>
-                        {friendRequests && friendRequests.length > 0 && (
-                            <Badge value={friendRequests.length} status='error'
+                        {(friendRequests.length > 0 || unreadMessages > 0)  && (
+                            <Badge value={friendRequests.length + unreadMessages} status='error'
                                    containerStyle={{position: 'absolute', top: 5, right: 35}}></Badge>
                         )}
                     </TouchableOpacity>
