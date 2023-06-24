@@ -123,16 +123,13 @@ function AppNavigation() {
 
 	useEffect(() => {
 		const unsubscribe = auth.onAuthStateChanged((user) => {
+			console.log(user); // Add this line to debug user state
 			setUser(user);
 			setIsReady(true);
 		});
 
 		return () => unsubscribe();
 	}, []);
-
-	if (!isReady) {
-		return null; // Warte auf den Abschluss der Authentifizierungsprüfung
-	}
 
 	return (
 		<NavigationContainer>
