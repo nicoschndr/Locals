@@ -21,7 +21,6 @@ const Profile = ({route, navigation}) => {
     useEffect(() => {
         getUserData();
         getCurrentUserData();
-        getUserPosts();
     }, []);
 
     const goToFriendList = () => {
@@ -77,10 +76,10 @@ const Profile = ({route, navigation}) => {
         firestore
             .collection("users")
             .doc(uid)
-            .get()
-            .then((snapshot) => {
-                setUser(snapshot.data());
-                getCurrentUserFriends(snapshot.data().username);
+            .onSnapshot((doc) => {
+                const userData = doc.data();
+                setUser(userData);
+                getUserPosts(userData.username)
             })
     }
 
@@ -88,11 +87,13 @@ const Profile = ({route, navigation}) => {
         firestore
             .collection("users")
             .doc(auth.currentUser.uid)
-            .get()
-            .then((snapshot) => {
-                setCurrentUser(snapshot.data());
-                checkFollowerDiff(snapshot.data());
-            });
+            .onSnapshot((doc) => {
+                const currentUserData = doc.data();
+                setCurrentUser(currentUserData);
+                checkFollowerDiff(currentUserData);
+                setCurrentFriends(currentUserData.friends);
+                setFriendRequests(Object.keys(currentUserData.friendRequests));
+            })
     }
 
     function getCurrentUserFriends(username) {
@@ -169,11 +170,11 @@ const Profile = ({route, navigation}) => {
         sendFriendRequest(senderUsername, receiverUsername);
     }
 
-    function getUserPosts() {
+    function getUserPosts(username) {
         firestore
             .collection("events")
             //where("creator", "==", uid  or user.username
-            .where("creator", "==", user.username || uid)
+            .where("creator", "==", username)
             .onSnapshot((snapshot) => {
                 const posts = snapshot.docs.map((doc) => ({
                     id: doc.id,
@@ -185,7 +186,6 @@ const Profile = ({route, navigation}) => {
 
     useEffect(() => {
         const user = firebase.auth().currentUser;
-        getUserPosts();
         if (user) {
             const userDocRef = firebase.firestore().collection("users").doc(user.uid);
 
@@ -357,7 +357,8 @@ const Profile = ({route, navigation}) => {
             console.error(`No document found with username: ${currentUsername}`);
         }
     }
-    function checkFollowerDiff(userData){
+
+    function checkFollowerDiff(userData) {
         setFollowerDiff(userData.follower.length - userData.followerWhenClicked)
     }
 
@@ -790,7 +791,8 @@ const Profile = ({route, navigation}) => {
                                         <Text>Follower </Text>
                                         <Text>{user.follower.length}</Text>
                                         {followerDiff > 0 && followerDiff && (
-                                            <Badge containerStyle={{position:"absolute", top: -5, right: -15}} status='error' value={followerDiff}></Badge>
+                                            <Badge containerStyle={{position: "absolute", top: -5, right: -15}}
+                                                   status='error' value={followerDiff}></Badge>
                                         )}
                                     </TouchableOpacity>
                                 )}
@@ -852,26 +854,28 @@ const Profile = ({route, navigation}) => {
                     )
                 }
                 <View style={{marginTop: windowHeight * 0.05}}>
-                    <ScrollView
-                        horizontal={true}
-                        showsVerticalScrollIndicator={false}
-                        showsHorizontalScrollIndicator={false}
-                    >
-                        {events.map((event) => (
-                            <TouchableOpacity
-                                style={styles.mediaImageContainer}
-                                key={event.id}
-                                onPress={() => navigation.navigate("EventDetails", {event})}
-                            >
-                                <Image
-                                    source={{uri: event.imageUrl}}
-                                    style={styles.image}
-                                    resizeMode="center"
-                                />
-                                <Text style={styles.imageText}>{event.title}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
+                    {events.length > 0 && (
+                        <ScrollView
+                            horizontal={true}
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
+                        >
+                            {events.map((event) => (
+                                <TouchableOpacity
+                                    style={styles.mediaImageContainer}
+                                    key={event.id}
+                                    onPress={() => navigation.navigate("EventDetails", {event})}
+                                >
+                                    <Image
+                                        source={{uri: event.imageUrl}}
+                                        style={styles.image}
+                                        resizeMode="center"
+                                    />
+                                    <Text style={styles.imageText}>{event.title}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    )}
                     <Text
                         style={[
                             styles.text,
