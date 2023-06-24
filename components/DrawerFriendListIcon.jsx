@@ -6,12 +6,28 @@ import {auth, firebase, firestore} from "../firebase";
 import {Badge} from "react-native-elements";
 
 const DrawerFriendList = () => {
+    const [currentUser, setCurrentUser] = useState([]);
     const [friendRequests, setFriendRequests] = useState([]);
+    const [number, setNumber] = useState(0);
+
 
     useEffect(() => {
-        getOpenFriendRequests();
+        getCurrentUserData();
     }, []);
 
+    function getCurrentUserData() {
+        firestore
+            .collection("users")
+            .doc(auth.currentUser.uid)
+            .onSnapshot((doc) => {
+                const currentUserData = doc.data();
+                setNumber((Object.keys(currentUserData.friendRequests)).length+currentUserData.unreadMessages)
+                console.log(number)
+                //setCurrentUser(currentUserData);
+                //setFriendRequests(Object.keys(currentUserData.friendRequests || {}))
+                //getChats(currentUserData.username);
+            })
+    }
 
     function getOpenFriendRequests() {
         firestore
@@ -31,9 +47,13 @@ const DrawerFriendList = () => {
 
     return (
         <SafeAreaView>
-            {friendRequests && (
-                <View style={{flexDirection: 'row'}}><Text>FriendList</Text>{friendRequests.length > 0 && (<Badge
-                    containerStyle={{marginLeft: 5}} value={friendRequests.length} status='error'></Badge>)}</View>
+            {{number} && (
+                <View style={{flexDirection: 'row'}}>
+                    <Text>FriendList</Text>
+                    {number>0 && (
+                        <Badge containerStyle={{marginLeft: 5}} value={number} status='error'></Badge>
+                    )}
+                </View>
             )}
         </SafeAreaView>
     )

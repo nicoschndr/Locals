@@ -25,8 +25,9 @@ const Profile = ({route, navigation}) => {
     }, []);
 
 
-        useFocusEffect(() => {
-            getChats();
+        useFocusEffect(
+           ()=>{
+                getChats();
         }, []);
 
 
@@ -123,9 +124,19 @@ const Profile = ({route, navigation}) => {
                     messages.splice(1, messages.length)
                     console.log(unreadMessages)
                 });
+            setUnread()
         }catch (e){
             console.log(e)
         }
+    }
+
+    function setUnread() {
+        firestore
+            .collection('users')
+            .doc(auth.currentUser.uid)
+            .update({
+                unreadMessages: unreadMessages
+            })
     }
 
 
