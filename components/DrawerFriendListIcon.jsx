@@ -1,11 +1,22 @@
 import React, {useEffect, useState} from "react";
-import {View, Text, StyleSheet, ScrollView, ImageBackground, Image, Pressable, SafeAreaView} from "react-native";
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    ImageBackground,
+    Image,
+    Pressable,
+    SafeAreaView,
+    TouchableOpacity
+} from "react-native";
 import {DrawerItemList} from "@react-navigation/drawer";
 import {Ionicons} from "@expo/vector-icons";
 import {auth, firebase, firestore} from "../firebase";
 import {Badge} from "react-native-elements";
+import {useFocusEffect} from "@react-navigation/native";
 
-const DrawerFriendList = () => {
+const DrawerFriendList = (navigation) => {
     const [currentUser, setCurrentUser] = useState([]);
     const [friendRequests, setFriendRequests] = useState([]);
     const [number, setNumber] = useState(0);

@@ -5,6 +5,8 @@ import LocalsButton from "../../components/LocalsButton";
 import {Ionicons} from "@expo/vector-icons";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import { Image } from "react-native";
+import {useFocusEffect} from "@react-navigation/native";
+import {Badge} from "react-native-elements";
 
 async function sendFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
@@ -131,6 +133,34 @@ function FriendList({navigation}) {
 		}
 	}, []);
 
+	useEffect(
+		()=>{
+			getChats();
+		}, []);
+	let messages = [];
+	const [unreadMessages, setUnreadMessages] = useState([]);
+
+	const getChats = async () =>  {
+		try {
+			const chatRef = firebase.firestore().collection('chatRooms')
+
+			const userChats = chatRef
+				.where(`nico_isTyping`, '==', false)
+				.onSnapshot((snapshot) => {
+					const chats = snapshot.docs.map((doc) => ({
+						...doc.data()
+					}));
+					chats.forEach((c) => c.messages.map((e) => messages.push(e)))
+					setUnreadMessages(messages.filter((e) => e.sender !== 'nico' && e.readStatus === false))
+					messages.splice(1, messages.length)
+					console.log(unreadMessages)
+				});
+
+		}catch (e){
+			console.log(e)
+		}
+	}
+
 	const searchUsers = async () => {
 		const usersRef = firebase.firestore().collection('users');
 		const lowercaseSearchTerm = searchTerm.toLowerCase();
@@ -210,6 +240,8 @@ function FriendList({navigation}) {
 						/>
 						}
 						<Text style={{ marginLeft: 10 }}>{friendUsername}</Text>
+						{(unreadMessages.filter((e) => e.sender === friendUsername)).length > 0 && (
+						<Badge containerStyle={{position: 'absolute', top: -2, left:40}} status='error' value={(unreadMessages.filter((e) => e.sender === friendUsername)).length}></Badge>)}
 						{index !== friends.length - 1 &&
 						<View style={{ borderBottomWidth: 1, borderBottomColor: '#ec404b', marginTop: 5 }} />
 						}
