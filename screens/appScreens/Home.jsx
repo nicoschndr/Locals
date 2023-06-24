@@ -202,6 +202,7 @@ const HomeScreen = ({ navigation }) => {
 				<ScrollView
 					contentContainerStyle={{
 						margin: 24,
+						marginTop: 12,
 					}}
 					horizontal
 				>
