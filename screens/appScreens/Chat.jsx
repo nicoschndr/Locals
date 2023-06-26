@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef, useLayoutEffect} from 'react';
 import {View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Button} from 'react-native';
 import { firebase } from "../../firebase";
-import { MaterialIcons } from '@expo/vector-icons';
+import {Ionicons, MaterialIcons} from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Chat({ route }) {
@@ -18,10 +18,21 @@ export default function Chat({ route }) {
 
 	useEffect(() => {
 		navigation.setOptions({
-			headerTitle: friendUsername,
+			headerTitle: () => (<Text style={{marginLeft: 30, marginBottom: 15, fontSize: 20, fontWeight: "bold"}}>{friendUsername}</Text>),
+			headerLeft: () => (
+				<TouchableOpacity onPress={()=>{handleTyping(false); navigation.goBack()}}>
+					<Ionicons
+						style={{ marginRight:  - 90 }}
+						name={"arrow-back-outline"}
+						size={40}
+					>
+						{" "}
+					</Ionicons>
+				</TouchableOpacity>
+			),
 			headerRight: () => (
 				<Button
-					onPress={deleteChat}
+					onPress={()=> {deleteChat(); handleTyping(false)}}
 					title="Chat löschen"
 					color="#ff0000"
 				/>
