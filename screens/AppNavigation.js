@@ -18,6 +18,7 @@ import EventDetails from "./appScreens/EventDetails";
 import EditPost from "./appScreens/EditPost";
 import Follower from "./appScreens/Follower";
 import Chatbot from "./appScreens/Chatbot";
+import Yelling from	"./appScreens/Yelling"
 
 import { auth } from "../firebase";
 import { Dimensions } from "react-native";
@@ -67,6 +68,7 @@ const MainStackNavigator = () => {
 			<Stack.Screen name="PostEvent" component={PostEvent} />
 			<Stack.Screen name="EventDetails" component={EventDetails} />
 			<Stack.Screen name="EditPost" component={EditPost} />
+			<Stack.Screen name="Yelling" component={Yelling} />
 		</Stack.Navigator>
 	);
 };

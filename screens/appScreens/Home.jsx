@@ -104,7 +104,7 @@ const HomeScreen = ({ navigation }) => {
 			<StatusBar barStyle="dark-content" />
 			{/* <View style={styles.header}>
 				<Image source={require("../../assets/Logo.png")} style={styles.logo} />
-				
+
 				</View>
 			</View> */}
 			<View style={styles.header}>
@@ -162,6 +162,12 @@ const HomeScreen = ({ navigation }) => {
 						onPress={() => navigation.navigate("PostEvent")}
 					>
 						<Ionicons name="add-circle-outline" size={28} color="black" />
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={styles.postButton}
+						onPress={() => navigation.navigate("Yelling")}
+					>
+						<Ionicons name="radio-outline" size={28} color="black" />
 					</TouchableOpacity>
 					<TouchableOpacity
 						style={styles.postButton}
