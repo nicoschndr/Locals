@@ -19,6 +19,7 @@ import { Modal } from "react-native";
 import LocalsButton from "../../components/LocalsButton";
 import { MaterialIcons } from "@expo/vector-icons"; // Importieren Sie die Slider und Modal Komponenten
 import LocalsEventCard from "../../components/LocalsEventCard";
+import AppleHeader from "react-native-apple-header";
 
 export default function Chatbot({ route }) {
 	const scrollViewRef = useRef();
@@ -360,9 +361,15 @@ export default function Chatbot({ route }) {
 
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity onPress={openRadiusPicker} style={styles.radiusIcon}>
-				<MaterialIcons name="my-location" size={24} color="#ec404b" />
-			</TouchableOpacity>
+			<View style={styles.headerContainer}>
+				<AppleHeader
+					largeTitle={"Guide"}
+					onPress={() => navigation.navigate("Home")}
+				/>
+				<TouchableOpacity onPress={openRadiusPicker} style={styles.radiusIcon}>
+					<MaterialIcons name="my-location" size={24} color="#ec404b" />
+				</TouchableOpacity>
+			</View>
 			<Modal
 				visible={isRadiusPickerVisible}
 				transparent={true}
@@ -391,7 +398,7 @@ export default function Chatbot({ route }) {
 				contentContainerStyle={styles.scrollViewContent}
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps="handled"
-				style={{ marginTop: 64 }}
+				style={{ marginTop: 10 }}
 			>
 				<View style={styles.chatContainer}>
 					{/* Chat Output */}
@@ -579,9 +586,15 @@ const styles = StyleSheet.create({
 	},
 	radiusIcon: {
 		position: "absolute",
-		top: 48,
-		right: 24,
+		right: 10,
 		zIndex: 999,
+	},
+	headerContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 10,
+		top: 24,
+		marginHorizontal: -10,
 	},
 	radiusPickerContainer: {
 		flex: 1,
