@@ -894,8 +894,9 @@ const Profile = ({route, navigation}) => {
                         </View>
                     )
                 }
+                {currentUser.blockedUsers && user.blockedUsers && (
                 <View style={{marginTop: windowHeight * 0.05}}>
-                    {events.length > 0 && (
+                    {events.length > 0 && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
                         <ScrollView
                             horizontal={true}
                             showsVerticalScrollIndicator={false}
@@ -917,6 +918,9 @@ const Profile = ({route, navigation}) => {
                             ))}
                         </ScrollView>
                     )}
+                    {((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) && (
+                        <View></View>
+                    ))}
                     <Text
                         style={[
                             styles.text,
@@ -945,6 +949,7 @@ const Profile = ({route, navigation}) => {
                         </View>
                     </View>
                 </View>
+                    )}
             </ScrollView>
 
         </SafeAreaView>
