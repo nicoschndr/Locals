@@ -28,6 +28,7 @@ import {HeaderBackButton} from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
 import {Badge} from "react-native-elements";
+import TabProfileIcon from "../components/TabProfileIcon";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -83,7 +84,7 @@ function ProfileDrawerScreen() {
             <Drawer.Screen
                 name="FriendList"
                 component={FriendStackNavigator}
-                options={{headerShown: true,
+                options={{headerShown: true, unmountOnBlur: true,
                     drawerLabel: () => <DrawerFriendList />
                 }}
             />
@@ -180,7 +181,7 @@ function AppNavigation() {
                 >
                     <Tab.Screen options={{unmountOnBlur: true}} name="Home" component={MainStackNavigator}/>
                     <Tab.Screen name="LiveMap" component={LiveMap}/>
-                    <Tab.Screen options={{unmountOnBlur: true}} name="Me" component={ProfileDrawerScreen}/>
+                    <Tab.Screen options={{unmountOnBlur: true, tabBarLabel: () => <TabProfileIcon />}} name="Me" component={ProfileDrawerScreen}/>
                 </Tab.Navigator>
             ) : (
                 <Stack.Navigator>

@@ -25,12 +25,10 @@ const Profile = ({route, navigation}) => {
     }, []);
 
 
-        useFocusEffect(
-           ()=>{
-               if(auth.currentUser.uid === route.params.uid){
-                   getChats();
-               }
-        });
+    /*useFocusEffect(
+        () => {
+           // getChats();
+        });*/
 
 
     const goToFriendList = () => {
@@ -107,38 +105,28 @@ const Profile = ({route, navigation}) => {
                 checkFollowerDiff(currentUserData);
                 setCurrentFriends(currentUserData.friends);
                 setFriendRequests(Object.keys(currentUserData.friendRequests));
-                //getChats(currentUserData.username);
+                getChats(currentUserData.username);
             })
     }
 
-    const getChats = async () =>  {
-        try {
-            const chatRef = firebase.firestore().collection('chatRooms')
+    const getChats = async (username) => {
+            try {
+                const chatRef = firebase.firestore().collection('chatRooms')
 
-            const userChats = chatRef
-                .where(`${currentUsername}_isTyping`, '==', false)
-                .onSnapshot((snapshot) => {
-                    const chats = snapshot.docs.map((doc) => ({
-                        ...doc.data()
-                    }));
-                    chats.forEach((c) => c.messages.map((e) => messages.push(e)))
-                    setUnreadMessages(messages.filter((e) => e.sender !== currentUser.username && e.readStatus === false).length)
-                    messages.splice(1, messages.length)
-                    console.log(unreadMessages)
-                });
-            setUnread()
-        }catch (e){
-            console.log(e)
-        }
-    }
-
-    function setUnread() {
-        firestore
-            .collection('users')
-            .doc(auth.currentUser.uid)
-            .update({
-                unreadMessages: unreadMessages
-            })
+                const userChats = chatRef
+                    .where(`${username}_isTyping`, '==', false)
+                    .onSnapshot((snapshot) => {
+                        const chats = snapshot.docs.map((doc) => ({
+                            ...doc.data()
+                        }));
+                        chats.forEach((c) => c.messages.map((e) => messages.push(e)))
+                        setUnreadMessages(messages.filter((e) => e.sender !== username && e.readStatus === false).length)
+                        messages.splice(0, messages.length)
+                        console.log(unreadMessages)
+                    });
+            } catch (e) {
+                console.log(e)
+            }
     }
 
 
@@ -335,6 +323,12 @@ const Profile = ({route, navigation}) => {
             .update({
                 blockedUsers: blockedUsers
             })
+        firestore
+            .collection('chatRooms')
+            .doc(currentUser.username+'_'+user.username)
+            .update({
+                messages: []
+            })
         setModalVisible(false)
         getCurrentUserData()
         blockedUsers = []
@@ -434,7 +428,7 @@ const Profile = ({route, navigation}) => {
                         >
                             {" "}
                         </Ionicons>
-                        {(friendRequests.length > 0 || unreadMessages > 0)  && (
+                        {(friendRequests.length > 0 || unreadMessages > 0) && (
                             <Badge value={friendRequests.length + unreadMessages} status='error'
                                    containerStyle={{position: 'absolute', top: 5, right: 35}}></Badge>
                         )}

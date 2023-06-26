@@ -107,6 +107,7 @@ function FriendList({navigation}) {
 					const userData = doc.data();
 					setFriendRequests(Object.keys(userData.friendRequests || {}));
 					setCurrentUsername(userData.username);
+					getChats(userData.username)
 
 					const friendIds = Object.keys(userData.friends || {});
 					setFriends(friendIds);
@@ -135,24 +136,24 @@ function FriendList({navigation}) {
 
 	useEffect(
 		()=>{
-			getChats();
+
 		}, []);
 	let messages = [];
 	const [unreadMessages, setUnreadMessages] = useState([]);
 
-	const getChats = async () =>  {
+	const getChats = async (username) =>  {
 		try {
 			const chatRef = firebase.firestore().collection('chatRooms')
 
 			const userChats = chatRef
-				.where(`nico_isTyping`, '==', false)
+				.where(`${username}_isTyping`, '==', false)
 				.onSnapshot((snapshot) => {
 					const chats = snapshot.docs.map((doc) => ({
 						...doc.data()
 					}));
 					chats.forEach((c) => c.messages.map((e) => messages.push(e)))
-					setUnreadMessages(messages.filter((e) => e.sender !== 'nico' && e.readStatus === false))
-					messages.splice(1, messages.length)
+					setUnreadMessages(messages.filter((e) => e.sender !== username && e.readStatus === false))
+					messages.splice(0, messages.length)
 					console.log(unreadMessages)
 				});
 

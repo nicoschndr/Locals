@@ -16,7 +16,7 @@ import {auth, firebase, firestore} from "../firebase";
 import {Badge} from "react-native-elements";
 import {useFocusEffect} from "@react-navigation/native";
 
-const DrawerFriendList = (navigation) => {
+const TabProfileIcon = (navigation) => {
     const [currentUser, setCurrentUser] = useState([]);
     const [friendRequests, setFriendRequests] = useState(0);
     const [number, setNumber] = useState(0);
@@ -39,6 +39,7 @@ const DrawerFriendList = (navigation) => {
                     messages.splice(0, messages.length)
                     console.log(unreadMessages)
                 });
+
         }catch (e){
             console.log(e)
         }
@@ -55,10 +56,10 @@ const DrawerFriendList = (navigation) => {
             .doc(auth.currentUser.uid)
             .onSnapshot((doc) => {
                 const currentUserData = doc.data();
+                setNumber((Object.keys(currentUserData.friendRequests)).length+unreadMessages.length)
                 console.log(number)
                 setCurrentUser(currentUserData);
                 getChats(currentUserData.username);
-                setNumber((Object.keys(currentUserData.friendRequests)).length+unreadMessages.length)
                 setFriendRequests((Object.keys(currentUserData.friendRequests)).length)
                 //getChats(currentUserData.username);
             })
@@ -81,9 +82,10 @@ const DrawerFriendList = (navigation) => {
 
 
     return (
+
         <SafeAreaView>
                 <View style={{flexDirection: 'row'}}>
-                    <Text>FriendList</Text>
+                    <Text>Me</Text>
                     {(friendRequests > 0 || unreadMessages.length > 0) && (
                         <Badge containerStyle={{marginLeft: 5}} value={friendRequests+unreadMessages.length} status='error'></Badge>
                     )}
@@ -92,4 +94,4 @@ const DrawerFriendList = (navigation) => {
     )
 }
 
-export default DrawerFriendList;
+export default TabProfileIcon;
