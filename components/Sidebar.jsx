@@ -18,9 +18,9 @@ const Sidebar = props => {
         firestore
             .collection("users")
             .doc(auth.currentUser.uid)
-            .get()
-            .then((snapshot) => {
-                setCurrentUser(snapshot.data());
+            .onSnapshot((doc) => {
+                const currentUserData = doc.data();
+                setCurrentUser(currentUserData);
             })
     }
     function getOpenFriendRequests() {
