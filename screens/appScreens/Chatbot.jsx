@@ -1,19 +1,30 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Animated, Alert, Button } from 'react-native';
+import React, { useEffect, useState, useRef } from "react";
+import {
+	View,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	StyleSheet,
+	ScrollView,
+	Image,
+	Animated,
+	Alert,
+	Button,
+} from "react-native";
 import { firebase } from "../../firebase";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 import * as Location from "expo-location";
 import Slider from "@react-native-community/slider";
-import { Modal } from 'react-native';
+import { Modal } from "react-native";
 import LocalsButton from "../../components/LocalsButton";
-import {MaterialIcons} from "@expo/vector-icons"; // Importieren Sie die Slider und Modal Komponenten
-
+import { MaterialIcons } from "@expo/vector-icons"; // Importieren Sie die Slider und Modal Komponenten
+import LocalsEventCard from "../../components/LocalsEventCard";
 
 export default function Chatbot({ route }) {
 	const scrollViewRef = useRef();
 	const [location, setLocation] = useState(null);
-	const [userInput, setUserInput] = useState('');
-	const [aiResponse, setAiResponse] = useState('');
+	const [userInput, setUserInput] = useState("");
+	const [aiResponse, setAiResponse] = useState("");
 	const navigation = useNavigation();
 	const [radius, setRadius] = useState(37);
 	const [events, setEvents] = useState([]);
@@ -21,7 +32,7 @@ export default function Chatbot({ route }) {
 	const [gifUrl, setGifUrl] = useState(null);
 	const [isRadiusPickerVisible, setIsRadiusPickerVisible] = useState(false); // Neuer Status für die Sichtbarkeit des Sliders
 
-// Diese Funktion wird aufgerufen, wenn der Benutzer auf das Symbol klickt, um den Radius einzustellen
+	// Diese Funktion wird aufgerufen, wenn der Benutzer auf das Symbol klickt, um den Radius einzustellen
 	const openRadiusPicker = () => {
 		setIsRadiusPickerVisible(true);
 	};
@@ -32,11 +43,13 @@ export default function Chatbot({ route }) {
 	};
 	const fetchGifUrl = async () => {
 		try {
-			const response = await fetch('http://api.giphy.com/v1/gifs/random?api_key=0UTRbFtkMxAplrohufYco5IY74U8hOes&tag=looking&rating=r');
+			const response = await fetch(
+				"http://api.giphy.com/v1/gifs/random?api_key=0UTRbFtkMxAplrohufYco5IY74U8hOes&tag=looking&rating=r"
+			);
 			const data = await response.json();
 			setGifUrl(data.data.images.original.url);
 		} catch (error) {
-			console.error('Error fetching gif:', error);
+			console.error("Error fetching gif:", error);
 		}
 	};
 
@@ -46,7 +59,7 @@ export default function Chatbot({ route }) {
 			user: true,
 		};
 		setMessages((prevMessages) => [...prevMessages, userMessage]);
-		setUserInput('');
+		setUserInput("");
 		scrollViewRef.current.scrollToEnd({ animated: true });
 
 		// Platzhalter hinzufügen
@@ -57,7 +70,11 @@ export default function Chatbot({ route }) {
 		setMessages((prevMessages) => [...prevMessages, placeholderMessage]);
 
 		const keywords = await extractKeywords(userInput);
-		const nearbyEvents = filterEventsByRadiusAndKeywords(events, radius, keywords);
+		const nearbyEvents = filterEventsByRadiusAndKeywords(
+			events,
+			radius,
+			keywords
+		);
 		const aiResponse = await fetchAIResponse(userInput, nearbyEvents);
 		const aiMessage = {
 			text: aiResponse,
@@ -67,87 +84,100 @@ export default function Chatbot({ route }) {
 
 		// Platzhalter entfernen und AI Nachricht hinzufügen
 		setMessages((prevMessages) => {
-			const filteredMessages = prevMessages.filter((message) => !message.loading);
+			const filteredMessages = prevMessages.filter(
+				(message) => !message.loading
+			);
 			return [...filteredMessages, aiMessage];
 		});
 		fetchGifUrl();
-
 	};
 
 	const fetchAIResponse = async (input, events) => {
-		console.log(events)
+		console.log(events);
 		if (events.length !== 0) {
 			try {
-				const message = `Das ist der Text: ${input}\nUnd das die gefundenen Events: ${events.map(event => {
-					// Umwandlung des Firebase Timestamps in ein JavaScript Date Objekt
-					const eventDate = event.date.toDate();
+				const message = `Das ist der Text: ${input}\nUnd das die gefundenen Events: ${events
+					.map((event) => {
+						// Umwandlung des Firebase Timestamps in ein JavaScript Date Objekt
+						const eventDate = event.date.toDate();
 
-					// Formatierung des Datums in deutschem Format (Tag.Monat.Jahr)
-					const formattedDate = eventDate.toLocaleDateString('de-DE');
+						// Formatierung des Datums in deutschem Format (Tag.Monat.Jahr)
+						const formattedDate = eventDate.toLocaleDateString("de-DE");
 
-					// Rückgabe des Titels und des formatierten Datums
-					return `${event.title} (${formattedDate})`;
-				}).join(", ")}\nGeneriere einen kurzen Text um die Events vorzuschlagen. Schreibe nur kurze und wichtige Sätze`;
-
-				const response = await fetch('https://api.openai.com/v1/chat/completions', {
-					method: 'POST',
-					headers: {
-						'Authorization': 'Bearer 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', // Ersetzen Sie dies durch Ihren OpenAI API-Schlüssel
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						messages: [{'role': 'user', 'content': message}],
-						model: "gpt-3.5-turbo",
+						// Rückgabe des Titels und des formatierten Datums
+						return `${event.title} (${formattedDate})`;
 					})
-				});
+					.join(
+						", "
+					)}\nGeneriere einen kurzen Text um die Events vorzuschlagen. Schreibe nur kurze und wichtige Sätze`;
+
+				const response = await fetch(
+					"https://api.openai.com/v1/chat/completions",
+					{
+						method: "POST",
+						headers: {
+							Authorization:
+								"Bearer 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", // Ersetzen Sie dies durch Ihren OpenAI API-Schlüssel
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							messages: [{ role: "user", content: message }],
+							model: "gpt-3.5-turbo",
+						}),
+					}
+				);
 
 				if (!response.ok) {
-					throw new Error('Error generating AI response');
+					throw new Error("Error generating AI response");
 				}
 
 				const data = await response.json();
 				return data.choices[0].message.content;
 			} catch (error) {
-				console.error('Error generating AI response:', error);
+				console.error("Error generating AI response:", error);
 				return "I'm sorry, there was an error generating the response. Can I help you with anything else?";
 			}
 		} else {
 			try {
-				const message = `Das ist der Text: ${input}\n Schreibe dem Nutzer, dass leider keine Events gefunden werden können. Falls er fragt sag ihm, dass er nach events für sport, kultur, party, konzerten und kultur suchen kann. Beantworte keine Fragen, die abseits von Events sind und nichts mit Events zutun haben. In solchen Fällen sag, dass du das nicht weißt`
-				const response = await fetch('https://api.openai.com/v1/chat/completions', {
-					method: 'POST',
-					headers: {
-						'Authorization': 'Bearer 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', // Ersetzen Sie dies durch Ihren OpenAI API-Schlüssel
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						messages: [{'role': 'user', 'content': message}],
-						model: "gpt-3.5-turbo",
-					})
-				});
+				const message = `Das ist der Text: ${input}\n Schreibe dem Nutzer, dass leider keine Events gefunden werden können. Falls er fragt sag ihm, dass er nach events für sport, kultur, party, konzerten und kultur suchen kann. Beantworte keine Fragen, die abseits von Events sind und nichts mit Events zutun haben. In solchen Fällen sag, dass du das nicht weißt`;
+				const response = await fetch(
+					"https://api.openai.com/v1/chat/completions",
+					{
+						method: "POST",
+						headers: {
+							Authorization:
+								"Bearer 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", // Ersetzen Sie dies durch Ihren OpenAI API-Schlüssel
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							messages: [{ role: "user", content: message }],
+							model: "gpt-3.5-turbo",
+						}),
+					}
+				);
 
 				if (!response.ok) {
-					throw new Error('Error generating AI response');
+					throw new Error("Error generating AI response");
 				}
 
 				const data = await response.json();
 				return data.choices[0].message.content;
 			} catch (error) {
-				console.error('Error generating AI response:', error);
+				console.error("Error generating AI response:", error);
 				return "I'm sorry, there was an error generating the response. Can I help you with anything else?";
 			}
 		}
 	};
 
 	const openEventDetails = (event) => {
-		navigation.navigate('EventDetails', { event });
+		navigation.navigate("EventDetails", { event });
 	};
 
 	const keywordsTranslations = {
-		"sport": "sport",
-		"kultur": "culture",
-		"party": "party",
-		"konzert": "concert"
+		sport: "sport",
+		kultur: "culture",
+		party: "party",
+		konzert: "concert",
 		// Fügen Sie weitere Übersetzungen hinzu
 	};
 
@@ -159,50 +189,58 @@ export default function Chatbot({ route }) {
 			 . 
 			Beachte, dass der Text deutsch ist, der ausgabewert aber englisch.
 			Gebe als Antwort nur die keywords zurück die in dem Text ein match haben. 
-			Ich brauche wirklich nur die keywords von dir, sonst nichts. Separiere die Keyword mit einem Komma`
-			const response = await fetch('https://api.openai.com/v1/chat/completions', {
-				method: 'POST',
-				headers: {
-					'Authorization': 'Bearer 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', // Ersetzen Sie dies durch Ihren OpenAI API-Schlüssel
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					messages: [{'role': 'user', 'content': message}],
-					model: "gpt-3.5-turbo",
-				})
-			});
+			Ich brauche wirklich nur die keywords von dir, sonst nichts. Separiere die Keyword mit einem Komma`;
+			const response = await fetch(
+				"https://api.openai.com/v1/chat/completions",
+				{
+					method: "POST",
+					headers: {
+						Authorization:
+							"Bearer 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", // Ersetzen Sie dies durch Ihren OpenAI API-Schlüssel
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						messages: [{ role: "user", content: message }],
+						model: "gpt-3.5-turbo",
+					}),
+				}
+			);
 
 			if (!response.ok) {
-				throw new Error('Error generating AI response');
+				throw new Error("Error generating AI response");
 			}
 
 			const data = await response.json();
 			// Assuming the response is an array of keywords
-			return data.choices[0].message.content.split(', '); // Splitting the response by commas to get an array of keywords
+			return data.choices[0].message.content.split(", "); // Splitting the response by commas to get an array of keywords
 		} catch (error) {
-			console.error('Error generating AI response:', error);
+			console.error("Error generating AI response:", error);
 			return [];
 		}
-	}
-
-	const extractKeywords =  async (text) => {
-		const matches = await aiKeywords(text)
-		const keywords = Object.keys(keywordsTranslations); // Die deutschen Schlüsselwörter
-		const foundKeywords = keywords.filter(keyword => text.toLowerCase().includes(keyword));
-		console.log(foundKeywords.map(keyword => keywordsTranslations[keyword]))
-		return matches; // Übersetzung zu englischen Schlüsselwörtern
 	};
 
-
+	const extractKeywords = async (text) => {
+		const matches = await aiKeywords(text);
+		const keywords = Object.keys(keywordsTranslations); // Die deutschen Schlüsselwörter
+		const foundKeywords = keywords.filter((keyword) =>
+			text.toLowerCase().includes(keyword)
+		);
+		console.log(foundKeywords.map((keyword) => keywordsTranslations[keyword]));
+		return matches; // Übersetzung zu englischen Schlüsselwörtern
+	};
 
 	const getEventsByKeywords = async (keywords) => {
 		let events = [];
 
 		for (let keyword of keywords) {
-			const snapshot = await firebase.firestore().collection('events').where('category', 'array-contains', keyword).get();
+			const snapshot = await firebase
+				.firestore()
+				.collection("events")
+				.where("category", "array-contains", keyword)
+				.get();
 
 			if (!snapshot.empty) {
-				snapshot.forEach(doc => {
+				snapshot.forEach((doc) => {
 					events.push(doc.data());
 				});
 			}
@@ -227,7 +265,6 @@ export default function Chatbot({ route }) {
 
 				const filteredEvents = filterEventsByRadius(eventsData, radius);
 				setEvents(filteredEvents);
-
 			});
 		};
 		fetchEvents();
@@ -245,10 +282,10 @@ export default function Chatbot({ route }) {
 				event.latitude,
 				event.longitude
 			);
-			console.log('Event Distance:', eventDistance);
-			console.log('Radius:', radius);
+			console.log("Event Distance:", eventDistance);
+			console.log("Radius:", radius);
 			const numericRadius = parseFloat(radius);
-			const re = eventDistance <= numericRadius
+			const re = eventDistance <= numericRadius;
 			//console.log(re)
 			return eventDistance <= numericRadius;
 		});
@@ -257,15 +294,15 @@ export default function Chatbot({ route }) {
 		const getLocation = async () => {
 			try {
 				const { status } = await Location.requestForegroundPermissionsAsync();
-				if (status !== 'granted') {
-					console.log('Permission to access location was denied');
+				if (status !== "granted") {
+					console.log("Permission to access location was denied");
 					return;
 				}
 
 				const currentLocation = await Location.getCurrentPositionAsync({});
 				setLocation(currentLocation);
 			} catch (error) {
-				console.error('Error getting current location:', error);
+				console.error("Error getting current location:", error);
 			}
 		};
 
@@ -303,9 +340,9 @@ export default function Chatbot({ route }) {
 		const a =
 			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
 			Math.cos(deg2rad(lat1)) *
-			Math.cos(deg2rad(lat2)) *
-			Math.sin(dLon / 2) *
-			Math.sin(dLon / 2);
+				Math.cos(deg2rad(lat2)) *
+				Math.sin(dLon / 2) *
+				Math.sin(dLon / 2);
 		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		const d = R * c; // Entfernung in km
 		return d;
@@ -315,12 +352,22 @@ export default function Chatbot({ route }) {
 		return deg * (Math.PI / 180);
 	};
 
+	const shortDate = {
+		year: "numeric",
+		month: "numeric",
+		day: "numeric",
+	};
+
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity onPress={openRadiusPicker} style={styles.radiusIcon}>
 				<MaterialIcons name="my-location" size={24} color="#ec404b" />
 			</TouchableOpacity>
-			<Modal visible={isRadiusPickerVisible} transparent={true} animationType="slide">
+			<Modal
+				visible={isRadiusPickerVisible}
+				transparent={true}
+				animationType="slide"
+			>
 				<View style={styles.radiusPickerContainer}>
 					<Slider
 						minimumValue={1}
@@ -330,8 +377,13 @@ export default function Chatbot({ route }) {
 						onValueChange={(value) => setRadius(value)}
 						style={styles.slider}
 					/>
-					<Text style={{fontWeight: "bold", fontSize: "18px"}}>{radius}km</Text>
-					<LocalsButton title={"Set"} onPress={closeRadiusPicker}></LocalsButton>
+					<Text style={{ fontWeight: "bold", fontSize: "18px" }}>
+						{radius}km
+					</Text>
+					<LocalsButton
+						title={"Set"}
+						onPress={closeRadiusPicker}
+					></LocalsButton>
 				</View>
 			</Modal>
 			<ScrollView
@@ -339,6 +391,7 @@ export default function Chatbot({ route }) {
 				contentContainerStyle={styles.scrollViewContent}
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps="handled"
+				style={{ marginTop: 64 }}
 			>
 				<View style={styles.chatContainer}>
 					{/* Chat Output */}
@@ -354,7 +407,7 @@ export default function Chatbot({ route }) {
 								{message.loading ? (
 									<View>
 										<Image
-											source={{uri: gifUrl}} // Verwenden Sie gifUrl hier
+											source={{ uri: gifUrl }} // Verwenden Sie gifUrl hier
 											style={styles.placeholderGif}
 										/>
 										<Text>Ich suche...</Text>
@@ -364,23 +417,44 @@ export default function Chatbot({ route }) {
 								)}
 								{message.events && message.events.length > 0 && (
 									<View style={styles.eventContainer}>
-										{message.events.map((event, eventIndex) => (
-											<TouchableOpacity
-												key={eventIndex}
-												style={styles.eventItem}
-												onPress={() => openEventDetails(event)}
-											>
-												<View>
-													<Image source={{ uri: event.imageUrl }} style={styles.eventImage} />
-													<Text style={styles.eventTitle}>{event.title}</Text>
-												</View>
-											</TouchableOpacity>
-										))}
+										<ScrollView
+											horizontal
+											showsHorizontalScrollIndicator={false}
+										>
+											{message.events.map((event, eventIndex) => (
+												// <TouchableOpacity
+												// 	key={eventIndex}
+												// 	style={styles.eventItem}
+												// 	onPress={() => openEventDetails(event)}
+												// >
+												// 	<View>
+												// 		<Image
+												// 			source={{ uri: event.imageUrl }}
+												// 			style={styles.eventImage}
+												// 		/>
+												// 		<Text style={styles.eventTitle}>{event.title}</Text>
+												// 	</View>
+												// </TouchableOpacity>
+												<LocalsEventCard
+													key={eventIndex}
+													event={event}
+													onPress={() => openEventDetails(event)}
+													profile
+													style={{ marginRight: 8 }}
+													title={event.title}
+													imageUrl={event.imageUrl}
+													date={event.date
+														?.toDate()
+														?.toLocaleDateString("de-DE", shortDate)}
+													location={event.address}
+												/>
+											))}
+										</ScrollView>
 									</View>
+									// replace with localsEventCard component
 								)}
 							</View>
 						))}
-
 					</View>
 				</View>
 			</ScrollView>
@@ -410,7 +484,8 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
-		justifyContent: 'flex-end', // Eingabe am unteren Bildschirmrand
+		justifyContent: "flex-end", // Eingabe am unteren Bildschirmrand
+		marginBottom: 80,
 	},
 	scrollViewContent: {
 		flexGrow: 1,
@@ -423,7 +498,7 @@ const styles = StyleSheet.create({
 		paddingBottom: 10,
 	},
 	chatBubbleContainer: {
-		backgroundColor: '#ECECEC',
+		backgroundColor: "#ECECEC",
 		borderRadius: 10,
 		padding: 10,
 		marginBottom: 10,
@@ -432,35 +507,35 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 	},
 	eventContainer: {
-		display: 'flex',
-		flexDirection: 'row',
+		display: "flex",
+		flexDirection: "row",
 		marginTop: 10,
 	},
 	eventItem: {
-		flex: '0 0 auto',
-		width: '50%',
-		alignItems: 'center',
+		flex: "0 0 auto",
+		width: "50%",
+		alignItems: "center",
 		marginBottom: 5,
 		paddingTop: 5,
-		backgroundColor: 'rgba(236, 64, 75, 0.5)',
-		justifyContent: 'center',
+		backgroundColor: "rgba(236, 64, 75, 0.5)",
+		justifyContent: "center",
 		borderRadius: 5,
-		marginRight: 5
+		marginRight: 5,
 	},
 	eventImage: {
 		width: 100,
 		height: 100,
-		alignSelf: 'center',
+		alignSelf: "center",
 		borderRadius: 5,
 	},
 	eventTitle: {
 		fontSize: 14,
-		textAlign: 'center'
+		textAlign: "center",
 	},
 
 	inputContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
+		flexDirection: "row",
+		alignItems: "center",
 		marginTop: 10,
 	},
 	input: {
@@ -470,47 +545,49 @@ const styles = StyleSheet.create({
 		marginRight: 8,
 		paddingHorizontal: 8,
 		borderWidth: 1,
-		borderColor: 'gray',
+		borderColor: "gray",
 		borderRadius: 15,
 	},
 	radiusInput: {
 		width: 80,
 		height: 40,
-		borderColor: 'gray',
+		borderColor: "gray",
 		borderWidth: 1,
 		marginRight: 10,
 		paddingHorizontal: 10,
 	},
 	button: {
-		alignItems: 'center',
-		backgroundColor: 'rgba(255,255,255,0.3)',
+		alignItems: "center",
+		backgroundColor: "rgba(255,255,255,0.3)",
 		padding: 10,
 	},
 	iconContainer: {
 		marginRight: 10,
 	},
 	userMessage: {
-		alignSelf: 'flex-end',
-		backgroundColor: '#ec404b',
+		alignSelf: "flex-end",
+		backgroundColor: "#ec404b",
 		borderBottomRightRadius: 0,
+		marginLeft: 40,
 	},
 	aiMessage: {
-		alignSelf: 'flex-start',
-		backgroundColor: '#e1e1e1',
+		alignSelf: "flex-start",
+		backgroundColor: "#e1e1e1",
 		borderBottomLeftRadius: 0,
-		color: "white"
+		color: "white",
+		marginRight: 40,
 	},
 	radiusIcon: {
-		position: 'absolute',
-		top: 20,
-		right: 10,
-		zIndex: 999
+		position: "absolute",
+		top: 48,
+		right: 24,
+		zIndex: 999,
 	},
 	radiusPickerContainer: {
 		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'rgba(0, 0, 0, 0.5)',
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "rgba(0, 0, 0, 0.5)",
 	},
 
 	sliderContainer: {
