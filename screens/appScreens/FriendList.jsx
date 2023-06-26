@@ -154,7 +154,6 @@ function FriendList({navigation}) {
 					chats.forEach((c) => c.messages.map((e) => messages.push(e)))
 					setUnreadMessages(messages.filter((e) => e.sender !== username && e.readStatus === false))
 					messages.splice(0, messages.length)
-					console.log(unreadMessages)
 				});
 
 		}catch (e){
