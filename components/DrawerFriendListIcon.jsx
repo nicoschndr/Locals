@@ -18,8 +18,36 @@ import {useFocusEffect} from "@react-navigation/native";
 
 const DrawerFriendList = (navigation) => {
     const [currentUser, setCurrentUser] = useState([]);
-    const [friendRequests, setFriendRequests] = useState([]);
+    const [friendRequests, setFriendRequests] = useState(0);
     const [number, setNumber] = useState(0);
+
+    useEffect(
+        ()=>{
+            getChats();
+        }, []);
+    let messages = [];
+    const [unreadMessages, setUnreadMessages] = useState([]);
+
+    const getChats = async () =>  {
+        try {
+            const chatRef = firebase.firestore().collection('chatRooms')
+
+            const userChats = chatRef
+                .where(`nico_isTyping`, '==', false)
+                .onSnapshot((snapshot) => {
+                    const chats = snapshot.docs.map((doc) => ({
+                        ...doc.data()
+                    }));
+                    chats.forEach((c) => c.messages.map((e) => messages.push(e)))
+                    setUnreadMessages(messages.filter((e) => e.sender !== 'nico' && e.readStatus === false))
+                    messages.splice(1, messages.length)
+                    console.log(unreadMessages)
+                });
+
+        }catch (e){
+            console.log(e)
+        }
+    }
 
 
     useEffect(() => {
@@ -32,10 +60,10 @@ const DrawerFriendList = (navigation) => {
             .doc(auth.currentUser.uid)
             .onSnapshot((doc) => {
                 const currentUserData = doc.data();
-                setNumber((Object.keys(currentUserData.friendRequests)).length+currentUserData.unreadMessages)
+                setNumber((Object.keys(currentUserData.friendRequests)).length+unreadMessages.length)
                 console.log(number)
                 //setCurrentUser(currentUserData);
-                //setFriendRequests(Object.keys(currentUserData.friendRequests || {}))
+                setFriendRequests((Object.keys(currentUserData.friendRequests)).length)
                 //getChats(currentUserData.username);
             })
     }
@@ -61,8 +89,8 @@ const DrawerFriendList = (navigation) => {
             {{number} && (
                 <View style={{flexDirection: 'row'}}>
                     <Text>FriendList</Text>
-                    {number>0 && (
-                        <Badge containerStyle={{marginLeft: 5}} value={number} status='error'></Badge>
+                    {(friendRequests > 0 || unreadMessages.length > 0) && (
+                        <Badge containerStyle={{marginLeft: 5}} value={friendRequests+unreadMessages.length} status='error'></Badge>
                     )}
                 </View>
             )}

@@ -27,8 +27,10 @@ const Profile = ({route, navigation}) => {
 
         useFocusEffect(
            ()=>{
-                getChats();
-        }, []);
+               if(auth.currentUser.uid === route.params.uid){
+                   getChats();
+               }
+        });
 
 
     const goToFriendList = () => {
