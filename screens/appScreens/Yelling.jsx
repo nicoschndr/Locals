@@ -13,7 +13,7 @@ const formatTimestamp = (timestamp) => {
 	if (isSameDay) {
 		return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 	} else {
-		return date.toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit' });
+		return date.toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
 	}
 };
 
@@ -55,6 +55,7 @@ const Template = () => {
 			return () => unsubscribe();
 		}
 	}, [selectedPost]);
+
 	const handleSubmitComment = () => {
 		if (commentInput.trim() !== "") {
 			const comment = {
@@ -76,6 +77,59 @@ const Template = () => {
 				});
 		}
 	};
+
+	const handleReport = (postId) => {
+		firestore
+			.collection("posts")
+			.doc(postId)
+			.get()
+			.then((doc) => {
+				if (doc.exists) {
+					const postData = doc.data();
+					if (!postData.reports) {
+						firestore
+							.collection("posts")
+							.doc(postId)
+							.update({ reports: [] })
+							.then(() => {
+								console.log("Das 'reports'-Array wurde erfolgreich erstellt.");
+								reportPost(postId);
+							})
+							.catch((error) => {
+								console.log("Fehler beim Erstellen des 'reports'-Arrays:", error);
+							});
+					} else {
+						reportPost(postId);
+					}
+				}
+			})
+			.catch((error) => {
+				console.log("Fehler beim Abrufen des Posts:", error);
+			});
+	};
+
+	const reportPost = (postId) => {
+		const reportData = {
+			username: username,
+			timestamp: new Date()
+		};
+
+		firestore
+			.collection("posts")
+			.doc(postId)
+			.update({
+				reports: firebase.firestore.FieldValue.arrayUnion(reportData)
+			})
+			.then(() => {
+				console.log("Post erfolgreich gemeldet");
+				alert("Yell gemeldet")
+
+			})
+			.catch((error) => {
+				console.log("Fehler beim Melden des Posts:", error);
+			});
+	};
+
 	useEffect(() => {
 		const unsubscribe = auth.onAuthStateChanged((user) => {
 			if (user) {
@@ -116,27 +170,41 @@ const Template = () => {
 		return () => unsubscribe();
 	}, []);
 
-	const submitText = () => {
-		if (textInput.trim() !== "") {
-			const post = {
-				text: textInput,
-				username: username,
-				color: selectedColor,
-				likes: [],
-				timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-			};
 
-			firestore
-				.collection("posts")
-				.add(post)
-				.then(() => {
-					console.log("Text erfolgreich gespeichert");
-					setTextInput("");
-					setModalVisible(false);
-				})
-				.catch((error) => {
-					console.log("Fehler beim Speichern des Textes:", error);
-				});
+	const submitText = async () => {
+		if (textInput.trim() !== "") {
+			try {
+				const { status } = await Location.requestForegroundPermissionsAsync();
+				if (status === 'granted') {
+					const location = await Location.getCurrentPositionAsync({});
+					const { latitude, longitude } = location.coords;
+
+					const post = {
+						text: textInput,
+						username: username,
+						color: selectedColor,
+						likes: [],
+						timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+						location: new firebase.firestore.GeoPoint(latitude, longitude),
+					};
+
+					firestore
+						.collection("posts")
+						.add(post)
+						.then(() => {
+							console.log("Text erfolgreich gespeichert");
+							setTextInput("");
+							setModalVisible(false);
+						})
+						.catch((error) => {
+							console.log("Fehler beim Speichern des Textes:", error);
+						});
+				} else {
+					console.log("Keine Berechtigung zur Standortabfrage erteilt");
+				}
+			} catch (error) {
+				console.log("Fehler bei der Standortabfrage:", error);
+			}
 		}
 	};
 
@@ -156,8 +224,6 @@ const Template = () => {
 		{ name: "MediumOrchid", color: "#BA55D3" },
 		{ name: "MediumVioletRed", color: "#C71585" },
 	];
-
-
 
 	const handleColorSelection = (color) => {
 		setSelectedColor(color);
@@ -238,7 +304,17 @@ const Template = () => {
 					<View style={{flex: 1, backgroundColor: 'white', minWidth: "100%"}}>
 
 					<ScrollView style={[styles.postContainer, { backgroundColor: selectedPost?.color }]}>
+
 						<View style={[styles.postModal, { backgroundColor: selectedPost?.color }]}>
+							<View style={styles.postHeader}>
+								<TouchableOpacity style={styles.reportBtn} onPress={()=>handleReport(selectedPost?.id)}>
+									<Ionicons
+										name="alert-circle-outline"
+										size={20}
+									/>
+								</TouchableOpacity>
+							</View>
+
 							<View style={styles.postContent}>
 								<Text style={styles.postText}>{selectedPost?.text}</Text>
 							</View>
@@ -303,6 +379,7 @@ const Template = () => {
 
 							<View style={styles.postFooter}>
 								<Text style={styles.postUsername}>- {post.username}</Text>
+								<Text style={styles.postUsername}>- {formatTimestamp(post.timestamp)}</Text>
 
 								<TouchableOpacity
 									style={[styles.likeButton, post.likes.includes(username) && styles.likedButton]}
@@ -401,6 +478,16 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 
+	postHeader:{
+		flex: 1,
+		justifyContent: "flex-end",
+		alignItems: "flex-end"
+	},
+
+	reportBtn:{
+
+	},
+
 	postContent: {
 		flex: 1,
 		justifyContent: "center",
@@ -455,6 +542,8 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: 'rgba(0,0,0,0.6)'
 	},
+
+
 
 });
 
