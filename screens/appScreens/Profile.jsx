@@ -825,7 +825,8 @@ const Profile = ({route, navigation}) => {
                                                           navigation.goBack();
                                                           navigation.navigate('Follower', {
                                                               uid: uid,
-                                                              follower: currentUser.follower
+                                                              follower: currentUser.follower,
+                                                              diff: followerDiff
                                                           })
                                                       }}>
                                         <Text>Follower </Text>

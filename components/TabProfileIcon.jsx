@@ -20,6 +20,7 @@ const TabProfileIcon = (navigation) => {
     const [currentUser, setCurrentUser] = useState([]);
     const [friendRequests, setFriendRequests] = useState(0);
     const [number, setNumber] = useState(0);
+    const [followerDiff, setFollowerDiff] = useState(0)
 
     let messages = [];
     const [unreadMessages, setUnreadMessages] = useState([]);
@@ -60,8 +61,13 @@ const TabProfileIcon = (navigation) => {
                 setCurrentUser(currentUserData);
                 getChats(currentUserData.username);
                 setFriendRequests((Object.keys(currentUserData.friendRequests)).length)
+                checkFollowerDiff(currentUserData)
                 //getChats(currentUserData.username);
             })
+    }
+
+    function checkFollowerDiff(userData) {
+        setFollowerDiff(userData.follower.length - userData.followerWhenClicked)
     }
 
     function getOpenFriendRequests() {
@@ -85,8 +91,8 @@ const TabProfileIcon = (navigation) => {
         <SafeAreaView>
                 <View style={{flexDirection: 'row'}}>
                     <Text>Me</Text>
-                    {(friendRequests > 0 || unreadMessages.length > 0) && (
-                        <Badge containerStyle={{marginLeft: 5}} value={friendRequests+unreadMessages.length} status='error'></Badge>
+                    {(friendRequests > 0 || unreadMessages.length > 0 || followerDiff > 0) && (
+                        <Badge containerStyle={{marginLeft: 5}} value={friendRequests+unreadMessages.length+followerDiff} status='error'></Badge>
                     )}
                 </View>
         </SafeAreaView>
