@@ -10,6 +10,7 @@ import {
 	Animated,
 	Alert,
 	Button,
+	KeyboardAvoidingView,
 } from "react-native";
 import { firebase } from "../../firebase";
 import { useNavigation } from "@react-navigation/native";
@@ -360,7 +361,7 @@ export default function Chatbot({ route }) {
 	};
 
 	return (
-		<View style={styles.container}>
+		<KeyboardAvoidingView style={styles.container} behavior="padding">
 			<View style={styles.headerContainer}>
 				<AppleHeader
 					largeTitle={"Guide"}
@@ -478,7 +479,7 @@ export default function Chatbot({ route }) {
 					<MaterialIcons name="send" size={24} color="#ec404b" />
 				</TouchableOpacity>
 			</View>
-		</View>
+		</KeyboardAvoidingView>
 	);
 }
 
@@ -543,7 +544,7 @@ const styles = StyleSheet.create({
 	inputContainer: {
 		flexDirection: "row",
 		alignItems: "center",
-		marginTop: 10,
+		marginVertical: 10,
 	},
 	input: {
 		flex: 1,
