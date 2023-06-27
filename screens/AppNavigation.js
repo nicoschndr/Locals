@@ -96,8 +96,18 @@ function ProfileDrawerScreen() {
 				component={FriendStackNavigator}
 				options={{ headerShown: true }}
 			/>
-			<Drawer.Screen name="EventDetails" component={EventDetails} />
-			<Drawer.Screen name="EditPost" component={EditPost} />
+			<Drawer.Screen
+				options={{
+					drawerItemStyle: { display: "none" },
+					unmountOnBlur: true,
+				}}
+				name="EventDetails" component={EventDetails} />
+			<Drawer.Screen
+				options={{
+					drawerItemStyle: { display: "none" },
+					unmountOnBlur: true,
+				}}
+				name="EditPost" component={EditPost} />
 			<Drawer.Screen name="Settings" component={Settings} />
 			<Drawer.Screen
 				options={{
