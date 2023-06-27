@@ -2,23 +2,40 @@ import { View, Text, Button, StyleSheet, TouchableOpacity, Modal, TextInput, Scr
 import React, { useEffect, useState } from "react";
 import {Ionicons, MaterialIcons} from "@expo/vector-icons";
 import { firebase, firestore, auth } from "../../firebase";
+import * as Location from 'expo-location';
+
 
 const formatTimestamp = (timestamp) => {
-	const date = timestamp.toDate();
-	const now = new Date();
-	const isSameDay = now.getDate() === date.getDate() &&
-		now.getMonth() === date.getMonth() &&
-		now.getFullYear() === date.getFullYear();
+	if (timestamp && timestamp.toDate) {
+		const date = timestamp.toDate();
+		const now = new Date();
+		const isSameDay =
+			now.getDate() === date.getDate() &&
+			now.getMonth() === date.getMonth() &&
+			now.getFullYear() === date.getFullYear();
 
-	if (isSameDay) {
-		return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+		if (isSameDay) {
+			return date.toLocaleTimeString("de-DE", {
+				hour: "2-digit",
+				minute: "2-digit",
+			});
+		} else {
+			return date.toLocaleString("de-DE", {
+				hour: "2-digit",
+				minute: "2-digit",
+				day: "2-digit",
+				month: "2-digit",
+				year: "numeric",
+			});
+		}
 	} else {
-		return date.toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+		return "";
 	}
 };
 
 
-const Template = () => {
+
+const Yell = () => {
 	const [textInput, setTextInput] = useState("");
 	const [modalVisible, setModalVisible] = useState(false);
 	const [modalSelectVisible, setModalSelectVisible] = useState(false);
@@ -49,12 +66,13 @@ const Template = () => {
 						const commentData = doc.data();
 						commentsData.push({ id: doc.id, ...commentData });
 					});
-					setComments(commentsData);
+					setComments(commentsData.reverse()); // Hier wurde reverse() hinzugefügt
 				});
 
 			return () => unsubscribe();
 		}
 	}, [selectedPost]);
+
 
 	const handleSubmitComment = () => {
 		if (commentInput.trim() !== "") {
@@ -247,15 +265,16 @@ const Template = () => {
 			}
 		});
 	};
-
+	useEffect(() => {
+		const randomColor = colorPalette[Math.floor(Math.random() * colorPalette.length)].color;
+		setSelectedColor(randomColor);
+	}, [modalVisible]);
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity style={styles.addIcon} onPress={() => setModalVisible(true)}>
-				<Ionicons name="add-circle-outline" size={30} color="black" />
-			</TouchableOpacity>
+
 
 			<Modal visible={modalVisible} animationType="slide">
-				<KeyboardAvoidingView style={styles.modalContainer} behavior="padding">
+				<KeyboardAvoidingView style={[styles.modalContainer, { backgroundColor: selectedColor }]} behavior="padding">
 					<TextInput
 						value={textInput}
 						onChangeText={setTextInput}
@@ -267,12 +286,15 @@ const Template = () => {
 					/>
 
 					<View style={styles.buttonContainer}>
-						<Button title="Absenden" onPress={submitText} />
-						<Button title="Abbrechen" onPress={() => setModalVisible(false)} />
+						<TouchableOpacity  onPress={() => setModalVisible(false)}>
+							<Ionicons name="close-outline" size={50} color="white" />
+						</TouchableOpacity>
+						<TouchableOpacity  onPress={submitText}>
+							<Ionicons name="megaphone-outline" size={50} color="white" />
+						</TouchableOpacity>
 					</View>
 
-					<Text>Wählen Sie eine Farbe aus</Text>
-
+					<Text style={{fontSize: 20, paddingTop: 90}}>Wählen eine Farbe aus</Text>
 					<ScrollView horizontal contentContainerStyle={styles.colorPickerScrollContainer}>
 						{colorPalette.map((color, index) => (
 							<TouchableOpacity
@@ -291,13 +313,11 @@ const Template = () => {
 			</Modal>
 
 
-
 			<Modal
 				visible={modalSelectVisible}
 				animationType="slide"
 				animationIn="slideInUp"
 				animationOut="slideOutDown"
-				style={{backgroundColor: selectedPost?.color, flex: 1}}
 
 			>
 				<KeyboardAvoidingView style={styles.modalContainer} >
@@ -335,7 +355,7 @@ const Template = () => {
 								</TouchableOpacity>
 							</View>
 						</View>
-						{comments.reverse().map((comment, index) => (
+						{comments.map((comment, index) => (
 							<View key={index} style={styles.comment}>
 								<Text style={styles.postText}>{comment.text}</Text>
 								<Text style={[styles.postUsername, {textAlign: "right"}]}>{comment.username}</Text>
@@ -369,8 +389,8 @@ const Template = () => {
 			<ScrollView style={styles.postContainer}>
 				{posts.map((post, index) => (
 					<TouchableOpacity
-					key={index}
-					onPress={()=>handlePostClick(post)}
+						key={index}
+						onPress={()=>handlePostClick(post)}
 					>
 						<View key={index} style={[styles.post, { backgroundColor: post.color }]}>
 							<View style={styles.postContent}>
@@ -398,6 +418,12 @@ const Template = () => {
 					</TouchableOpacity>
 				))}
 			</ScrollView>
+			<View style={styles.addIconContainer} pointerEvents='box-none'>
+				<TouchableOpacity style={styles.addIcon} onPress={() => setModalVisible(true)}>
+					<Ionicons name="add-circle-outline" size={80} color="white" />
+				</TouchableOpacity>
+			</View>
+
 		</View>
 	);
 };
@@ -406,14 +432,20 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingTop: 20,
-		paddingBottom: 20,
 		marginBottom: 85,
 	},
-	addIcon: {
+	addIconContainer: {
 		position: "absolute",
-		top: 20,
-		right: 20,
+		bottom: 20,
+		right: 0,
+		left: 0,
 		zIndex: 999,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	addIcon: {
+		width: 80,
+		height: 80,
 	},
 	modalContainer: {
 		flex: 1,
@@ -425,15 +457,15 @@ const styles = StyleSheet.create({
 	input: {
 		width: "99%",
 		height: "50%",
-		borderWidth: 1,
-		borderColor: "gray",
-		marginBottom: 10,
+		borderBottomWidth: 1,
+		borderColor: "white",
 		paddingHorizontal: 10,
 		textAlignVertical: "top",
+		color: "white"
 	},
 	buttonContainer: {
 		flexDirection: "row",
-		justifyContent: "space-between",
+		justifyContent: "space-evenly",
 		marginBottom: 10,
 	},
 	colorPickerScrollContainer: {
@@ -445,22 +477,41 @@ const styles = StyleSheet.create({
 		height: 30,
 		borderRadius: 15,
 		marginHorizontal: 5,
+		borderWidth: 1,
+		borderColor: "white"
 	},
 	selectedColorButton: {
 		width: 50,
 		height: 50,
 		borderRadius: 25,
 		marginHorizontal: 5,
+		shadowColor: "rgba(0, 0, 0, 0.3)", // Schattenfarbe
+		shadowOffset: {
+			width: 1,
+			height: 5,
+		},
+		shadowOpacity: 1,
+		shadowRadius: 2,
+		elevation: 2, // Für Android-Schatten
 	},
 	postContainer: {
 		flex: 1,
 	},
 	post: {
 		flexDirection: "column",
-		marginBottom: 10,
+		borderRadius: 10,
+		margin: 5,
 		padding: 10,
 		minHeight: 100,
 		justifyContent: "space-between",
+		shadowColor: "rgba(0, 0, 0, 0.2)", // Schattenfarbe
+		shadowOffset: {
+			width: 0,
+			height: 5,
+		},
+		shadowOpacity: 1,
+		shadowRadius: 2,
+		elevation: 2, // Für Android-Schatten
 	},
 	postFooter: {
 		flexDirection: "row",
@@ -537,6 +588,7 @@ const styles = StyleSheet.create({
 
 	},
 	comment: {
+		padding: 5,
 		marginTop: 10,
 		marginBottom: 10,
 		borderBottomWidth: 1,
@@ -547,4 +599,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default Template;
+export default Yell;
