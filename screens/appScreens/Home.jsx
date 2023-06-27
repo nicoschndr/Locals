@@ -122,13 +122,23 @@ const HomeScreen = ({ navigation }) => {
 
 
 	userFriendsEvents.slice(0, 5)
-	console.log(userFriendsEvents)
 
 
-	const combinedEvents = [...topEvents, ...userFriendsEvents]; // Kombiniere die Top-Events und die Events der Freunde
+	const combinedEvents = [...topEvents, ...userFriendsEvents];
 
-	const displayedEvents = combinedEvents.slice(0, 10); // Begrenze die Gesamtanzahl der angezeigten Events auf 10
+	const uniqueEvents = combinedEvents.reduce((unique, event) => {
+		if (!unique.find((e) => e.id === event.id)) {
+			unique.push(event);
+		}
+		return unique;
+	}, []);
 
+	let displayedEvents = uniqueEvents.slice(0, 10);
+
+	if (displayedEvents.length < 10) {
+		const remainingEvents = FilteredEvents.filter((event) => !uniqueEvents.includes(event));
+		displayedEvents = [...displayedEvents, ...remainingEvents.slice(0, 10 - displayedEvents.length)];
+	}
 
 	return (
 		<View style={styles.container}>
@@ -240,9 +250,9 @@ const HomeScreen = ({ navigation }) => {
 								</View>
 							) : (
 								<View style={[styles.friendEventMarker, { display: "flex", flexDirection: "row", alignItems: "center" }]}>
-									<Ionicons name="flame-outline" size={20} color="white" />
+									<Ionicons name="flame-outline" size={30} color="white" />
 									<Text style={{ color: "white", marginLeft: 4, fontWeight: "bold" }}>
-										{event.impressions} Impressions
+										{event.impressions}
 									</Text>
 								</View>
 							)}
