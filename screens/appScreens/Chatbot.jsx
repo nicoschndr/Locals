@@ -18,7 +18,7 @@ import * as Location from "expo-location";
 import Slider from "@react-native-community/slider";
 import { Modal } from "react-native";
 import LocalsButton from "../../components/LocalsButton";
-import { MaterialIcons } from "@expo/vector-icons"; // Importieren Sie die Slider und Modal Komponenten
+import { Ionicons, MaterialIcons } from "@expo/vector-icons"; // Importieren Sie die Slider und Modal Komponenten
 import LocalsEventCard from "../../components/LocalsEventCard";
 import AppleHeader from "react-native-apple-header";
 
@@ -362,21 +362,51 @@ export default function Chatbot({ route }) {
 
 	return (
 		<KeyboardAvoidingView style={styles.container} behavior="padding">
+			{/* <AppleHeader
+				largeTitle={"Guide"}
+				onPress={() => navigation.goBack()}
+				largeTitleTextStyle={{ textAlign: "center", marginTop: 20 }}
+			/> */}
 			<View style={styles.headerContainer}>
-				<AppleHeader
-					largeTitle={"Guide"}
-					onPress={() => navigation.navigate("Home")}
-				/>
+				<TouchableOpacity
+					style={styles.goBack}
+					onPress={() => navigation.goBack()}
+				>
+					<Ionicons name="chevron-back" size={30} />
+				</TouchableOpacity>
+				<Text
+					style={{
+						fontSize: 34,
+						fontWeight: "bold",
+					}}
+				>
+					Guide
+				</Text>
 				<TouchableOpacity onPress={openRadiusPicker} style={styles.radiusIcon}>
-					<MaterialIcons name="my-location" size={24} color="#ec404b" />
+					<Ionicons name="compass-outline" size={30} />
 				</TouchableOpacity>
 			</View>
-			<Modal
-				visible={isRadiusPickerVisible}
-				transparent={true}
-				animationType="slide"
-			>
+			<Modal visible={isRadiusPickerVisible} animationType="slide">
 				<View style={styles.radiusPickerContainer}>
+					{/* close icon on top right  */}
+
+					<Text
+						style={{
+							fontSize: 26,
+							fontWeight: "bold",
+							position: "absolute",
+							top: 65,
+						}}
+					>
+						Umkreis
+					</Text>
+					<TouchableOpacity
+						style={styles.closeIcon}
+						onPress={closeRadiusPicker}
+					>
+						<Ionicons name="close-outline" size={30} />
+					</TouchableOpacity>
+
 					<Slider
 						minimumValue={1}
 						maximumValue={200}
@@ -391,6 +421,7 @@ export default function Chatbot({ route }) {
 					<LocalsButton
 						title={"Set"}
 						onPress={closeRadiusPicker}
+						style={{ marginTop: 20 }}
 					></LocalsButton>
 				</View>
 			</Modal>
@@ -484,6 +515,11 @@ export default function Chatbot({ route }) {
 }
 
 const styles = StyleSheet.create({
+	closeIcon: {
+		position: "absolute",
+		top: 65,
+		right: 20,
+	},
 	placeholderGif: {
 		width: 200,
 		height: 200,
@@ -501,6 +537,8 @@ const styles = StyleSheet.create({
 	chatContainer: {
 		flex: 1,
 	},
+	goBack: {},
+
 	chatOutputContainer: {
 		paddingHorizontal: 10,
 		paddingBottom: 10,
@@ -586,22 +624,20 @@ const styles = StyleSheet.create({
 		marginRight: 40,
 	},
 	radiusIcon: {
-		position: "absolute",
-		right: 10,
 		zIndex: 999,
 	},
 	headerContainer: {
+		top: 40,
 		flexDirection: "row",
+		justifyContent: "space-between",
 		alignItems: "center",
-		marginBottom: 10,
-		top: 24,
-		marginHorizontal: -10,
+		position: "relative",
+		zIndex: 1,
 	},
 	radiusPickerContainer: {
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "rgba(0, 0, 0, 0.5)",
 	},
 
 	sliderContainer: {

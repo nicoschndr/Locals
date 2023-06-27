@@ -227,8 +227,8 @@ const Register = ({ navigation }) => {
 						<View style={{ width: "48%" }}>
 							<Text style={styles.inputTitle}>Vormame</Text>
 							<LocalsTextInput
+								autoCapitalize
 								value={firstName}
-								autoCapitalize="none"
 								onChangeText={(firstName) => setFirstName(firstName)}
 								style={styles.input}
 							/>
@@ -238,6 +238,7 @@ const Register = ({ navigation }) => {
 							<Text style={styles.inputTitle}>Nachname</Text>
 							<LocalsTextInput
 								value={lastName}
+								autoCapitalize
 								onChangeText={(lastName) => setLastName(lastName)}
 								style={styles.input}
 							/>

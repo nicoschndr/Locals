@@ -1,24 +1,43 @@
-import { View, Text, Button, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, KeyboardAvoidingView } from "react-native";
+import {
+	View,
+	Text,
+	Button,
+	StyleSheet,
+	TouchableOpacity,
+	Modal,
+	TextInput,
+	ScrollView,
+	KeyboardAvoidingView,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import {Ionicons, MaterialIcons} from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { firebase, firestore, auth } from "../../firebase";
 
 const formatTimestamp = (timestamp) => {
 	const date = timestamp.toDate();
 	const now = new Date();
-	const isSameDay = now.getDate() === date.getDate() &&
+	const isSameDay =
+		now.getDate() === date.getDate() &&
 		now.getMonth() === date.getMonth() &&
 		now.getFullYear() === date.getFullYear();
 
 	if (isSameDay) {
-		return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+		return date.toLocaleTimeString("de-DE", {
+			hour: "2-digit",
+			minute: "2-digit",
+		});
 	} else {
-		return date.toLocaleString('de-DE', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+		return date.toLocaleString("de-DE", {
+			hour: "2-digit",
+			minute: "2-digit",
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+		});
 	}
 };
 
-
-const Template = () => {
+const Template = ({ navigation }) => {
 	const [textInput, setTextInput] = useState("");
 	const [modalVisible, setModalVisible] = useState(false);
 	const [modalSelectVisible, setModalSelectVisible] = useState(false);
@@ -30,7 +49,6 @@ const Template = () => {
 	const [commentInput, setCommentInput] = useState("");
 	const [comments, setComments] = useState([]);
 	const [inputHeight, setInputHeight] = useState(0);
-
 
 	const handlePostClick = (post) => {
 		setSelectedPost(post);
@@ -96,7 +114,10 @@ const Template = () => {
 								reportPost(postId);
 							})
 							.catch((error) => {
-								console.log("Fehler beim Erstellen des 'reports'-Arrays:", error);
+								console.log(
+									"Fehler beim Erstellen des 'reports'-Arrays:",
+									error
+								);
 							});
 					} else {
 						reportPost(postId);
@@ -111,19 +132,18 @@ const Template = () => {
 	const reportPost = (postId) => {
 		const reportData = {
 			username: username,
-			timestamp: new Date()
+			timestamp: new Date(),
 		};
 
 		firestore
 			.collection("posts")
 			.doc(postId)
 			.update({
-				reports: firebase.firestore.FieldValue.arrayUnion(reportData)
+				reports: firebase.firestore.FieldValue.arrayUnion(reportData),
 			})
 			.then(() => {
 				console.log("Post erfolgreich gemeldet");
-				alert("Yell gemeldet")
-
+				alert("Yell gemeldet");
 			})
 			.catch((error) => {
 				console.log("Fehler beim Melden des Posts:", error);
@@ -170,12 +190,11 @@ const Template = () => {
 		return () => unsubscribe();
 	}, []);
 
-
 	const submitText = async () => {
 		if (textInput.trim() !== "") {
 			try {
 				const { status } = await Location.requestForegroundPermissionsAsync();
-				if (status === 'granted') {
+				if (status === "granted") {
 					const location = await Location.getCurrentPositionAsync({});
 					const { latitude, longitude } = location.coords;
 
@@ -250,10 +269,28 @@ const Template = () => {
 
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity style={styles.addIcon} onPress={() => setModalVisible(true)}>
-				<Ionicons name="add-circle-outline" size={30} color="black" />
-			</TouchableOpacity>
-
+			<View style={styles.header}>
+				<TouchableOpacity
+					style={styles.goBack}
+					onPress={() => navigation.goBack()}
+				>
+					<Ionicons name="chevron-back" size={30} color="black" />
+				</TouchableOpacity>
+				<Text
+					style={{
+						fontSize: 34,
+						fontWeight: "bold",
+					}}
+				>
+					Guide
+				</Text>
+				<TouchableOpacity
+					style={styles.addIcon}
+					onPress={() => setModalVisible(true)}
+				>
+					<Ionicons name="add-circle-outline" size={30} color="black" />
+				</TouchableOpacity>
+			</View>
 			<Modal visible={modalVisible} animationType="slide">
 				<KeyboardAvoidingView style={styles.modalContainer} behavior="padding">
 					<TextInput
@@ -273,7 +310,10 @@ const Template = () => {
 
 					<Text>Wählen Sie eine Farbe aus</Text>
 
-					<ScrollView horizontal contentContainerStyle={styles.colorPickerScrollContainer}>
+					<ScrollView
+						horizontal
+						contentContainerStyle={styles.colorPickerScrollContainer}
+					>
 						{colorPalette.map((color, index) => (
 							<TouchableOpacity
 								key={index}
@@ -286,107 +326,149 @@ const Template = () => {
 							/>
 						))}
 					</ScrollView>
-
 				</KeyboardAvoidingView>
 			</Modal>
-
-
 
 			<Modal
 				visible={modalSelectVisible}
 				animationType="slide"
 				animationIn="slideInUp"
 				animationOut="slideOutDown"
-				style={{backgroundColor: selectedPost?.color, flex: 1}}
-
+				style={{ backgroundColor: selectedPost?.color, flex: 1 }}
 			>
-				<KeyboardAvoidingView style={styles.modalContainer} >
-					<View style={{flex: 1, backgroundColor: 'white', minWidth: "100%"}}>
+				<KeyboardAvoidingView style={styles.modalContainer}>
+					<View
+						style={{
+							flex: 1,
+							backgroundColor: "white",
+							minWidth: "100%",
+							bottom: 80,
+						}}
+					>
+						<ScrollView
+							style={[
+								styles.postDetailContainer,
+								{ backgroundColor: selectedPost?.color },
+							]}
+						>
+							<View
+								style={[
+									styles.postModal,
+									{ backgroundColor: selectedPost?.color },
+								]}
+							>
+								<View style={styles.postHeader}>
+									<TouchableOpacity
+										style={styles.reportBtn}
+										onPress={() => handleReport(selectedPost?.id)}
+									>
+										<Ionicons name="alert-circle-outline" size={20} />
+									</TouchableOpacity>
+								</View>
 
-					<ScrollView style={[styles.postContainer, { backgroundColor: selectedPost?.color }]}>
+								<View style={styles.postContent}>
+									<Text style={styles.postText}>{selectedPost?.text}</Text>
+								</View>
 
-						<View style={[styles.postModal, { backgroundColor: selectedPost?.color }]}>
-							<View style={styles.postHeader}>
-								<TouchableOpacity style={styles.reportBtn} onPress={()=>handleReport(selectedPost?.id)}>
-									<Ionicons
-										name="alert-circle-outline"
-										size={20}
-									/>
-								</TouchableOpacity>
+								<View style={styles.postFooter}>
+									<Text style={styles.postUsername}>
+										- {selectedPost?.username}
+									</Text>
+
+									<TouchableOpacity
+										style={[
+											styles.likeButton,
+											selectedPost?.likes.includes(username) &&
+												styles.likedButton,
+										]}
+										onPress={() => handleLike(selectedPost?.id)}
+									>
+										<Ionicons
+											name={
+												selectedPost?.likes.includes(username)
+													? "heart"
+													: "heart-outline"
+											}
+											size={16}
+											color={
+												selectedPost?.likes.includes(username) ? "red" : "black"
+											}
+										/>
+										<Text style={styles.likeCount}>
+											{selectedPost?.likes.length}
+										</Text>
+									</TouchableOpacity>
+								</View>
 							</View>
+							{comments.reverse().map((comment, index) => (
+								<View key={index} style={styles.comment}>
+									<Text style={styles.postText}>{comment.text}</Text>
+									<Text style={[styles.postUsername, { textAlign: "right" }]}>
+										{comment.username}
+									</Text>
+									<Text style={[styles.postUsername, { textAlign: "right" }]}>
+										{formatTimestamp(comment.timestamp)}
+									</Text>
+								</View>
+							))}
+						</ScrollView>
 
-							<View style={styles.postContent}>
-								<Text style={styles.postText}>{selectedPost?.text}</Text>
-							</View>
-
-							<View style={styles.postFooter}>
-								<Text style={styles.postUsername}>- {selectedPost?.username}</Text>
-
-								<TouchableOpacity
-									style={[styles.likeButton, selectedPost?.likes.includes(username) && styles.likedButton]}
-									onPress={() => handleLike(selectedPost?.id)}
-								>
-									<Ionicons
-										name={selectedPost?.likes.includes(username) ? "heart" : "heart-outline"}
-										size={16}
-										color={selectedPost?.likes.includes(username) ? "red" : "black"}
-									/>
-									<Text style={styles.likeCount}>{selectedPost?.likes.length}</Text>
-								</TouchableOpacity>
-							</View>
+						<View
+							style={[
+								styles.inputContainerComment,
+								{ backgroundColor: "white" },
+							]}
+						>
+							<TextInput
+								style={[
+									styles.inputComment,
+									{ height: Math.min(5 * 18, inputHeight) },
+								]}
+								placeholder="Kommentar hinzufügen"
+								value={commentInput}
+								onChangeText={setCommentInput}
+							/>
+							<TouchableOpacity onPress={handleSubmitComment}>
+								<MaterialIcons name="send" size={24} color="#ec404b" />
+							</TouchableOpacity>
 						</View>
-						{comments.reverse().map((comment, index) => (
-							<View key={index} style={styles.comment}>
-								<Text style={styles.postText}>{comment.text}</Text>
-								<Text style={[styles.postUsername, {textAlign: "right"}]}>{comment.username}</Text>
-								<Text style={[styles.postUsername, {textAlign: "right"}]}>{formatTimestamp(comment.timestamp)}</Text>
-							</View>
-						))}
-					</ScrollView>
 
-
-
-					<View style={[styles.inputContainerComment, {backgroundColor: "white"}]}>
-						<TextInput
-							style={[styles.inputComment, { height: Math.min(5 * 18, inputHeight) }]}
-							placeholder="Kommentar hinzufügen"
-							value={commentInput}
-							onChangeText={setCommentInput}
+						<Button
+							title="Schließen"
+							onPress={() => setModalSelectVisible(false)}
 						/>
-						<TouchableOpacity onPress={handleSubmitComment}>
-							<MaterialIcons name="send" size={24} color="#ec404b" />
-						</TouchableOpacity>
-					</View>
-
-					<Button title="Schließen" onPress={() => setModalSelectVisible(false)} />
 					</View>
 				</KeyboardAvoidingView>
 			</Modal>
 
-
-
-
 			<ScrollView style={styles.postContainer}>
 				{posts.map((post, index) => (
-					<TouchableOpacity
-					key={index}
-					onPress={()=>handlePostClick(post)}
-					>
-						<View key={index} style={[styles.post, { backgroundColor: post.color }]}>
+					<TouchableOpacity key={index} onPress={() => handlePostClick(post)}>
+						<View
+							key={index}
+							style={[styles.post, { backgroundColor: post.color }]}
+						>
 							<View style={styles.postContent}>
 								<Text style={styles.postText}>{post.text}</Text>
 							</View>
 
 							<View style={styles.postFooter}>
 								<Text style={styles.postUsername}>- {post.username}</Text>
-								<Text style={styles.postUsername}>- {formatTimestamp(post.timestamp)}</Text>
+								<Text style={styles.postUsername}>
+									- {formatTimestamp(post.timestamp)}
+								</Text>
 
 								<TouchableOpacity
-									style={[styles.likeButton, post.likes.includes(username) && styles.likedButton]}
+									style={[
+										styles.likeButton,
+										post.likes.includes(username) && styles.likedButton,
+									]}
 									onPress={() => handleLike(post.id)}
 								>
 									<Ionicons
-										name={post.likes.includes(username) ? "heart" : "heart-outline"}
+										name={
+											post.likes.includes(username) ? "heart" : "heart-outline"
+										}
 										size={16}
 										color={post.likes.includes(username) ? "red" : "black"}
 									/>
@@ -394,7 +476,6 @@ const Template = () => {
 								</TouchableOpacity>
 							</View>
 						</View>
-
 					</TouchableOpacity>
 				))}
 			</ScrollView>
@@ -407,13 +488,19 @@ const styles = StyleSheet.create({
 		flex: 1,
 		paddingTop: 20,
 		paddingBottom: 20,
-		marginBottom: 85,
+		marginTop: 24,
 	},
 	addIcon: {
-		position: "absolute",
-		top: 20,
-		right: 20,
 		zIndex: 999,
+	},
+	header: {
+		top: 20,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		position: "relative",
+		zIndex: 1,
+		marginHorizontal: 20,
 	},
 	modalContainer: {
 		flex: 1,
@@ -421,6 +508,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		backgroundColor: "white",
 		paddingVertical: 20,
+		top: 40,
 	},
 	input: {
 		width: "99%",
@@ -454,6 +542,13 @@ const styles = StyleSheet.create({
 	},
 	postContainer: {
 		flex: 1,
+		top: 32,
+		marginBottom: 100,
+	},
+	postDetailContainer: {
+		flex: 1,
+		top: 80,
+		marginBottom: 100,
 	},
 	post: {
 		flexDirection: "column",
@@ -478,15 +573,13 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 
-	postHeader:{
+	postHeader: {
 		flex: 1,
 		justifyContent: "flex-end",
-		alignItems: "flex-end"
+		alignItems: "flex-end",
 	},
 
-	reportBtn:{
-
-	},
+	reportBtn: {},
 
 	postContent: {
 		flex: 1,
@@ -496,7 +589,7 @@ const styles = StyleSheet.create({
 	postText: {
 		fontSize: 16,
 		color: "white",
-		textAlign: "left"
+		textAlign: "left",
 	},
 
 	likedButton: {
@@ -507,8 +600,8 @@ const styles = StyleSheet.create({
 		marginLeft: 5,
 	},
 	inputContainerComment: {
-		flexDirection: 'row',
-		alignItems: 'center',
+		flexDirection: "row",
+		alignItems: "center",
 		paddingHorizontal: 16,
 		paddingVertical: 8,
 	},
@@ -519,10 +612,10 @@ const styles = StyleSheet.create({
 		marginRight: 8,
 		paddingHorizontal: 8,
 		borderWidth: 1,
-		borderColor: 'gray',
+		borderColor: "gray",
 		borderRadius: 15,
 	},
-	commentContainer:{
+	commentContainer: {
 		width: "100%",
 		borderTopWidth: 2,
 	},
@@ -533,18 +626,14 @@ const styles = StyleSheet.create({
 		minHeight: 100,
 		justifyContent: "space-between",
 		borderBottomWidth: 5, // Fügt eine untere Grenze hinzu
-		borderBottomColor: 'rgb(255,255,255)'
-
+		borderBottomColor: "rgb(255,255,255)",
 	},
 	comment: {
 		marginTop: 10,
 		marginBottom: 10,
 		borderBottomWidth: 1,
-		borderBottomColor: 'rgba(0,0,0,0.6)'
+		borderBottomColor: "rgba(0,0,0,0.6)",
 	},
-
-
-
 });
 
 export default Template;

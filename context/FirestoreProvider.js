@@ -42,7 +42,7 @@ const FirestoreProvider = ({ children }) => {
 	}, []);
 
 	return (
-		<FirestoreContext.Provider value={{ events, users }}>
+		<FirestoreContext.Provider value={{ events, users, setEvents }}>
 			{children}
 		</FirestoreContext.Provider>
 	);

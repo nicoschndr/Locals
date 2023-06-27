@@ -27,6 +27,8 @@ const HomeScreen = ({ navigation }) => {
 	const [showSearch, setShowSearch] = useState(false);
 
 	const { events } = useContext(FirestoreContext);
+	// create contest for events
+	const { setEvents } = useContext(FirestoreContext);
 
 	useEffect(() => {
 		getUsers();
@@ -44,6 +46,21 @@ const HomeScreen = ({ navigation }) => {
 				setUsers(users);
 			});
 	}
+
+	const updateEvents = () => {
+		firestore
+			.collection("events")
+			//where date >= today
+			.where("date", ">=", new Date())
+			.orderBy("date", "asc")
+			.onSnapshot((snapshot) => {
+				const events = snapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+				setEvents(events);
+			});
+	};
 
 	// const getActiveEvents = useMemo(() => {
 	// 	return () => {
@@ -64,7 +81,7 @@ const HomeScreen = ({ navigation }) => {
 
 	const handleRefresh = () => {
 		setRefreshing(true);
-		// getActiveEvents();
+		updateEvents();
 		setRefreshing(false);
 	};
 
