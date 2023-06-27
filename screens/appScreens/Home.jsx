@@ -222,21 +222,34 @@ const HomeScreen = ({ navigation }) => {
 					horizontal
 				>
 					{displayedEvents.map((event) => (
-						<LocalsEventCard
-							key={event.id}
-							title={event.title}
-							date={event.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}
-							location={event.address}
-							category={event.title}
-							onPress={() => navigation.navigate("EventDetails", { event })}
-							style={{
-								marginRight: 24,
-								borderBottomWidth: userFriendsEvents.includes(event) ? 5 : 0, // Hinzufügen des roten Rahmens
-								borderColor: userFriendsEvents.includes(event) ? "red" : "transparent", // Farbe des Rahmens
-							}}
-							slim
-						/>
+						<View key={event.id} style={{ marginRight: 24 }}>
+							<LocalsEventCard
+								title={event.title}
+								date={event.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}
+								location={event.address}
+								category={event.title}
+								onPress={() => navigation.navigate("EventDetails", { event })}
+								style={{
+									position: "relative",
+								}}
+								slim
+							/>
+							{userFriendsEvents.includes(event) ? (
+								<View style={styles.friendEventMarker}>
+									<Ionicons name="people-outline" size={30} color="white" />
+								</View>
+							) : (
+								<View style={[styles.friendEventMarker, { display: "flex", flexDirection: "row", alignItems: "center" }]}>
+									<Ionicons name="flame-outline" size={20} color="white" />
+									<Text style={{ color: "white", marginLeft: 4, fontWeight: "bold" }}>
+										{event.impressions} Impressions
+									</Text>
+								</View>
+							)}
+						</View>
 					))}
+
+
 				</ScrollView>
 
 				<View>
@@ -339,6 +352,23 @@ const styles = StyleSheet.create({
 		resizeMode: "contain",
 		left: 10,
 	},
+	friendEventMarker:{
+		fontWeight: "bold",
+		shadowColor: "rgba(236,64,75,0.2)", // Schattenfarbe
+		shadowOffset: {
+			width: 0,
+			height: 8,
+		},
+		position: "absolute",
+		top: 3,
+		right: 3,
+		backgroundColor: "#ec404b",
+		padding: 4,
+		borderRadius: 8,
+		shadowOpacity: 1,
+		shadowRadius: 2,
+		elevation: 2, // Für Android-Schatten
+	}
 });
 
 export default HomeScreen;
