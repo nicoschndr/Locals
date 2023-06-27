@@ -26,6 +26,8 @@ import Sidebar from "../components/Sidebar";
 import { HeaderBackButton } from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Onboarding from "./appScreens/Onboarding";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -49,9 +51,10 @@ function FriendStackNavigator() {
 }
 
 const MainStackNavigator = () => {
+
 	return (
 		<Stack.Navigator
-			initialRouteName="Home"
+			initialRouteName={'Home'}
 			screenOptions={{ headerShown: false }}
 		>
 			<Stack.Screen name="Start" component={HomeScreen} />
@@ -120,6 +123,17 @@ function ProfileDrawerScreen() {
 function AppNavigation() {
 	const [user, setUser] = useState(null);
 	const [isReady, setIsReady] = useState(false);
+
+	const [onboarded, setOnboarded] = useState();
+	useEffect(() => {
+		getStorage();
+	})
+
+	const getStorage = async () => {
+		const onboarded = await AsyncStorage.getItem('ONBOARDED');
+		setOnboarded(JSON.parse(onboarded));
+	};
+
 
 	useEffect(() => {
 		const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -196,12 +210,13 @@ function AppNavigation() {
 					/>
 				</Tab.Navigator>
 			) : (
-				<Stack.Navigator>
+				<Stack.Navigator initialRouteName={onboarded ? 'Auth' : 'Onboarding'}>
 					<Stack.Screen
 						name="Auth"
 						component={AuthScreen}
 						options={{ headerShown: false }}
 					/>
+					<Stack.Screen name='Onboarding' component={Onboarding} options={{ headerShown: false }} />
 				</Stack.Navigator>
 			)}
 		</NavigationContainer>
