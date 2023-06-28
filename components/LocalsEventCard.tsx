@@ -26,7 +26,7 @@ interface LocalsEventCardProps {
 const LocalsEventCard = (props: LocalsEventCardProps) => {
 	const image = props.category
 		? {
-				uri: "https://source.unsplash.com/random/?" + props.category,
+				uri: "https://source.unsplash.com/random/?city,night",
 				cache: FastImage.cacheControl.cacheOnly,
 				priority: FastImage.priority.high,
 		  }
@@ -43,7 +43,7 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 
 	return (
 		<AppleCard
-			source={image}
+			source={{ uri: props.image }}
 			largeTitle={props.title}
 			smallTitle={props.date}
 			footnote={props.location}

@@ -12,32 +12,37 @@ import {
 import React, { useEffect, useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { firebase, firestore, auth } from "../../firebase";
+import * as Location from "expo-location";
 
 const formatTimestamp = (timestamp) => {
-	const date = timestamp.toDate();
-	const now = new Date();
-	const isSameDay =
-		now.getDate() === date.getDate() &&
-		now.getMonth() === date.getMonth() &&
-		now.getFullYear() === date.getFullYear();
+	if (timestamp && timestamp.toDate) {
+		const date = timestamp.toDate();
+		const now = new Date();
+		const isSameDay =
+			now.getDate() === date.getDate() &&
+			now.getMonth() === date.getMonth() &&
+			now.getFullYear() === date.getFullYear();
 
-	if (isSameDay) {
-		return date.toLocaleTimeString("de-DE", {
-			hour: "2-digit",
-			minute: "2-digit",
-		});
+		if (isSameDay) {
+			return date.toLocaleTimeString("de-DE", {
+				hour: "2-digit",
+				minute: "2-digit",
+			});
+		} else {
+			return date.toLocaleString("de-DE", {
+				hour: "2-digit",
+				minute: "2-digit",
+				day: "2-digit",
+				month: "2-digit",
+				year: "numeric",
+			});
+		}
 	} else {
-		return date.toLocaleString("de-DE", {
-			hour: "2-digit",
-			minute: "2-digit",
-			day: "2-digit",
-			month: "2-digit",
-			year: "numeric",
-		});
+		return "";
 	}
 };
 
-const Template = ({ navigation }) => {
+const Yell = ({ navigation }) => {
 	const [textInput, setTextInput] = useState("");
 	const [modalVisible, setModalVisible] = useState(false);
 	const [modalSelectVisible, setModalSelectVisible] = useState(false);
@@ -67,7 +72,7 @@ const Template = ({ navigation }) => {
 						const commentData = doc.data();
 						commentsData.push({ id: doc.id, ...commentData });
 					});
-					setComments(commentsData);
+					setComments(commentsData.reverse()); // Hier wurde reverse() hinzugefügt
 				});
 
 			return () => unsubscribe();
@@ -266,7 +271,11 @@ const Template = ({ navigation }) => {
 			}
 		});
 	};
-
+	useEffect(() => {
+		const randomColor =
+			colorPalette[Math.floor(Math.random() * colorPalette.length)].color;
+		setSelectedColor(randomColor);
+	}, [modalVisible]);
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -278,11 +287,11 @@ const Template = ({ navigation }) => {
 				</TouchableOpacity>
 				<Text
 					style={{
-						fontSize: 34,
+						fontSize: 24,
 						fontWeight: "bold",
 					}}
 				>
-					Guide
+					Community Posts
 				</Text>
 				<TouchableOpacity
 					style={styles.addIcon}
@@ -292,40 +301,66 @@ const Template = ({ navigation }) => {
 				</TouchableOpacity>
 			</View>
 			<Modal visible={modalVisible} animationType="slide">
-				<KeyboardAvoidingView style={styles.modalContainer} behavior="padding">
-					<TextInput
-						value={textInput}
-						onChangeText={setTextInput}
-						placeholder="Text eingeben"
-						style={styles.input}
-						multiline={true}
-						numberOfLines={5}
-						maxLength={240}
-					/>
-
-					<View style={styles.buttonContainer}>
-						<Button title="Absenden" onPress={submitText} />
-						<Button title="Abbrechen" onPress={() => setModalVisible(false)} />
-					</View>
-
-					<Text>Wählen Sie eine Farbe aus</Text>
-
-					<ScrollView
-						horizontal
-						contentContainerStyle={styles.colorPickerScrollContainer}
-					>
-						{colorPalette.map((color, index) => (
-							<TouchableOpacity
-								key={index}
-								style={[
-									styles.colorButton,
-									{ backgroundColor: color.color },
-									selectedColor === color.color && styles.selectedColorButton,
-								]}
-								onPress={() => handleColorSelection(color.color)}
+				<KeyboardAvoidingView
+					style={[
+						styles.postModalContainer,
+						{ backgroundColor: selectedColor },
+					]}
+					behavior="padding"
+				>
+					<View style={styles.modalHeader}>
+						<TouchableOpacity
+							style={styles.goBack}
+							onPress={() => setModalVisible(false)}
+						>
+							<Ionicons name="chevron-down" size={30} />
+						</TouchableOpacity>
+						<Text style={{ fontSize: 24, fontWeight: "bold" }}>Neuer Post</Text>
+						<TouchableOpacity style={styles.addIcon} onPress={console.log}>
+							<Ionicons
+								name="add-circle-outline"
+								size={30}
+								color="transparent"
 							/>
-						))}
-					</ScrollView>
+						</TouchableOpacity>
+					</View>
+					<View style={{ alignItems: "center" }}>
+						<TextInput
+							value={textInput}
+							onChangeText={setTextInput}
+							placeholder="Text eingeben"
+							style={styles.input}
+							multiline={true}
+							numberOfLines={5}
+							maxLength={240}
+						/>
+
+						<View style={styles.buttonContainer}>
+							<TouchableOpacity onPress={submitText}>
+								<Ionicons name="megaphone-outline" size={50} color="white" />
+							</TouchableOpacity>
+						</View>
+
+						<Text style={{ fontSize: 20, paddingTop: 90 }}>
+							Wählen eine Farbe aus
+						</Text>
+						<ScrollView
+							horizontal
+							contentContainerStyle={styles.colorPickerScrollContainer}
+						>
+							{colorPalette.map((color, index) => (
+								<TouchableOpacity
+									key={index}
+									style={[
+										styles.colorButton,
+										{ backgroundColor: color.color },
+										selectedColor === color.color && styles.selectedColorButton,
+									]}
+									onPress={() => handleColorSelection(color.color)}
+								/>
+							))}
+						</ScrollView>
+					</View>
 				</KeyboardAvoidingView>
 			</Modal>
 
@@ -334,20 +369,12 @@ const Template = ({ navigation }) => {
 				animationType="slide"
 				animationIn="slideInUp"
 				animationOut="slideOutDown"
-				style={{ backgroundColor: selectedPost?.color, flex: 1 }}
 			>
 				<KeyboardAvoidingView style={styles.modalContainer}>
-					<View
-						style={{
-							flex: 1,
-							backgroundColor: "white",
-							minWidth: "100%",
-							bottom: 80,
-						}}
-					>
+					<View style={{ flex: 1, backgroundColor: "white", minWidth: "100%" }}>
 						<ScrollView
 							style={[
-								styles.postDetailContainer,
+								styles.postContainer,
 								{ backgroundColor: selectedPost?.color },
 							]}
 						>
@@ -400,7 +427,7 @@ const Template = ({ navigation }) => {
 									</TouchableOpacity>
 								</View>
 							</View>
-							{comments.reverse().map((comment, index) => (
+							{comments.map((comment, index) => (
 								<View key={index} style={styles.comment}>
 									<Text style={styles.postText}>{comment.text}</Text>
 									<Text style={[styles.postUsername, { textAlign: "right" }]}>
@@ -441,7 +468,10 @@ const Template = ({ navigation }) => {
 				</KeyboardAvoidingView>
 			</Modal>
 
-			<ScrollView style={styles.postContainer}>
+			<ScrollView
+				style={styles.postContainer}
+				showsVerticalScrollIndicator={false}
+			>
 				{posts.map((post, index) => (
 					<TouchableOpacity key={index} onPress={() => handlePostClick(post)}>
 						<View
@@ -487,14 +517,10 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingTop: 20,
-		paddingBottom: 20,
-		marginTop: 24,
-	},
-	addIcon: {
-		zIndex: 999,
+		marginBottom: 85,
 	},
 	header: {
-		top: 20,
+		top: 40,
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
@@ -502,27 +528,45 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 		marginHorizontal: 20,
 	},
+	modalHeader: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		position: "relative",
+		zIndex: 1,
+		marginHorizontal: 20,
+	},
+	addIcon: {
+		zIndex: 999,
+	},
 	modalContainer: {
 		flex: 1,
 		justifyContent: "space-between",
 		alignItems: "center",
 		backgroundColor: "white",
 		paddingVertical: 20,
-		top: 40,
+		paddingTop: 80,
+	},
+	postModalContainer: {
+		flex: 1,
+		justifyContent: "space-between",
+		backgroundColor: "white",
+		paddingVertical: 20,
+		paddingTop: 60,
 	},
 	input: {
 		width: "99%",
 		height: "50%",
-		borderWidth: 1,
-		borderColor: "gray",
-		marginBottom: 10,
+		borderBottomWidth: 1,
+		borderColor: "white",
 		paddingHorizontal: 10,
 		textAlignVertical: "top",
+		color: "white",
 	},
 	buttonContainer: {
 		flexDirection: "row",
-		justifyContent: "space-between",
-		marginBottom: 10,
+		justifyContent: "space-evenly",
+		marginVertical: 10,
 	},
 	colorPickerScrollContainer: {
 		alignItems: "center",
@@ -533,29 +577,43 @@ const styles = StyleSheet.create({
 		height: 30,
 		borderRadius: 15,
 		marginHorizontal: 5,
+		borderWidth: 1,
+		borderColor: "white",
 	},
 	selectedColorButton: {
 		width: 50,
 		height: 50,
 		borderRadius: 25,
 		marginHorizontal: 5,
+		shadowColor: "rgba(0, 0, 0, 0.3)", // Schattenfarbe
+		shadowOffset: {
+			width: 1,
+			height: 5,
+		},
+		shadowOpacity: 1,
+		shadowRadius: 2,
+		elevation: 2, // Für Android-Schatten
 	},
 	postContainer: {
 		flex: 1,
-		top: 32,
-		marginBottom: 100,
-	},
-	postDetailContainer: {
-		flex: 1,
-		top: 80,
-		marginBottom: 100,
+		top: 48,
+		marginBottom: 52,
 	},
 	post: {
 		flexDirection: "column",
-		marginBottom: 10,
+		borderRadius: 10,
+		margin: 5,
 		padding: 10,
 		minHeight: 100,
 		justifyContent: "space-between",
+		shadowColor: "rgba(0, 0, 0, 0.2)", // Schattenfarbe
+		shadowOffset: {
+			width: 0,
+			height: 5,
+		},
+		shadowOpacity: 1,
+		shadowRadius: 2,
+		elevation: 2, // Für Android-Schatten
 	},
 	postFooter: {
 		flexDirection: "row",
@@ -629,6 +687,7 @@ const styles = StyleSheet.create({
 		borderBottomColor: "rgb(255,255,255)",
 	},
 	comment: {
+		padding: 5,
 		marginTop: 10,
 		marginBottom: 10,
 		borderBottomWidth: 1,
@@ -636,4 +695,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default Template;
+export default Yell;

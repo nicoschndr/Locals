@@ -376,7 +376,7 @@ export default function Chatbot({ route }) {
 				</TouchableOpacity>
 				<Text
 					style={{
-						fontSize: 34,
+						fontSize: 24,
 						fontWeight: "bold",
 					}}
 				>

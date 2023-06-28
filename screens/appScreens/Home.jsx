@@ -19,12 +19,15 @@ import { AppleCard } from "react-native-apple-card-views";
 import AppleHeader from "react-native-apple-header";
 import { Divider, SocialIcon } from "react-native-elements";
 import FirestoreContext from "../../context/FirestoreContext";
+import { set } from "react-native-reanimated";
 
 const HomeScreen = ({ navigation }) => {
 	const [users, setUsers] = useState([]);
 	const [search, setSearch] = useState("");
 	const [refreshing, setRefreshing] = useState(false);
 	const [showSearch, setShowSearch] = useState(false);
+	const [categories, setCategories] = useState([]);
+	const [activeEvents, setActiveEvents] = useState([]);
 
 	const { events } = useContext(FirestoreContext);
 	// create contest for events
@@ -32,6 +35,7 @@ const HomeScreen = ({ navigation }) => {
 
 	useEffect(() => {
 		getUsers();
+		filterEventsByCategory(events);
 	}, []);
 
 	function getUsers() {
@@ -62,22 +66,28 @@ const HomeScreen = ({ navigation }) => {
 			});
 	};
 
-	// const getActiveEvents = useMemo(() => {
-	// 	return () => {
-	// 		firestore
-	// 			.collection("events")
-	// 			//where date >= today
-	// 			.where("date", ">=", new Date())
-	// 			.orderBy("date", "asc")
-	// 			.onSnapshot((snapshot) => {
-	// 				const events = snapshot.docs.map((doc) => ({
-	// 					id: doc.id,
-	// 					...doc.data(),
-	// 				}));
-	// 				setEvents(events);
-	// 			});
-	// 	};
-	// }, []);
+	const filterEventsByCategory = () => {
+		const categoriesMap = {};
+		events.forEach((event) => {
+			const { category } = event;
+			categoriesMap[category] = event;
+		});
+
+		const filteredCategories = Object.values(categoriesMap);
+		setCategories(filteredCategories);
+	};
+
+	const getActiveEvents = useMemo(() => {
+		return events.filter((event) => {
+			const date = event.date?.toDate()?.toLocaleDateString();
+			const today = new Date().toLocaleDateString();
+			return date >= today;
+		});
+	}, [events]);
+
+	useEffect(() => {
+		setActiveEvents(getActiveEvents);
+	}, [getActiveEvents]);
 
 	const handleRefresh = () => {
 		setRefreshing(true);
@@ -135,11 +145,11 @@ const HomeScreen = ({ navigation }) => {
 				/>
 				<View
 					style={{
-						marginRight: 16,
 						alignItems: "center",
 						flexDirection: "row",
 						justifyContent: "space-between",
 						alignSelf: "center",
+						right: 10,
 					}}
 				>
 					<View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -221,6 +231,8 @@ const HomeScreen = ({ navigation }) => {
 				refreshControl={
 					<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
 				}
+				showsHorizontalScrollIndicator={false}
+				showsVerticalScrollIndicator={false}
 			>
 				<ScrollView
 					contentContainerStyle={{
@@ -228,8 +240,11 @@ const HomeScreen = ({ navigation }) => {
 						marginTop: 12,
 					}}
 					horizontal
+					show={false}
+					showsHorizontalScrollIndicator={false}
+					showsVerticalScrollIndicator={false}
 				>
-					{FilteredEvents.map((event) => (
+					{activeEvents.map((event) => (
 						<LocalsEventCard
 							key={event.id}
 							title={event.title}
@@ -237,7 +252,7 @@ const HomeScreen = ({ navigation }) => {
 								?.toDate()
 								?.toLocaleDateString("de-DE", shortDate)}
 							location={event.address}
-							// image={event.imageUrl}
+							image={event.imageUrl}
 							category={event.title}
 							onPress={() => navigation.navigate("EventDetails", { event })}
 							style={{ marginRight: 24 }}
@@ -266,13 +281,16 @@ const HomeScreen = ({ navigation }) => {
 							margin: 24,
 						}}
 					>
-						{events.map((event) => (
+						{/* filter event categories  */}
+
+						{categories.map((event) => (
 							<LocalsEventCard
 								key={event.id}
 								title={event.category}
 								category={event.category}
 								onPress={() => navigation.navigate("Category", { event })}
 								style={{ marginRight: 24 }}
+								image={event.imageUrl}
 								small
 							/>
 						))}
@@ -299,7 +317,7 @@ const HomeScreen = ({ navigation }) => {
 									?.toDate()
 									?.toLocaleDateString("de-DE", shortDate)}
 								location={event.address}
-								// image={event.imageUrl}
+								image={event.imageUrl}
 								category={event.title}
 								onPress={() => navigation.navigate("EventDetails", { event })}
 								style={{ marginBottom: 24 }}
