@@ -18,7 +18,8 @@ import EventDetails from "./appScreens/EventDetails";
 import EditPost from "./appScreens/EditPost";
 import Follower from "./appScreens/Follower";
 import Chatbot from "./appScreens/Chatbot";
-import Yelling from	"./appScreens/Yelling"
+import Yelling from "./appScreens/Yelling";
+import Categories from "./appScreens/Categories";
 
 import { auth } from "../firebase";
 import { Dimensions } from "react-native";
@@ -69,6 +70,7 @@ const MainStackNavigator = () => {
 			<Stack.Screen name="EventDetails" component={EventDetails} />
 			<Stack.Screen name="EditPost" component={EditPost} />
 			<Stack.Screen name="Yelling" component={Yelling} />
+			<Stack.Screen name="Categories" component={Categories} />
 		</Stack.Navigator>
 	);
 };
@@ -101,13 +103,17 @@ function ProfileDrawerScreen() {
 					drawerItemStyle: { display: "none" },
 					unmountOnBlur: true,
 				}}
-				name="EventDetails" component={EventDetails} />
+				name="EventDetails"
+				component={EventDetails}
+			/>
 			<Drawer.Screen
 				options={{
 					drawerItemStyle: { display: "none" },
 					unmountOnBlur: true,
 				}}
-				name="EditPost" component={EditPost} />
+				name="EditPost"
+				component={EditPost}
+			/>
 			<Drawer.Screen name="Settings" component={Settings} />
 			<Drawer.Screen
 				options={{

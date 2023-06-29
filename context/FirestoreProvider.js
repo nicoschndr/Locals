@@ -6,6 +6,7 @@ import { firestore } from "../firebase";
 const FirestoreProvider = ({ children }) => {
 	const [events, setEvents] = useState([]);
 	const [users, setUser] = useState(null);
+	const [categories, setCategories] = useState([]);
 
 	const getEvents = async () => {
 		const snapshot = await firestore

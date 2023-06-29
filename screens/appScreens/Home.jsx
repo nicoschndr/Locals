@@ -26,18 +26,40 @@ const HomeScreen = ({ navigation }) => {
 	const [search, setSearch] = useState("");
 	const [refreshing, setRefreshing] = useState(false);
 	const [showSearch, setShowSearch] = useState(false);
-	const [categories, setCategories] = useState([]);
 	const [activeEvents, setActiveEvents] = useState([]);
+	const [categories, setCategories] = useState([]);
 
 	const { events } = useContext(FirestoreContext);
+
 	// create contest for events
 	const { setEvents } = useContext(FirestoreContext);
 
 	useEffect(() => {
-		getUsers();
 		filterEventsByCategory(events);
+		getUsers();
+		setActiveEvents(getActiveEvents);
 	}, []);
 
+	const filterEventsByCategory = () => {
+		firestore
+			.collection("events")
+			.where("date", ">=", new Date())
+			.orderBy("date", "asc")
+			.onSnapshot((snapshot) => {
+				const categories = snapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+
+				const categoriesMap = {};
+				categories.forEach((event) => {
+					const { category } = event;
+					categoriesMap[category] = event;
+				});
+				const filteredCategories = Object.values(categoriesMap);
+				setCategories(filteredCategories);
+			});
+	};
 	function getUsers() {
 		firestore
 			.collection("users")
@@ -66,17 +88,6 @@ const HomeScreen = ({ navigation }) => {
 			});
 	};
 
-	const filterEventsByCategory = () => {
-		const categoriesMap = {};
-		events.forEach((event) => {
-			const { category } = event;
-			categoriesMap[category] = event;
-		});
-
-		const filteredCategories = Object.values(categoriesMap);
-		setCategories(filteredCategories);
-	};
-
 	const getActiveEvents = useMemo(() => {
 		return events.filter((event) => {
 			const date = event.date?.toDate()?.toLocaleDateString();
@@ -84,10 +95,6 @@ const HomeScreen = ({ navigation }) => {
 			return date >= today;
 		});
 	}, [events]);
-
-	useEffect(() => {
-		setActiveEvents(getActiveEvents);
-	}, [getActiveEvents]);
 
 	const handleRefresh = () => {
 		setRefreshing(true);
@@ -244,7 +251,7 @@ const HomeScreen = ({ navigation }) => {
 					showsHorizontalScrollIndicator={false}
 					showsVerticalScrollIndicator={false}
 				>
-					{activeEvents.map((event) => (
+					{FilteredEvents.map((event) => (
 						<LocalsEventCard
 							key={event.id}
 							title={event.title}
@@ -288,7 +295,11 @@ const HomeScreen = ({ navigation }) => {
 								key={event.id}
 								title={event.category}
 								category={event.category}
-								onPress={() => navigation.navigate("Category", { event })}
+								onPress={() =>
+									navigation.navigate("Categories", {
+										category: event.category,
+									})
+								}
 								style={{ marginRight: 24 }}
 								image={event.imageUrl}
 								small
