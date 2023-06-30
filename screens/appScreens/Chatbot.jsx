@@ -7,9 +7,6 @@ import {
 	StyleSheet,
 	ScrollView,
 	Image,
-	Animated,
-	Alert,
-	Button,
 	KeyboardAvoidingView,
 } from "react-native";
 import { firebase } from "../../firebase";
@@ -36,8 +33,13 @@ export default function Chatbot({ route }) {
 
 	// Diese Funktion wird aufgerufen, wenn der Benutzer auf das Symbol klickt, um den Radius einzustellen
 	const openRadiusPicker = () => {
-		setIsRadiusPickerVisible(true);
+		try {
+			setIsRadiusPickerVisible(true);
+		} catch (error) {
+			console.error(error);
+		}
 	};
+
 
 	// Diese Funktion wird aufgerufen, wenn der Benutzer den "Set" Button drückt, um den neuen Radius zu bestätigen
 	const closeRadiusPicker = () => {
@@ -385,7 +387,7 @@ export default function Chatbot({ route }) {
 						onValueChange={(value) => setRadius(value)}
 						style={styles.slider}
 					/>
-					<Text style={{ fontWeight: "bold", fontSize: "18px" }}>
+					<Text style={{ fontWeight: "bold", fontSize: 18 }}>
 						{radius}km
 					</Text>
 					<LocalsButton
