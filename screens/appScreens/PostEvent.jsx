@@ -61,8 +61,8 @@ const PostEvent = ({ navigation }) => {
 		requestLocationPermission();
 	}, []);
 
-/*
-	const requestLocationPermission2 = async () => {
+
+	const requestLocationPermission = async () => {
 		if (Platform.OS === "android") {
 			try {
 				const granted = await PermissionsAndroid.request(
@@ -81,10 +81,10 @@ const PostEvent = ({ navigation }) => {
 		}
 	};
 
- */
 
 
-	const requestLocationPermission = async () => {
+
+	const getCurrentLocation = async () => {
 		try {
 			let { status } = await Location.requestForegroundPermissionsAsync();
 			if (status !== "granted") {
@@ -202,7 +202,7 @@ const PostEvent = ({ navigation }) => {
 
 
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior="padding">
+		<KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
 			<ScrollView
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps="always"
