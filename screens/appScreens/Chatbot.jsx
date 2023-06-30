@@ -328,7 +328,7 @@ export default function Chatbot({ route }) {
 
 			return (
 				eventDistance <= numericRadius &&
-				eventKeywords.some((keyword) => keywords.includes(keyword))
+				Array.isArray(eventKeywords) && eventKeywords.some((keyword) => keywords.includes(keyword))
 			);
 		});
 	};
