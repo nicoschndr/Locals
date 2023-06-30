@@ -363,8 +363,7 @@ export default function Chatbot({ route }) {
 	};
 
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}
-		>
+		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""} keyboardVerticalOffset={10}>
 			<View style={styles.headerContainer}>
 				<AppleHeader
 					largeTitle={"Guide"}
@@ -494,7 +493,7 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		flex: 1,
-		padding: 20,
+		padding: 10,
 		justifyContent: "flex-end", // Eingabe am unteren Bildschirmrand
 		marginBottom: 80,
 	},
