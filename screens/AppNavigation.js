@@ -239,6 +239,10 @@ function AuthScreen() {
 		>
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Register" component={Register} />
+			<Stack.Screen name="Home" component={HomeScreen} options={{
+				drawerItemStyle: { display: "none" },
+				unmountOnBlur: true,
+			}}/>
 		</Stack.Navigator>
 	);
 }
