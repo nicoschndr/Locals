@@ -129,7 +129,6 @@ const Register = ({ navigation }) => {
 				address: address,
 				imageUrl: imageUrl,
 				username: username,
-				birthday: birthday,
 				friends: {},
 				friendRequests: {},
 				follower: [],
@@ -351,7 +350,6 @@ const styles = StyleSheet.create({
 	name: {
 		marginTop: 10,
 		width: "48%",
-		backgroundColor: "transparent",
 		borderBottomColor: "white",
 		borderBottomWidth: StyleSheet.hairlineWidth,
 		height: 40,
@@ -375,6 +373,7 @@ const styles = StyleSheet.create({
 	username: {
 		marginTop: 10,
 		color: "#fff",
+		backgroundColor: "transparent",
 	},
 	google: {
 		justifyContent: "center",
@@ -382,9 +381,6 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 	},
 	email: {
-		backgroundColor: "transparent",
-	},
-	username: {
 		backgroundColor: "transparent",
 	},
 	form: {
