@@ -202,7 +202,7 @@ const PostEvent = ({ navigation }) => {
 
 
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
+		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
 			<ScrollView
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps="always"
@@ -319,7 +319,7 @@ const PostEvent = ({ navigation }) => {
 						</View>
 					</View>
 				</View>
-				<KeyboardAvoidingView style={styles.inputContainer}>
+				<KeyboardAvoidingView style={styles.inputContainer} behavior={Platform.OS === "ios" ? "padding" : ""}>
 					<Text>Category</Text>
 					<DropDownPicker
 						open={open}

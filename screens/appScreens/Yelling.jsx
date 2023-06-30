@@ -1,4 +1,15 @@
-import { View, Text, Button, StyleSheet, TouchableOpacity, Modal, TextInput, ScrollView, KeyboardAvoidingView } from "react-native";
+import {
+	View,
+	Text,
+	Button,
+	StyleSheet,
+	TouchableOpacity,
+	Modal,
+	TextInput,
+	ScrollView,
+	KeyboardAvoidingView,
+	Platform
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import {Ionicons, MaterialIcons} from "@expo/vector-icons";
 import { firebase, firestore, auth } from "../../firebase";
@@ -274,7 +285,8 @@ const Yell = () => {
 
 
 			<Modal visible={modalVisible} animationType="slide">
-				<KeyboardAvoidingView style={[styles.modalContainer, { backgroundColor: selectedColor }]} behavior="padding">
+
+				<KeyboardAvoidingView style={[styles.modalContainer, { backgroundColor: selectedColor }]} behavior={Platform.OS === "ios" ? "padding" : ""}>
 					<TextInput
 						value={textInput}
 						onChangeText={setTextInput}

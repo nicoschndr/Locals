@@ -156,7 +156,7 @@ const Register = ({ navigation }) => {
 	}, []);
 
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior="padding">
+		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
 			<ImageBackground
 				source={require("../../assets/BackGround(h).png")}
 				style={{ alignItems: "center", flex: 1, width: "100%" }}

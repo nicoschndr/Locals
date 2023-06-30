@@ -7,7 +7,7 @@ import {
 	StyleSheet,
 	ScrollView,
 	Image,
-	KeyboardAvoidingView,
+	KeyboardAvoidingView, Platform,
 } from "react-native";
 import { firebase } from "../../firebase";
 import { useNavigation } from "@react-navigation/native";
@@ -363,7 +363,8 @@ export default function Chatbot({ route }) {
 	};
 
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior="padding">
+		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}
+		>
 			<View style={styles.headerContainer}>
 				<AppleHeader
 					largeTitle={"Guide"}
