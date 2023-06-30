@@ -10,7 +10,7 @@ import {
 	TextInput,
 	TouchableOpacity,
 	KeyboardAvoidingView,
-	ActivityIndicator, Platform, PermissionsAndroid,
+	ActivityIndicator, Platform, PermissionsAndroid, FlatList,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { CheckBox } from "react-native-elements";
@@ -237,37 +237,39 @@ const PostEvent = ({ navigation }) => {
 					/>
 				</View>
 
-				<View style={styles.inputContainer}>
-					<Text>
-						Address
-					</Text>
-					<View style={{ flexDirection: "row", alignItems: "center" }}>
-						<GooglePlacesAutocomplete
-							fetchDetails={false}
-							currentLocation={false}
-							currentLocationLabel="Current location"
-							listViewDisplayed={false}
-							onPress={(data, details = null) => {
-								setAddress(details.formatted_address);
-								setLongitude(details.geometry.location.lng);
-								setLatitude(details.geometry.location.lat);
-							}}
-							query={{
-								key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
-							}}
-							styles={{
-								textInput: styles.addressInput,
-								listView: {
-									width: "90%", // Set the width of the suggestions list
-								},
-								container: {
-									width: "100%", // Set the width of the container
-								},
-							}}
-						/>
-
-					</View>
-				</View>
+				<FlatList
+					data={[{ key: 'uniqueKey' }]} // Pass an array of objects to `data`, it could be your state or prop
+					renderItem={({ item }) => (
+						<View style={styles.inputContainer}>
+							<Text>Address</Text>
+							<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+								<GooglePlacesAutocomplete
+									fetchDetails={true}
+									currentLocation={true}
+									currentLocationLabel='Current location'
+									listViewDisplayed={false}
+									onPress={(data, details = null) => {
+										setAddress(details.formatted_address);
+										setLongitude(details.geometry.location.lng);
+										setLatitude(details.geometry.location.lat);
+									}}
+									query={{
+										key: 'AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI',
+									}}
+									styles={{
+										textInput: styles.addressInput,
+										listView: {
+											width: '90%', // Set the width of the suggestions list
+										},
+										container: {
+											width: '100%', // Set the width of the container
+										},
+									}}
+								/>
+							</View>
+						</View>
+					)}
+				/>
 
 				<View style={styles.inputContainer}>
 					<Text>Group Size</Text>
