@@ -300,6 +300,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		marginHorizontal: 20,
+		marginBottom: 80,
 	},
 	titleBar: {
 		flexDirection: "row",

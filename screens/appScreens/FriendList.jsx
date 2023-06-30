@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, Button, TextInput, Modal, TouchableOpacity, Alert} from 'react-native';
+import {View, Text, Button, TextInput, Modal, TouchableOpacity, Alert, StyleSheet} from 'react-native';
 import { firebase } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import {Ionicons} from "@expo/vector-icons";
@@ -159,7 +159,8 @@ function FriendList({navigation}) {
 		navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
 	}
 	return (
-		<View>
+		<View style={{flex: 1,
+			marginBottom: 80,}}>
 			<TouchableOpacity onPress={handleOpenRequests} style={{ position: 'absolute', top: 10, right: 10, zIndex: 999 }}>
 				<Ionicons name="notifications-outline" size={24} color="black" />
 				{friendRequests.length > 0 && (
@@ -253,6 +254,9 @@ function FriendList({navigation}) {
 
 		</View>
 	);
+
 }
+
+
 
 export default FriendList;

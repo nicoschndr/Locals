@@ -331,7 +331,7 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		marginBottom: 85,
+		marginBottom: 80,
 	},
 	header: {
 		flexDirection: "row",

@@ -184,12 +184,16 @@ function AppNavigation() {
 						tabBarInactiveTintColor: "#734e61",
 						headerShown: false,
 						tabBarStyle: {
-							backgroundColor: "transparent",
+							backgroundColor: "white",
 							borderTopWidth: 0,
-							position: "absolute",
+							position: "absolute", // Position auf "absolute" setzen
 							bottom: 0,
+							left: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
+							right: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
 							height: 80,
+							width: Dimensions.get('window').width, // Gerätebreite setzen
 						},
+
 					})}
 				>
 					<Tab.Screen

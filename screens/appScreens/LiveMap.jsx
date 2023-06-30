@@ -862,6 +862,7 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		flex: 1,
+		marginBottom: 80
 	},
 	map: {
 		...StyleSheet.absoluteFillObject,
