@@ -11,7 +11,8 @@ import {
 import React, { useState, useEffect } from "react";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import LocalsButton from "../../components/LocalsButton";
-import { auth, firestore } from "../../firebase";
+import { firestore } from "../../firebase";
+import { auth } from "../../firebase";
 import { useNavigation } from "@react-navigation/native";
 import { CheckBox, Divider } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,22 +22,6 @@ const Login = ({ navigation }) => {
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 
-	useEffect(() => {
-		const unsubscribe = auth.onAuthStateChanged((user) => {
-			if (user) {
-				// Der Benutzer ist angemeldet
-				// Hier können Sie den Benutzer zu einer bestimmten Seite weiterleiten
-				navigation.navigate('Home');
-			} else {
-				// Der Benutzer ist abgemeldet
-				// Hier können Sie den Benutzer zu Ihrer Login-Seite weiterleiten
-				navigation.navigate('Login');
-			}
-		});
-
-		// Aufräumen
-		return unsubscribe;
-	}, []);
 	const login = () => {
 		// Überprüfen, ob die Eingabe eine E-Mail-Adresse ist
 		const isEmail = /\S+@\S+\.\S+/.test(emailOrUsername);
@@ -84,7 +69,7 @@ const Login = ({ navigation }) => {
 		if (isEmail) {
 			// Passwort zurücksetzen
 			auth
-				.sendPasswordResetEmail(emailOrUsername)
+				.sendPasswordResetEmail(JSON.stringify(emailOrUsername))
 				.then(() => {
 					Alert.alert(
 						"Geschaft!",
@@ -105,7 +90,7 @@ const Login = ({ navigation }) => {
 					if (!querySnapshot.empty) {
 						const user = querySnapshot.docs[0];
 						const email = user.data().email;
-						return auth.sendPasswordResetEmail(email);
+						return auth.sendPasswordResetEmail(JSON.stringify(email));
 					} else {
 						throw new Error("Ungültiger Benutzername oder E-Mail-Adresse");
 					}

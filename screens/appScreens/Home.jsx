@@ -19,6 +19,7 @@ import { AppleCard } from "react-native-apple-card-views";
 import AppleHeader from "react-native-apple-header";
 import { Divider, SocialIcon } from "react-native-elements";
 import FirestoreContext from "../../context/FirestoreContext";
+import { set } from "react-native-reanimated";
 
 const HomeScreen = ({ navigation }) => {
 	const [users, setUsers] = useState([]);
@@ -26,12 +27,39 @@ const HomeScreen = ({ navigation }) => {
 	const [refreshing, setRefreshing] = useState(false);
 	const [showSearch, setShowSearch] = useState(false);
 	const [username, setUsername] = useState("");
+	const [categories, setCategories] = useState([]);
+	const [nearby, setNearby] = useState([]);
 
 	const { events } = useContext(FirestoreContext);
 
+	// create contest for events
+	const { setEvents } = useContext(FirestoreContext);
+
 	useEffect(() => {
+		filterEventsByCategory(events);
 		getUsers();
 	}, []);
+
+	const filterEventsByCategory = () => {
+		firestore
+			.collection("events")
+			.where("date", ">=", new Date())
+			.orderBy("date", "asc")
+			.onSnapshot((snapshot) => {
+				const categories = snapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+
+				const categoriesMap = {};
+				categories.forEach((event) => {
+					const { category } = event;
+					categoriesMap[category] = event;
+				});
+				const filteredCategories = Object.values(categoriesMap);
+				setCategories(filteredCategories);
+			});
+	};
 
 	function getUsers() {
 		firestore
@@ -48,7 +76,10 @@ const HomeScreen = ({ navigation }) => {
 
 	const handleRefresh = () => {
 		setRefreshing(true);
-		setRefreshing(false);
+		updateEvents();
+		setTimeout(() => {
+			setRefreshing(false);
+		}, 1000);
 	};
 
 	const filterEvents = (events, search) => {
@@ -106,9 +137,9 @@ const HomeScreen = ({ navigation }) => {
 		return () => unsubscribe();
 	}, []);
 
-	const topEvents = FilteredEvents
-		.sort((a, b) => b.impressions - a.impressions)
-		.slice(0, 5);
+	const topEvents = FilteredEvents.sort(
+		(a, b) => b.impressions - a.impressions
+	).slice(0, 5);
 
 	const userFriendsEvents = FilteredEvents.filter((event) =>
 		users.find(
@@ -119,10 +150,7 @@ const HomeScreen = ({ navigation }) => {
 		)
 	);
 
-
-
-	userFriendsEvents.slice(0, 5)
-
+	userFriendsEvents.slice(0, 5);
 
 	const combinedEvents = [...topEvents, ...userFriendsEvents];
 
@@ -136,9 +164,29 @@ const HomeScreen = ({ navigation }) => {
 	let displayedEvents = uniqueEvents.slice(0, 10);
 
 	if (displayedEvents.length < 10) {
-		const remainingEvents = FilteredEvents.filter((event) => !uniqueEvents.includes(event));
-		displayedEvents = [...displayedEvents, ...remainingEvents.slice(0, 10 - displayedEvents.length)];
+		const remainingEvents = FilteredEvents.filter(
+			(event) => !uniqueEvents.includes(event)
+		);
+		displayedEvents = [
+			...displayedEvents,
+			...remainingEvents.slice(0, 10 - displayedEvents.length),
+		];
 	}
+
+	const updateEvents = () => {
+		firestore
+			.collection("events")
+			//where date >= today
+			.where("date", ">=", new Date())
+			.orderBy("date", "asc")
+			.onSnapshot((snapshot) => {
+				const events = snapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+				setEvents(events);
+			});
+	};
 
 	return (
 		<View style={styles.container}>
@@ -152,11 +200,11 @@ const HomeScreen = ({ navigation }) => {
 				/>
 				<View
 					style={{
-						marginRight: 16,
 						alignItems: "center",
 						flexDirection: "row",
 						justifyContent: "space-between",
 						alignSelf: "center",
+						right: 10,
 					}}
 				>
 					<View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -202,11 +250,7 @@ const HomeScreen = ({ navigation }) => {
 						style={styles.postButton}
 						onPress={() => navigation.navigate("Chatbot")}
 					>
-						<Ionicons
-							name="chatbox-ellipses-outline"
-							size={28}
-							color="black"
-						/>
+						<Ionicons name="chatbox-ellipses-outline" size={28} color="black" />
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -226,16 +270,23 @@ const HomeScreen = ({ navigation }) => {
 				refreshControl={
 					<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
 				}
+				showsHorizontalScrollIndicator={false}
+				showsVerticalScrollIndicator={false}
 			>
 				<ScrollView
 					contentContainerStyle={{ margin: 24, marginTop: 12 }}
 					horizontal
+					show={false}
+					showsHorizontalScrollIndicator={false}
+					showsVerticalScrollIndicator={false}
 				>
 					{displayedEvents.map((event) => (
 						<View key={event.id} style={{ marginRight: 24 }}>
 							<LocalsEventCard
 								title={event.title}
-								date={event.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}
+								date={event.date
+									?.toDate()
+									?.toLocaleDateString("de-DE", shortDate)}
 								location={event.address}
 								category={event.title}
 								onPress={() => navigation.navigate("EventDetails", { event })}
@@ -249,17 +300,30 @@ const HomeScreen = ({ navigation }) => {
 									<Ionicons name="people-outline" size={30} color="white" />
 								</View>
 							) : (
-								<View style={[styles.friendEventMarker, { display: "flex", flexDirection: "row", alignItems: "center" }]}>
+								<View
+									style={[
+										styles.friendEventMarker,
+										{
+											display: "flex",
+											flexDirection: "row",
+											alignItems: "center",
+										},
+									]}
+								>
 									<Ionicons name="flame-outline" size={30} color="white" />
-									<Text style={{ color: "white", marginLeft: 4, fontWeight: "bold" }}>
+									<Text
+										style={{
+											color: "white",
+											marginLeft: 4,
+											fontWeight: "bold",
+										}}
+									>
 										{event.impressions}
 									</Text>
 								</View>
 							)}
 						</View>
 					))}
-
-
 				</ScrollView>
 
 				<View>
@@ -282,13 +346,18 @@ const HomeScreen = ({ navigation }) => {
 							margin: 24,
 						}}
 					>
-						{FilteredEvents.map((event) => (
+						{categories.map((event) => (
 							<LocalsEventCard
 								key={event.id}
 								title={event.category}
 								category={event.category}
-								onPress={() => navigation.navigate("Category", { event })}
+								onPress={() =>
+									navigation.navigate("Categories", {
+										category: event.category,
+									})
+								}
 								style={{ marginRight: 24 }}
+								image={event.imageUrl}
 								small
 							/>
 						))}
@@ -315,7 +384,7 @@ const HomeScreen = ({ navigation }) => {
 									?.toDate()
 									?.toLocaleDateString("de-DE", shortDate)}
 								location={event.address}
-								// image={event.imageUrl}
+								image={event.imageUrl}
 								category={event.title}
 								onPress={() => navigation.navigate("EventDetails", { event })}
 								style={{ marginBottom: 24 }}
@@ -362,7 +431,7 @@ const styles = StyleSheet.create({
 		resizeMode: "contain",
 		left: 10,
 	},
-	friendEventMarker:{
+	friendEventMarker: {
 		fontWeight: "bold",
 		shadowColor: "rgba(236,64,75,0.2)", // Schattenfarbe
 		shadowOffset: {
@@ -378,7 +447,7 @@ const styles = StyleSheet.create({
 		shadowOpacity: 1,
 		shadowRadius: 2,
 		elevation: 2, // Für Android-Schatten
-	}
+	},
 });
 
 export default HomeScreen;

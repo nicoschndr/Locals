@@ -2,11 +2,11 @@
 // import "firebase/compat/auth";
 // import "firebase/compat/firestore";
 // import "firebase/compat/storage";
-// import { initializeAuth } from "firebase/auth";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { initializeAuth } from "firebase/auth";
 // import { getReactNativePersistence } from "firebase/auth";
 
-// // Your web app's Firebase configuration
+// Your web app's Firebase configuration
 // const firebaseConfig = {
 // 	apiKey: "AIzaSyAWl2xAw-XB8kyLnLcquMoImngwknLxuDU",
 // 	authDomain: "locals-ip2.firebaseapp.com",
@@ -23,6 +23,7 @@
 // } else {
 // 	app = firebase.app();
 // }
+
 // const auth = initializeAuth(app, {
 // 	persistence: getReactNativePersistence(AsyncStorage),
 // });

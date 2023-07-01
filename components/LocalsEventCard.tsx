@@ -17,28 +17,22 @@ interface LocalsEventCardProps {
 	image: string;
 	style: any;
 	onPress: () => void;
-	small: boolean;
-	slim: boolean;
+	small?: boolean;
+	slim?: boolean;
 	category?: string;
 	profile?: boolean;
 }
 
 const LocalsEventCard = (props: LocalsEventCardProps) => {
-	const image = props.category
-		? {
-				uri: "https://source.unsplash.com/random/?" + props.category,
-				cache: FastImage.cacheControl.cacheOnly,
-				priority: FastImage.priority.high,
-		  }
-		: ({
-				uri: props.image || "https://source.unsplash.com/random/?city,night",
-				cache: FastImage.cacheControl.cacheOnly,
-				priority: FastImage.priority.high,
-		  } as unknown as ImageSourcePropType & { cache: Source["cache"] });
+	const image = {
+		// uri: props.image,
+		uri: "https://source.unsplash.com/random/1920x1080/?nature",
+		cache: FastImage.cacheControl.immutable,
+	} as unknown as ImageSourcePropType;
 
 	// Prefetching the image on component mount
 	useEffect(() => {
-		Image.prefetch(image.uri);
+		Image.prefetch(props.image);
 	}, []);
 
 	return (

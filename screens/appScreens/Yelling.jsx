@@ -8,13 +8,11 @@ import {
 	TextInput,
 	ScrollView,
 	KeyboardAvoidingView,
-	Platform
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import {Ionicons, MaterialIcons} from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { firebase, firestore, auth } from "../../firebase";
-import * as Location from 'expo-location';
-
+import * as Location from "expo-location";
 
 const formatTimestamp = (timestamp) => {
 	if (timestamp && timestamp.toDate) {
@@ -44,9 +42,7 @@ const formatTimestamp = (timestamp) => {
 	}
 };
 
-
-
-const Yell = () => {
+const Yell = ({ navigation }) => {
 	const [textInput, setTextInput] = useState("");
 	const [modalVisible, setModalVisible] = useState(false);
 	const [modalSelectVisible, setModalSelectVisible] = useState(false);
@@ -58,7 +54,6 @@ const Yell = () => {
 	const [commentInput, setCommentInput] = useState("");
 	const [comments, setComments] = useState([]);
 	const [inputHeight, setInputHeight] = useState(0);
-
 
 	const handlePostClick = (post) => {
 		setSelectedPost(post);
@@ -83,7 +78,6 @@ const Yell = () => {
 			return () => unsubscribe();
 		}
 	}, [selectedPost]);
-
 
 	const handleSubmitComment = () => {
 		if (commentInput.trim() !== "") {
@@ -125,7 +119,10 @@ const Yell = () => {
 								reportPost(postId);
 							})
 							.catch((error) => {
-								console.log("Fehler beim Erstellen des 'reports'-Arrays:", error);
+								console.log(
+									"Fehler beim Erstellen des 'reports'-Arrays:",
+									error
+								);
 							});
 					} else {
 						reportPost(postId);
@@ -140,19 +137,18 @@ const Yell = () => {
 	const reportPost = (postId) => {
 		const reportData = {
 			username: username,
-			timestamp: new Date()
+			timestamp: new Date(),
 		};
 
 		firestore
 			.collection("posts")
 			.doc(postId)
 			.update({
-				reports: firebase.firestore.FieldValue.arrayUnion(reportData)
+				reports: firebase.firestore.FieldValue.arrayUnion(reportData),
 			})
 			.then(() => {
 				console.log("Post erfolgreich gemeldet");
-				alert("Yell gemeldet")
-
+				alert("Yell gemeldet");
 			})
 			.catch((error) => {
 				console.log("Fehler beim Melden des Posts:", error);
@@ -199,12 +195,11 @@ const Yell = () => {
 		return () => unsubscribe();
 	}, []);
 
-
 	const submitText = async () => {
 		if (textInput.trim() !== "") {
 			try {
 				const { status } = await Location.requestForegroundPermissionsAsync();
-				if (status === 'granted') {
+				if (status === "granted") {
 					const location = await Location.getCurrentPositionAsync({});
 					const { latitude, longitude } = location.coords;
 
@@ -277,148 +272,233 @@ const Yell = () => {
 		});
 	};
 	useEffect(() => {
-		const randomColor = colorPalette[Math.floor(Math.random() * colorPalette.length)].color;
+		const randomColor =
+			colorPalette[Math.floor(Math.random() * colorPalette.length)].color;
 		setSelectedColor(randomColor);
 	}, [modalVisible]);
 	return (
 		<View style={styles.container}>
-
-
+			<View style={styles.header}>
+				<TouchableOpacity
+					style={styles.goBack}
+					onPress={() => navigation.goBack()}
+				>
+					<Ionicons name="chevron-back" size={30} color="black" />
+				</TouchableOpacity>
+				<Text
+					style={{
+						fontSize: 24,
+						fontWeight: "bold",
+					}}
+				>
+					Community Posts
+				</Text>
+				<TouchableOpacity
+					style={styles.addIcon}
+					onPress={() => setModalVisible(true)}
+				>
+					<Ionicons name="add-circle-outline" size={30} color="black" />
+				</TouchableOpacity>
+			</View>
 			<Modal visible={modalVisible} animationType="slide">
-
-				<KeyboardAvoidingView style={[styles.modalContainer, { backgroundColor: selectedColor }]} behavior={Platform.OS === "ios" ? "padding" : ""}>
-					<TextInput
-						value={textInput}
-						onChangeText={setTextInput}
-						placeholder="Text eingeben"
-						style={styles.input}
-						multiline={true}
-						numberOfLines={5}
-						maxLength={240}
-					/>
-
-					<View style={styles.buttonContainer}>
-						<TouchableOpacity  onPress={() => setModalVisible(false)}>
-							<Ionicons name="close-outline" size={50} color="white" />
+				<KeyboardAvoidingView
+					style={[
+						styles.postModalContainer,
+						{ backgroundColor: selectedColor },
+					]}
+					behavior="padding"
+				>
+					<View style={styles.modalHeader}>
+						<TouchableOpacity
+							style={styles.goBack}
+							onPress={() => setModalVisible(false)}
+						>
+							<Ionicons name="chevron-down" size={30} />
 						</TouchableOpacity>
-						<TouchableOpacity  onPress={submitText}>
-							<Ionicons name="megaphone-outline" size={50} color="white" />
+						<Text style={{ fontSize: 24, fontWeight: "bold" }}>Neuer Post</Text>
+						<TouchableOpacity style={styles.addIcon} onPress={console.log}>
+							<Ionicons
+								name="add-circle-outline"
+								size={30}
+								color="transparent"
+							/>
 						</TouchableOpacity>
 					</View>
+					<View style={{ alignItems: "center" }}>
+						<TextInput
+							value={textInput}
+							onChangeText={setTextInput}
+							placeholder="Text eingeben"
+							style={styles.input}
+							multiline={true}
+							numberOfLines={5}
+							maxLength={240}
+						/>
 
-					<Text style={{fontSize: 20, paddingTop: 90}}>Wählen eine Farbe aus</Text>
-					<ScrollView horizontal contentContainerStyle={styles.colorPickerScrollContainer}>
-						{colorPalette.map((color, index) => (
-							<TouchableOpacity
-								key={index}
-								style={[
-									styles.colorButton,
-									{ backgroundColor: color.color },
-									selectedColor === color.color && styles.selectedColorButton,
-								]}
-								onPress={() => handleColorSelection(color.color)}
-							/>
-						))}
-					</ScrollView>
+						<View style={styles.buttonContainer}>
+							<TouchableOpacity onPress={submitText}>
+								<Ionicons name="megaphone-outline" size={50} color="white" />
+							</TouchableOpacity>
+						</View>
 
+						<Text style={{ fontSize: 20, paddingTop: 90 }}>
+							Wählen eine Farbe aus
+						</Text>
+						<ScrollView
+							horizontal
+							contentContainerStyle={styles.colorPickerScrollContainer}
+						>
+							{colorPalette.map((color, index) => (
+								<TouchableOpacity
+									key={index}
+									style={[
+										styles.colorButton,
+										{ backgroundColor: color.color },
+										selectedColor === color.color && styles.selectedColorButton,
+									]}
+									onPress={() => handleColorSelection(color.color)}
+								/>
+							))}
+						</ScrollView>
+					</View>
 				</KeyboardAvoidingView>
 			</Modal>
-
 
 			<Modal
 				visible={modalSelectVisible}
 				animationType="slide"
 				animationIn="slideInUp"
 				animationOut="slideOutDown"
-
 			>
-				<KeyboardAvoidingView style={styles.modalContainer} >
-					<View style={{flex: 1, backgroundColor: 'white', minWidth: "100%"}}>
+				<KeyboardAvoidingView style={styles.modalContainer}>
+					<View style={{ flex: 1, backgroundColor: "white", minWidth: "100%" }}>
+						<ScrollView
+							style={[
+								styles.postContainer,
+								{ backgroundColor: selectedPost?.color },
+							]}
+						>
+							<View
+								style={[
+									styles.postModal,
+									{ backgroundColor: selectedPost?.color },
+								]}
+							>
+								<View style={styles.postHeader}>
+									<TouchableOpacity
+										style={styles.reportBtn}
+										onPress={() => handleReport(selectedPost?.id)}
+									>
+										<Ionicons name="alert-circle-outline" size={20} />
+									</TouchableOpacity>
+								</View>
 
-					<ScrollView style={[styles.postContainer, { backgroundColor: selectedPost?.color }]}>
+								<View style={styles.postContent}>
+									<Text style={styles.postText}>{selectedPost?.text}</Text>
+								</View>
 
-						<View style={[styles.postModal, { backgroundColor: selectedPost?.color }]}>
-							<View style={styles.postHeader}>
-								<TouchableOpacity style={styles.reportBtn} onPress={()=>handleReport(selectedPost?.id)}>
-									<Ionicons
-										name="alert-circle-outline"
-										size={20}
-									/>
-								</TouchableOpacity>
+								<View style={styles.postFooter}>
+									<Text style={styles.postUsername}>
+										- {selectedPost?.username}
+									</Text>
+
+									<TouchableOpacity
+										style={[
+											styles.likeButton,
+											selectedPost?.likes.includes(username) &&
+												styles.likedButton,
+										]}
+										onPress={() => handleLike(selectedPost?.id)}
+									>
+										<Ionicons
+											name={
+												selectedPost?.likes.includes(username)
+													? "heart"
+													: "heart-outline"
+											}
+											size={16}
+											color={
+												selectedPost?.likes.includes(username) ? "red" : "black"
+											}
+										/>
+										<Text style={styles.likeCount}>
+											{selectedPost?.likes.length}
+										</Text>
+									</TouchableOpacity>
+								</View>
 							</View>
+							{comments.map((comment, index) => (
+								<View key={index} style={styles.comment}>
+									<Text style={styles.postText}>{comment.text}</Text>
+									<Text style={[styles.postUsername, { textAlign: "right" }]}>
+										{comment.username}
+									</Text>
+									<Text style={[styles.postUsername, { textAlign: "right" }]}>
+										{formatTimestamp(comment.timestamp)}
+									</Text>
+								</View>
+							))}
+						</ScrollView>
 
-							<View style={styles.postContent}>
-								<Text style={styles.postText}>{selectedPost?.text}</Text>
-							</View>
-
-							<View style={styles.postFooter}>
-								<Text style={styles.postUsername}>- {selectedPost?.username}</Text>
-
-								<TouchableOpacity
-									style={[styles.likeButton, selectedPost?.likes.includes(username) && styles.likedButton]}
-									onPress={() => handleLike(selectedPost?.id)}
-								>
-									<Ionicons
-										name={selectedPost?.likes.includes(username) ? "heart" : "heart-outline"}
-										size={16}
-										color={selectedPost?.likes.includes(username) ? "red" : "black"}
-									/>
-									<Text style={styles.likeCount}>{selectedPost?.likes.length}</Text>
-								</TouchableOpacity>
-							</View>
+						<View
+							style={[
+								styles.inputContainerComment,
+								{ backgroundColor: "white" },
+							]}
+						>
+							<TextInput
+								style={[
+									styles.inputComment,
+									{ height: Math.min(5 * 18, inputHeight) },
+								]}
+								placeholder="Kommentar hinzufügen"
+								value={commentInput}
+								onChangeText={setCommentInput}
+							/>
+							<TouchableOpacity onPress={handleSubmitComment}>
+								<MaterialIcons name="send" size={24} color="#ec404b" />
+							</TouchableOpacity>
 						</View>
-						{comments.map((comment, index) => (
-							<View key={index} style={styles.comment}>
-								<Text style={styles.postText}>{comment.text}</Text>
-								<Text style={[styles.postUsername, {textAlign: "right"}]}>{comment.username}</Text>
-								<Text style={[styles.postUsername, {textAlign: "right"}]}>{formatTimestamp(comment.timestamp)}</Text>
-							</View>
-						))}
-					</ScrollView>
 
-
-
-					<View style={[styles.inputContainerComment, {backgroundColor: "white"}]}>
-						<TextInput
-							style={[styles.inputComment, { height: Math.min(5 * 18, inputHeight) }]}
-							placeholder="Kommentar hinzufügen"
-							value={commentInput}
-							onChangeText={setCommentInput}
+						<Button
+							title="Schließen"
+							onPress={() => setModalSelectVisible(false)}
 						/>
-						<TouchableOpacity onPress={handleSubmitComment}>
-							<MaterialIcons name="send" size={24} color="#ec404b" />
-						</TouchableOpacity>
-					</View>
-
-					<Button title="Schließen" onPress={() => setModalSelectVisible(false)} />
 					</View>
 				</KeyboardAvoidingView>
 			</Modal>
 
-
-
-
-			<ScrollView style={styles.postContainer}>
+			<ScrollView
+				style={styles.postContainer}
+				showsVerticalScrollIndicator={false}
+			>
 				{posts.map((post, index) => (
-					<TouchableOpacity
-						key={index}
-						onPress={()=>handlePostClick(post)}
-					>
-						<View key={index} style={[styles.post, { backgroundColor: post.color }]}>
+					<TouchableOpacity key={index} onPress={() => handlePostClick(post)}>
+						<View
+							key={index}
+							style={[styles.post, { backgroundColor: post.color }]}
+						>
 							<View style={styles.postContent}>
 								<Text style={styles.postText}>{post.text}</Text>
 							</View>
 
 							<View style={styles.postFooter}>
 								<Text style={styles.postUsername}>- {post.username}</Text>
-								<Text style={styles.postUsername}>- {formatTimestamp(post.timestamp)}</Text>
+								<Text style={styles.postUsername}>
+									- {formatTimestamp(post.timestamp)}
+								</Text>
 
 								<TouchableOpacity
-									style={[styles.likeButton, post.likes.includes(username) && styles.likedButton]}
+									style={[
+										styles.likeButton,
+										post.likes.includes(username) && styles.likedButton,
+									]}
 									onPress={() => handleLike(post.id)}
 								>
 									<Ionicons
-										name={post.likes.includes(username) ? "heart" : "heart-outline"}
+										name={
+											post.likes.includes(username) ? "heart" : "heart-outline"
+										}
 										size={16}
 										color={post.likes.includes(username) ? "red" : "black"}
 									/>
@@ -426,16 +506,9 @@ const Yell = () => {
 								</TouchableOpacity>
 							</View>
 						</View>
-
 					</TouchableOpacity>
 				))}
 			</ScrollView>
-			<View style={styles.addIconContainer} pointerEvents='box-none'>
-				<TouchableOpacity style={styles.addIcon} onPress={() => setModalVisible(true)}>
-					<Ionicons name="add-circle-outline" size={80} color="white" />
-				</TouchableOpacity>
-			</View>
-
 		</View>
 	);
 };
@@ -446,18 +519,25 @@ const styles = StyleSheet.create({
 		paddingTop: 20,
 		marginBottom: 85,
 	},
-	addIconContainer: {
-		position: "absolute",
-		bottom: 20,
-		right: 0,
-		left: 0,
-		zIndex: 999,
+	header: {
+		top: 40,
+		flexDirection: "row",
+		justifyContent: "space-between",
 		alignItems: "center",
-		justifyContent: "center",
+		position: "relative",
+		zIndex: 1,
+		marginHorizontal: 20,
+	},
+	modalHeader: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		position: "relative",
+		zIndex: 1,
+		marginHorizontal: 20,
 	},
 	addIcon: {
-		width: 80,
-		height: 80,
+		zIndex: 999,
 	},
 	modalContainer: {
 		flex: 1,
@@ -465,6 +545,14 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		backgroundColor: "white",
 		paddingVertical: 20,
+		paddingTop: 80,
+	},
+	postModalContainer: {
+		flex: 1,
+		justifyContent: "space-between",
+		backgroundColor: "white",
+		paddingVertical: 20,
+		paddingTop: 60,
 	},
 	input: {
 		width: "99%",
@@ -473,12 +561,12 @@ const styles = StyleSheet.create({
 		borderColor: "white",
 		paddingHorizontal: 10,
 		textAlignVertical: "top",
-		color: "white"
+		color: "white",
 	},
 	buttonContainer: {
 		flexDirection: "row",
 		justifyContent: "space-evenly",
-		marginBottom: 10,
+		marginVertical: 10,
 	},
 	colorPickerScrollContainer: {
 		alignItems: "center",
@@ -490,7 +578,7 @@ const styles = StyleSheet.create({
 		borderRadius: 15,
 		marginHorizontal: 5,
 		borderWidth: 1,
-		borderColor: "white"
+		borderColor: "white",
 	},
 	selectedColorButton: {
 		width: 50,
@@ -508,6 +596,8 @@ const styles = StyleSheet.create({
 	},
 	postContainer: {
 		flex: 1,
+		top: 48,
+		marginBottom: 52,
 	},
 	post: {
 		flexDirection: "column",
@@ -541,15 +631,13 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 
-	postHeader:{
+	postHeader: {
 		flex: 1,
 		justifyContent: "flex-end",
-		alignItems: "flex-end"
+		alignItems: "flex-end",
 	},
 
-	reportBtn:{
-
-	},
+	reportBtn: {},
 
 	postContent: {
 		flex: 1,
@@ -559,7 +647,7 @@ const styles = StyleSheet.create({
 	postText: {
 		fontSize: 16,
 		color: "white",
-		textAlign: "left"
+		textAlign: "left",
 	},
 
 	likedButton: {
@@ -570,8 +658,8 @@ const styles = StyleSheet.create({
 		marginLeft: 5,
 	},
 	inputContainerComment: {
-		flexDirection: 'row',
-		alignItems: 'center',
+		flexDirection: "row",
+		alignItems: "center",
 		paddingHorizontal: 16,
 		paddingVertical: 8,
 	},
@@ -582,10 +670,10 @@ const styles = StyleSheet.create({
 		marginRight: 8,
 		paddingHorizontal: 8,
 		borderWidth: 1,
-		borderColor: 'gray',
+		borderColor: "gray",
 		borderRadius: 15,
 	},
-	commentContainer:{
+	commentContainer: {
 		width: "100%",
 		borderTopWidth: 2,
 	},
@@ -596,19 +684,15 @@ const styles = StyleSheet.create({
 		minHeight: 100,
 		justifyContent: "space-between",
 		borderBottomWidth: 5, // Fügt eine untere Grenze hinzu
-		borderBottomColor: 'rgb(255,255,255)'
-
+		borderBottomColor: "rgb(255,255,255)",
 	},
 	comment: {
 		padding: 5,
 		marginTop: 10,
 		marginBottom: 10,
 		borderBottomWidth: 1,
-		borderBottomColor: 'rgba(0,0,0,0.6)'
+		borderBottomColor: "rgba(0,0,0,0.6)",
 	},
-
-
-
 });
 
 export default Yell;
