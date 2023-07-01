@@ -544,7 +544,7 @@ const EventDetails = ({ route, navigation }) => {
 						// source={{ uri: event.imageUrl }}
 						source={{
 							uri:
-								"https://source.unsplash.com/random/?" + event.title,
+								"https://source.unsplash.com/random/?" + selectedEvent.title,
 						}}
 					/>
 					<Ionicons
@@ -557,7 +557,7 @@ const EventDetails = ({ route, navigation }) => {
 					<View style={{ padding: 20 }}>
 						<View style={styles.titleContainer}>
 							<View style={{ width: "100%" }}>
-								<Text style={styles.date}>{event.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}</Text>
+								<Text style={styles.date}>{selectedEvent.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}</Text>
 
 								<View
 									style={{
@@ -566,7 +566,7 @@ const EventDetails = ({ route, navigation }) => {
 										justifyContent: "space-between",
 									}}
 								>
-									<Text style={styles.title}>{event.title}</Text>
+									<Text style={styles.title}>{selectedEvent.title}</Text>
 
 									{selectedEvent.likedBy &&
 									selectedEvent.likedBy.includes(username) ? (
@@ -590,10 +590,10 @@ const EventDetails = ({ route, navigation }) => {
 						</View>
 					</View>
 					<View style={styles.infoContainer}>
-						{event.category && (
+						{selectedEvent.category && (
 							<View style={{ alignItems: "center" }}>
 								<Ionicons name="list" size={32} color="grey" />
-								<Text style={styles.item}>{event.category}</Text>
+								<Text style={styles.item}>{selectedEvent.category}</Text>
 							</View>
 						)}
 						<TouchableOpacity
@@ -602,19 +602,19 @@ const EventDetails = ({ route, navigation }) => {
 						>
 							<Ionicons name="compass" size={32} color="grey" />
 							<Text style={styles.item} numberOfLines={2}>
-								{event.address}
+								{selectedEvent.address}
 							</Text>
 						</TouchableOpacity>
-						{event.groupSize && (
+						{selectedEvent.groupSize && (
 							<View style={{ alignItems: "center" }}>
 								<Ionicons name="people" size={32} color="grey" />
-								<Text style={styles.item}>{event.groupSize}</Text>
+								<Text style={styles.item}>{selectedEvent.groupSize}</Text>
 							</View>
 						)}
 
 						<View style={{ alignItems: "center" }}>
 							<Ionicons name="person-circle" size={32} color="grey" />
-							<Text style={styles.item}>{event.creator}</Text>
+							<Text style={styles.item}>{selectedEvent.creator}</Text>
 						</View>
 					</View>
 					<View style={{ padding: 20 }}>
