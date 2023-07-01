@@ -158,6 +158,7 @@ const PostEvent = ({ navigation }) => {
 				advertised: advertised,
 				category: category,
 				date: date,
+				attendees: [],
 				userId: auth.currentUser.uid,
 			})
 			.then(() => {
