@@ -234,6 +234,8 @@ const EditProfile = ({route, navigation}) => {
                     <Divider style={styles.divider}/>
                 </View>
 
+                <TouchableOpacity onPress={() => navigation.navigate('ChangePassword')}><Text style={{fontWeight: 'bold', color: "#C8C8C8", marginTop: 30}}>Passwort ändern</Text></TouchableOpacity>
+
                 {!uploading && (
                     <LocalsButton
                         title="Änderungen Bestätigen"

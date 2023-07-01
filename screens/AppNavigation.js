@@ -20,6 +20,7 @@ import Follower from "./appScreens/Follower";
 import Chatbot from "./appScreens/Chatbot";
 import Yelling from "./appScreens/Yelling";
 import Categories from "./appScreens/Categories";
+import ChangePassword from "./appScreens/ChangePassword";
 
 import { auth } from "../firebase";
 import { Dimensions } from "react-native";
@@ -29,6 +30,7 @@ import { HeaderBackButton } from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
 import EditProfile from "./appScreens/EditProfile";
+import changePassword from "./appScreens/ChangePassword";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -72,6 +74,7 @@ const MainStackNavigator = () => {
 			<Stack.Screen name="EditPost" component={EditPost} />
 			<Stack.Screen name="Yelling" component={Yelling} />
 			<Stack.Screen name="Categories" component={Categories} />
+			<Stack.Screen name="ChangePassword" component={ChangePassword} />
 		</Stack.Navigator>
 	);
 };
@@ -133,6 +136,10 @@ function ProfileDrawerScreen() {
 				component={Following}
 			/>
 			<Drawer.Screen options={{unmountOnBlur: true}} name="EditProfile" component={EditProfile}/>
+			<Drawer.Screen options={{
+				drawerItemStyle: { display: "none" },
+				unmountOnBlur: true,
+			}}name='ChangePassword' component={changePassword} />
 		</Drawer.Navigator>
 	);
 }
