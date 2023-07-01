@@ -189,12 +189,15 @@ const PostEvent = ({ navigation }) => {
 	const renderDatePicker = () => {
 		if (showDatePicker) {
 			return (
-				<DateTimePicker
-					value={date}
-					locale="de-DE"
-					mode="date"
-					onChange={(event, date) => onDateSelected(date)}
-				/>
+				<View>
+					<DateTimePicker
+						value={date}
+						locale="de-DE"
+						mode="date"
+						onChange={(event, date) => onDateSelected(date)}
+					/>
+				</View>
+
 			);
 		}
 		return null;

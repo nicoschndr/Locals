@@ -7,7 +7,7 @@ import {
 	TouchableOpacity,
 	Platform,
 	ImageBackground,
-	ActivityIndicator,
+	ActivityIndicator, ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import LocalsTextInput from "../../components/LocalsTextInput";
@@ -15,13 +15,14 @@ import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsButton from "../../components/LocalsButton";
 import LocalsPlacesAutocomplete from "../../components/LocalsPlacesAutocomplete";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import DatePicker from "react-native-datepicker";
+import DatePicker from "@react-native-community/datetimepicker";
 
 import { auth, firestore, storage } from "../../firebase";
 import { CheckBox, Divider } from "react-native-elements";
 
 import { Ionicons } from "@expo/vector-icons";
 import { set } from "react-native-reanimated";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const Register = ({ navigation }) => {
 	const [email, setEmail] = useState("");
@@ -30,12 +31,15 @@ const Register = ({ navigation }) => {
 	const [password, setPassword] = useState("");
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
-	const [birthday, setBirthday] = useState("");
+	const [birthday, setBirthday] = useState(new Date());
+
 	const [mobile, setMobile] = useState("");
 	const [address, setAddress] = useState("");
 	const [username, setUsername] = useState("");
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
+	const [showDatePicker, setShowDatePicker] = useState(false);
+
 
 	const [showPassword, setShowPassword] = useState(false);
 
@@ -155,8 +159,41 @@ const Register = ({ navigation }) => {
 		requestLocationPermission();
 	}, []);
 
+
+	const openDatePicker = () => {
+		setShowDatePicker(true);
+	}
+
+	const closeDatePicker= () => {
+		setShowDatePicker(false);
+	}
+
+	const onDateSelected = (birthdate) => {
+		setBirthday(birthdate);
+		closeDatePicker();
+	}
+
+	const renderDatePicker = () => {
+		if (showDatePicker) {
+			return (
+				<View>
+					<DateTimePicker
+						value={birthday}
+						locale="de-DE"
+						mode="date"
+						onChange={(event, date) => onDateSelected(date)}
+					/>
+				</View>
+
+			);
+		}
+		return null;
+	}
+
 	return (
 		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
+			<ScrollView>
+
 			<ImageBackground
 				source={require("../../assets/BackGround(h).png")}
 				style={{ alignItems: "center", flex: 1, width: "100%" }}
@@ -279,22 +316,24 @@ const Register = ({ navigation }) => {
 					</View>
 					<View style={{ marginTop: 12 }}>
 						<Text style={styles.inputTitle}>Alter</Text>
-						<DatePicker
-							style={styles.datePicker}
-							date={birthday}
-							mode="date"
-							format="DD-MM-YYYY"
-							minDate="01-01-1900"
-							maxDate={new Date()}
-							confirmBtnText="Confirm"
-							cancelBtnText="Cancel"
-							customStyles={{
-								dateInput: styles.input,
-								placeholderText: styles.datePickerPlaceholder,
-								dateText: styles.datePickerText,
+						<View
+							style={{
+								flexDirection: "row",
+								marginTop: 12,
+								alignItems: "center",
 							}}
-							onDateChange={handleDateChange}
-						/>
+						>
+							<Ionicons
+								name={"calendar-outline"}
+								size={30}
+								onPress={openDatePicker}
+							/>
+
+							<View>
+								{renderDatePicker()}
+							</View>
+						</View>
+
 						<Divider style={styles.divider} />
 					</View>
 					{/* <View style={{ marginTop: 12 }}>
@@ -327,6 +366,7 @@ const Register = ({ navigation }) => {
 					{uploading && <ActivityIndicator size="large" color="#fff" />}
 				</View>
 			</ImageBackground>
+			</ScrollView>
 		</KeyboardAvoidingView>
 	);
 };
