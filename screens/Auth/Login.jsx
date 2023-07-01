@@ -6,7 +6,7 @@ import {
 	Image,
 	ImageBackground,
 	TouchableOpacity,
-	Alert,
+	Alert, Platform,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import LocalsTextInput from "../../components/LocalsTextInput";
@@ -128,7 +128,7 @@ const Login = ({ navigation }) => {
 	};
 
 	return (
-		<KeyboardAvoidingView behavior="padding">
+		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
 			<ImageBackground
 				source={require("../../assets/BackGround(h).png")}
 				style={{ width: "100%", height: "100%" }}
