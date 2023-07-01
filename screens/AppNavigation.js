@@ -28,6 +28,7 @@ import Sidebar from "../components/Sidebar";
 import { HeaderBackButton } from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
+import EditProfile from "./appScreens/EditProfile";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -131,6 +132,7 @@ function ProfileDrawerScreen() {
 				name="Following"
 				component={Following}
 			/>
+			<Drawer.Screen options={{unmountOnBlur: true}} name="EditProfile" component={EditProfile}/>
 		</Drawer.Navigator>
 	);
 }
