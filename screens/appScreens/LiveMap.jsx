@@ -116,6 +116,13 @@ const Livemap = () => {
 		setIsModalVisible(false);
 	};
 
+
+	const shortDate = {
+		year: "numeric",
+		month: "numeric",
+		day: "numeric",
+	};
+
 	const IMPRESSION_THRESHOLD = 100;
 
 	const onCommentLayout = (event, commentId) => {
@@ -703,7 +710,7 @@ const Livemap = () => {
 						<View style={{ padding: 20 }}>
 							<View style={styles.titleContainer}>
 								<View style={{ width: "100%" }}>
-									<Text style={styles.date}>03.01.2024</Text>
+									<Text style={styles.date}>{selectedEvent.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}</Text>
 
 									<View
 										style={{
