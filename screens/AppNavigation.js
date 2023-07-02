@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from "react";
-import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
-import {NavigationContainer} from "@react-navigation/native";
-import {createStackNavigator} from "@react-navigation/stack";
-import {Ionicons} from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { Ionicons } from "@expo/vector-icons";
 
 // Import screen components
 import HomeScreen from "./appScreens/Home";
@@ -22,14 +22,14 @@ import DrawerFriendList from "../components/DrawerFriendListIcon";
 import Yelling from "./appScreens/Yelling";
 import Categories from "./appScreens/Categories";
 
-import {auth} from "../firebase";
-import {Dimensions, Text, View} from "react-native";
-import {createDrawerNavigator, DrawerItem} from "@react-navigation/drawer";
+import { auth } from "../firebase";
+import { Dimensions, Text, View } from "react-native";
+import { createDrawerNavigator, DrawerItem } from "@react-navigation/drawer";
 import Sidebar from "../components/Sidebar";
-import {HeaderBackButton} from "@react-navigation/stack";
+import { HeaderBackButton } from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
-import {Badge} from "react-native-elements";
+import { Badge } from "react-native-elements";
 import TabProfileIcon from "../components/TabProfileIcon";
 
 const Tab = createBottomTabNavigator();
@@ -99,9 +99,11 @@ function ProfileDrawerScreen() {
 			<Drawer.Screen
 				name="FriendList"
 				component={FriendStackNavigator}
-                options={{headerShown: true, unmountOnBlur: true,
-                    drawerLabel: () => <DrawerFriendList />
-                }}
+				options={{
+					headerShown: true,
+					unmountOnBlur: true,
+					drawerLabel: () => <DrawerFriendList />,
+				}}
 			/>
 			<Drawer.Screen
 				options={{
@@ -186,16 +188,15 @@ function AppNavigation() {
 						tabBarInactiveTintColor: "#734e61",
 						headerShown: false,
 						tabBarStyle: {
-							backgroundColor: "white",
+							backgroundColor: "#efefef",
 							borderTopWidth: 0,
 							position: "absolute", // Position auf "absolute" setzen
 							bottom: 0,
 							left: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
 							right: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
 							height: 80,
-							width: Dimensions.get('window').width, // Gerätebreite setzen
+							width: Dimensions.get("window").width, // Gerätebreite setzen
 						},
-
 					})}
 				>
 					<Tab.Screen
@@ -205,7 +206,10 @@ function AppNavigation() {
 					/>
 					<Tab.Screen name="Map" component={LiveMap} />
 					<Tab.Screen
-						options={{ unmountOnBlur: true, tabBarLabel: () => <TabProfileIcon /> }}
+						options={{
+							unmountOnBlur: true,
+							tabBarLabel: () => <TabProfileIcon />,
+						}}
 						name="Me"
 						component={ProfileDrawerScreen}
 					/>
@@ -245,10 +249,14 @@ function AuthScreen() {
 		>
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Register" component={Register} />
-			<Stack.Screen name="Home" component={HomeScreen} options={{
-				drawerItemStyle: { display: "none" },
-				unmountOnBlur: true,
-			}}/>
+			<Stack.Screen
+				name="Home"
+				component={HomeScreen}
+				options={{
+					drawerItemStyle: { display: "none" },
+					unmountOnBlur: true,
+				}}
+			/>
 		</Stack.Navigator>
 	);
 }
