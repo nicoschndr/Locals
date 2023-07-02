@@ -90,7 +90,7 @@ const TabProfileIcon = (navigation) => {
 
         <SafeAreaView>
                 <View style={{flexDirection: 'row'}}>
-                    <Text>Profile</Text>
+                    <Text>Me</Text>
                     {(friendRequests > 0 || unreadMessages.length > 0 || followerDiff > 0) && (
                         <Badge containerStyle={{marginLeft: 5}} value={friendRequests+unreadMessages.length+followerDiff} status='error'></Badge>
                     )}

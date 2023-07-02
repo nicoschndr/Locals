@@ -17,6 +17,8 @@ export interface LocalsTextInputProps {
 	style?: any;
 	secureTextEntry?: boolean;
 	autoCapitalize?: "none" | "sentences" | "words" | "characters" | undefined;
+	fontStyle: any;
+	textColor: string;
 }
 
 const LocalsTextInput: React.FC<LocalsTextInputProps> = ({
@@ -27,7 +29,8 @@ const LocalsTextInput: React.FC<LocalsTextInputProps> = ({
 	onChangeText,
 	style,
 	secureTextEntry,
-	autoCapitalize,
+	autoCapitalize = "none",
+	textColor,
 }) => {
 	return (
 		<TextInput
@@ -39,6 +42,7 @@ const LocalsTextInput: React.FC<LocalsTextInputProps> = ({
 			style={[styles.container, style]}
 			secureTextEntry={secureTextEntry}
 			autoCapitalize={autoCapitalize}
+			placeholderTextColor={textColor}
 		/>
 	);
 };

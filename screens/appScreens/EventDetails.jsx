@@ -1,4 +1,15 @@
-import { View, Text, Modal, StyleSheet, Image, Actionsheet, ActionSheetIOS, Alert, TouchableOpacity, Linking } from "react-native";
+import {
+	View,
+	Text,
+	Modal,
+	StyleSheet,
+	Image,
+	Actionsheet,
+	ActionSheetIOS,
+	Alert,
+	TouchableOpacity,
+	Linking,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import LocalsButton from "../../components/LocalsButton";
@@ -11,7 +22,7 @@ const EventDetails = ({ route, navigation }) => {
 	const { showModal, setShowModal } = useState(false);
 	const [user, setUser] = useState({});
 
-	//TODO: attend to event from `LiveMap.jsx` 
+	//TODO: attend to event from `LiveMap.jsx`
 
 	const deleteEvent = () => {
 		Alert.alert(
@@ -26,7 +37,6 @@ const EventDetails = ({ route, navigation }) => {
 				{
 					text: "OK",
 					onPress: () => {
-
 						firestore
 							.collection("events")
 							.doc(event.id)
@@ -48,16 +58,12 @@ const EventDetails = ({ route, navigation }) => {
 	};
 
 	const getUser = async () => {
-		const userRef = await firestore
-			.collection("users")
-			.doc(event.userId)
-			.get();
+		const userRef = await firestore.collection("users").doc(event.userId).get();
 		setUser(userRef.data());
 	};
 
 	useEffect(() => {
 		getUser();
-
 	}, []);
 
 	// get current logged in user
@@ -76,7 +82,7 @@ const EventDetails = ({ route, navigation }) => {
 			},
 			(buttonIndex) => {
 				if (buttonIndex === 0) {
-					navigation.navigate("EditPost", { event })
+					navigation.navigate("EditPost", { event });
 				} else if (buttonIndex === 1) {
 					deleteEvent();
 				}
@@ -86,7 +92,10 @@ const EventDetails = ({ route, navigation }) => {
 
 	// navigate to google maps with lat lng from event address
 	const openMaps = () => {
-		const scheme = Platform.select({ ios: "maps:0,0?q=", android: "geo:0,0?q=" });
+		const scheme = Platform.select({
+			ios: "maps:0,0?q=",
+			android: "geo:0,0?q=",
+		});
 		const latLng = `${event.latitude},${event.longitude}`;
 		const label = event.address;
 		const url = Platform.select({
@@ -97,16 +106,15 @@ const EventDetails = ({ route, navigation }) => {
 		Linking.openURL(url);
 	};
 
-
-
-
 	return (
-		<ScrollView
-			style={{ height: "100%" }}
-		>
+		<ScrollView style={{ height: "100%", marginBottom: 85 }}>
 			<Image
 				placeholder="Event Image"
-				source={{ uri: event.imageUrl || "https://www.pngitem.com/pimgs/m/30-307416_profile-icon-png-image-free-download-searchpng-employee.png" }}
+				source={{
+					uri:
+						// event.imageUrl ||
+						"https://source.unsplash.com/random/?" + event.title,
+				}}
 				style={{ width: "100%", height: 400 }}
 			/>
 			<Ionicons
@@ -133,8 +141,12 @@ const EventDetails = ({ route, navigation }) => {
 					</View>
 					{user && (
 						<Image
-							source={{ uri: user.imageUrl || "https://www.pngitem.com/pimgs/m/30-307416_profile-icon-png-image-free-download-searchpng-employee.png" }}
-							style={{ width: 42, height: 42, borderRadius: 50, }}
+							source={{
+								uri:
+									user.imageUrl ||
+									"https://www.pngitem.com/pimgs/m/30-307416_profile-icon-png-image-free-download-searchpng-employee.png",
+							}}
+							style={{ width: 42, height: 42, borderRadius: 50 }}
 						/>
 					)}
 				</View>
@@ -142,29 +154,22 @@ const EventDetails = ({ route, navigation }) => {
 			<View style={styles.infoContainer}>
 				{event.category && (
 					<View style={{ alignItems: "center" }}>
-						<Ionicons
-							name="list"
-							size={32}
-							color="grey"
-						/>
+						<Ionicons name="list" size={32} color="grey" />
 						<Text style={styles.item}>{event.category}</Text>
 					</View>
 				)}
-				<TouchableOpacity style={{ alignItems: "center" }} onPress={() => openMaps()}>
-					<Ionicons
-						name="compass"
-						size={32}
-						color="grey"
-					/>
-					<Text style={styles.item} numberOfLines={2}>{event.address}</Text>
+				<TouchableOpacity
+					style={{ alignItems: "center" }}
+					onPress={() => openMaps()}
+				>
+					<Ionicons name="compass" size={32} color="grey" />
+					<Text style={styles.item} numberOfLines={2}>
+						{event.address}
+					</Text>
 				</TouchableOpacity>
 				{event.groupSize && (
 					<View style={{ alignItems: "center" }}>
-						<Ionicons
-							name="people"
-							size={32}
-							color="grey"
-						/>
+						<Ionicons name="people" size={32} color="grey" />
 						<Text style={styles.item}>{event.groupSize}</Text>
 					</View>
 				)}
@@ -179,27 +184,21 @@ const EventDetails = ({ route, navigation }) => {
 					</View>
 				)} */}
 				<View style={{ alignItems: "center" }}>
-					<Ionicons
-						name="person-circle"
-						size={32}
-						color="grey"
-					/>
+					<Ionicons name="person-circle" size={32} color="grey" />
 					<Text style={styles.item}>{event.creator}</Text>
 				</View>
 			</View>
-			{
-				event.description && (
-					<View style={{ padding: 20 }}>
-						<Text style={styles.header}>About</Text>
-						<Text style={{ color: "grey" }}>{event.description}</Text>
-					</View>
-				)
-			}
+			{event.description && (
+				<View style={{ padding: 20 }}>
+					<Text style={styles.header}>About</Text>
+					<Text style={{ color: "grey" }}>{event.description}</Text>
+				</View>
+			)}
 			<View style={styles.commentsContainer}>
 				<Text style={styles.header}>Comments</Text>
 				<Text style={{ color: "grey" }}>Comments will be here</Text>
 			</View>
-		</ScrollView >
+		</ScrollView>
 	);
 };
 
@@ -252,6 +251,8 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 	},
 	titleContainer: {
-		flexDirection: "row", alignItems: "center", justifyContent: "space-between"
-	}
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+	},
 });

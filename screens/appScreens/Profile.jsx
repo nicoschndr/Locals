@@ -1,21 +1,32 @@
 import {
-    View,
-    Image,
-    Text,
-    StyleSheet,
-    Dimensions,
-    SafeAreaView,
-    ScrollView,
-    TouchableOpacity,
-    Alert, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, Keyboard, RefreshControl,
+	View,
+	Image,
+	Text,
+	StyleSheet,
+	Dimensions,
+	SafeAreaView,
+	ScrollView,
+	TouchableOpacity,
+	StatusBar,
+	Alert,
+	Modal,
+	Pressable,
+	TextInput,
+	KeyboardAvoidingView,
+	Platform,
+	Keyboard,
+	RefreshControl, ImageBackground
 } from "react-native";
-import React, {useEffect, useState} from "react";
-import {Ionicons, MaterialIcons} from "@expo/vector-icons";
-import {auth, firebase, firestore, storage} from "../../firebase";
+import React, { useEffect, useState, useContext } from "react";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { auth, firebase, firestore, storage } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import {useFocusEffect} from "@react-navigation/native";
 import {Badge} from "react-native-elements";
+import LocalsEventCard from "../../components/LocalsEventCard";
+import FastImage from "react-native-fast-image";
 
+import FirestoreContext from "../../context/FirestoreContext";
 
 const Profile = ({route, navigation}) => {
 
@@ -23,13 +34,6 @@ const Profile = ({route, navigation}) => {
         getUserData();
         getCurrentUserData();
     }, []);
-
-
-    /*useFocusEffect(
-        () => {
-           // getChats();
-        });*/
-
 
     const goToFriendList = () => {
         navigation.navigate("FriendList");
@@ -41,9 +45,9 @@ const Profile = ({route, navigation}) => {
     let friends = [];
     let messages = [];
 
-    const windowWidth = Dimensions.get("window").width;
-    const windowHeight = Dimensions.get("window").height;
-    const platform = Platform.OS;
+	const windowWidth = Dimensions.get("window").width;
+	const windowHeight = Dimensions.get("window").height;
+	const platform = Platform.OS;
 
     const uid = route.params?.uid || auth.currentUser.uid;
     const [user, setUser] = useState({});
@@ -64,24 +68,28 @@ const Profile = ({route, navigation}) => {
     const [followerDiff, setFollowerDiff] = useState(0)
     const [unreadMessages, setUnreadMessages] = useState(null);
 
-    React.useLayoutEffect(() => {
-        if (uid === firebase.auth().currentUser.uid) {
-            navigation.setOptions({
-                headerRight: () => (
-                    <TouchableOpacity onPress={goToFriendList}>
-                        <Ionicons name={"people"} size={25} style={{marginRight: 15}}/>
-                    </TouchableOpacity>
-                ),
-            });
-        } else {
-            navigation.setOptions({
-                headerRight: null,
-            });
-        }
-    }, [navigation, uid]);
-    const handleFriendClick = (friendUsername) => {
-        navigation.navigate('Chat', {friendUsername: friendUsername, currentUsername: currentUsername});
-    }
+
+	React.useLayoutEffect(() => {
+		if (uid === firebase.auth().currentUser.uid) {
+			navigation.setOptions({
+				headerRight: () => (
+					<TouchableOpacity onPress={goToFriendList}>
+						<Ionicons name={"people"} size={25} style={{ marginRight: 15 }} />
+					</TouchableOpacity>
+				),
+			});
+		} else {
+			navigation.setOptions({
+				headerRight: null,
+			});
+		}
+	}, [navigation, uid]);
+	const handleFriendClick = (friendUsername) => {
+		navigation.navigate("Chat", {
+			friendUsername: friendUsername,
+			currentUsername: currentUsername,
+		});
+	};
 
     function getUserData() {
         setUser([])
@@ -129,79 +137,74 @@ const Profile = ({route, navigation}) => {
     }
 
 
-    function getCurrentUserFriends(username) {
-        firestore
-            .collection("users")
-            .doc(firebase.auth().currentUser.uid)
-            .get()
-            .then((snapshot) => {
-                setCurrentFriends(snapshot.data().friends);
-                setFriendRequests(Object.keys(snapshot.data().friendRequests || {}));
-                checkFriendship(username, snapshot.data().friends);
-                getOpenFriendRequests();
-            });
-    }
+	function getCurrentUserFriends(username) {
+		firestore
+			.collection("users")
+			.doc(firebase.auth().currentUser.uid)
+			.onSnapshot((snapshot) => {
+				setCurrentFriends(snapshot.data().friends);
+				setFriendRequests(Object.keys(snapshot.data().friendRequests || {}));
+				checkFriendship(username, snapshot.data().friends);
+				getOpenFriendRequests();
+			});
+	}
 
-    function getOpenFriendRequests() {
-        firestore
-            .collection("users")
-            .doc(uid)
-            .get()
-            .then((snapshot) => {
-                const userData = snapshot.data();
-                const friendRequests = Object.keys(userData.friendRequests || {});
-                setFriendRequests(friendRequests); // Aktualisiere den Zustand mit den offenen Freundesanfragen
-            })
-            .catch((error) => {
-                console.error("Fehler beim Abrufen der Freundschaftsanfragen:", error);
-            });
-    }
+	function getOpenFriendRequests() {
+		firestore
+			.collection("users")
+			.doc(uid)
+			.onSnapshot((snapshot) => {
+				const userData = snapshot.data();
+				const friendRequests = Object.keys(userData.friendRequests || {});
+				setFriendRequests(friendRequests); // Aktualisiere den Zustand mit den offenen Freundesanfragen
+			});
+	}
 
-    function checkFriendship(username, friends) {
-        if (friends && friends[username]) {
-            // Der Benutzer ist ein Freund
-            console.log(`Der Benutzer ${username} ist ein Freund.`);
-        } else {
-            // Der Benutzer ist kein Freund
-            console.log(`Der Benutzer ${username} ist kein Freund.`);
-        }
-    }
+	function checkFriendship(username, friends) {
+		if (friends && friends[username]) {
+			// Der Benutzer ist ein Freund
+			console.log(`Der Benutzer ${username} ist ein Freund.`);
+		} else {
+			// Der Benutzer ist kein Freund
+			console.log(`Der Benutzer ${username} ist kein Freund.`);
+		}
+	}
 
-    useEffect(() => {
-        const user = firebase.auth().currentUser;
+	useEffect(() => {
+		const user = firebase.auth().currentUser;
 
-        if (user) {
-            const userDocRef = firebase.firestore().collection("users").doc(user.uid);
-        }
-    }, [friendRequests]);
+		if (user) {
+			const userDocRef = firebase.firestore().collection("users").doc(user.uid);
+		}
+	}, [friendRequests]);
 
-    async function sendFriendRequest(senderUsername, receiverUsername) {
-        const usersRef = firebase.firestore().collection("users");
+	async function sendFriendRequest(senderUsername, receiverUsername) {
+		const usersRef = firebase.firestore().collection("users");
 
-        // Suchen des Dokuments mit dem gegebenen Benutzernamen
-        const receiverQuerySnapshot = await usersRef
-            .where("username", "==", receiverUsername)
-            .get();
-        if (!receiverQuerySnapshot.empty) {
-            // Das Dokument wurde gefunden, nehmen Sie das erste Ergebnis
-            const receiverDoc = receiverQuerySnapshot.docs[0];
-            const receiverId = receiverDoc.id;
+		// Suchen des Dokuments mit dem gegebenen Benutzernamen
+		const receiverQuerySnapshot = await usersRef
+			.where("username", "==", receiverUsername)
+			.get();
+		if (!receiverQuerySnapshot.empty) {
+			// Das Dokument wurde gefunden, nehmen Sie das erste Ergebnis
+			const receiverDoc = receiverQuerySnapshot.docs[0];
+			const receiverId = receiverDoc.id;
 
-            // Update für das Dokument mit der ID durchführen
-            await usersRef.doc(receiverId).update({
-                [`friendRequests.${senderUsername}`]: true,
-            });
-        } else {
-            // Das Dokument wurde nicht gefunden, handle den Fehler
-            console.error(`No document found with username: ${receiverUsername}`);
-        }
-    }
+			// Update für das Dokument mit der ID durchführen
+			await usersRef.doc(receiverId).update({
+				[`friendRequests.${senderUsername}`]: true,
+			});
+		} else {
+			// Das Dokument wurde nicht gefunden, handle den Fehler
+			console.error(`No document found with username: ${receiverUsername}`);
+		}
+	}
 
-    function handleSendFriendRequest() {
-        const senderUsername = firebase.auth().currentUser.displayName; // Benutzernamen aus Firebase Auth holen
-        const receiverUsername = user.username;
-        sendFriendRequest(senderUsername, receiverUsername);
-    }
+	function handleSendFriendRequest() {
+		const senderUsername = firebase.auth().currentUser.displayName; // Benutzernamen aus Firebase Auth holen
+		const receiverUsername = user.username;
+		sendFriendRequest(senderUsername, receiverUsername);
+	}
 
     function getUserPosts(username) {
         firestore
@@ -222,14 +225,14 @@ const Profile = ({route, navigation}) => {
         if (user) {
             const userDocRef = firebase.firestore().collection("users").doc(user.uid);
 
-            userDocRef.onSnapshot((doc) => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    setCurrentUsername(userData.username);
-                }
-            });
-        }
-    }, [friendRequests]);
+			userDocRef.onSnapshot((doc) => {
+				if (doc.exists) {
+					const userData = doc.data();
+					setCurrentUsername(userData.username);
+				}
+			});
+		}
+	}, [friendRequests]);
 
     function setFollower() {
         user.follower.forEach((r) => flw.push(r))
@@ -245,19 +248,19 @@ const Profile = ({route, navigation}) => {
         flw = [];
     }
 
-    function setFollowing() {
-        currentUser.following.forEach((r) => flwng.push(r))
-        flwng.push(uid.toString())
-        firestore
-            .collection("users")
-            .doc(auth.currentUser.uid)
-            .update({
-                following: flwng
-            })
-            .then(getCurrentUserData)
-            .then(getUserData)
-        flwng = [];
-    }
+	function setFollowing() {
+		currentUser.following.forEach((r) => flwng.push(r));
+		flwng.push(uid.toString());
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.update({
+				following: flwng,
+			})
+			.then(getCurrentUserData)
+			.then(getUserData);
+		flwng = [];
+	}
 
     function setUnfollow() {
         user.follower.forEach((r) => flw.push(r))
@@ -274,42 +277,45 @@ const Profile = ({route, navigation}) => {
         flw = [];
     }
 
-    function setUnfollowing() {
-        currentUser.following.forEach((r) => flwng.push(r))
-        const index = flwng.indexOf(uid.toString())
-        flwng.splice(index, 1)
-        firestore
-            .collection("users")
-            .doc(auth.currentUser.uid)
-            .update({
-                following: flwng
-            })
-            .then(getCurrentUserData)
-            .then(getUserData)
-        flwng = [];
-    }
+	function setUnfollowing() {
+		currentUser.following.forEach((r) => flwng.push(r));
+		const index = flwng.indexOf(uid.toString());
+		flwng.splice(index, 1);
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.update({
+				following: flwng,
+			})
+			.then(getCurrentUserData)
+			.then(getUserData);
+		flwng = [];
+	}
 
+	function changeModal() {
+		setModalVisible(false);
+		setReportModal(true);
+	}
 
-    function changeModal() {
-        setModalVisible(false)
-        setReportModal(true)
-    }
-
-    function reportUser() {
-        if (reportCategory.includes('Nutzer blockieren')) {
-            blockUser()
-        }
-        firestore
-            .collection('users')
-            .doc(uid)
-            .update({
-                [`reportedBy.${currentUsername}`]: {Time: new Date(), Category: reportCategory, Text: text}
-            }).then(
-        )
-        setReportModal(false)
-        setReportCategory([])
-        onChangeText('');
-    }
+	function reportUser() {
+		if (reportCategory.includes("Nutzer blockieren")) {
+			blockUser();
+		}
+		firestore
+			.collection("users")
+			.doc(uid)
+			.update({
+				[`reportedBy.${currentUsername}`]: {
+					Time: new Date(),
+					Category: reportCategory,
+					Text: text,
+				},
+			})
+			.then();
+		setReportModal(false);
+		setReportCategory([]);
+		onChangeText("");
+	}
 
     function blockUser() {
         setUnfollow()
@@ -333,69 +339,70 @@ const Profile = ({route, navigation}) => {
         blockedUsers = []
     }
 
-    function unblockUser() {
-        currentUser.blockedUsers.forEach((e) => blockedUsers.push(e))
-        const index = blockedUsers.indexOf(user.username)
-        blockedUsers.splice(index, 1);
-        firestore
-            .collection('users')
-            .doc(auth.currentUser.uid)
-            .update({
-                blockedUsers: blockedUsers
-            })
-        setModalVisible(false)
-        getCurrentUserData()
-        blockedUsers = []
-    }
+	function unblockUser() {
+		currentUser.blockedUsers.forEach((e) => blockedUsers.push(e));
+		const index = blockedUsers.indexOf(user.username);
+		blockedUsers.splice(index, 1);
+		firestore.collection("users").doc(auth.currentUser.uid).update({
+			blockedUsers: blockedUsers,
+		});
+		setModalVisible(false);
+		getCurrentUserData();
+		blockedUsers = [];
+	}
 
-    async function unFriendCurrentUser() {
-        const usersRef = firebase.firestore().collection('users');
+	async function unFriendCurrentUser() {
+		const usersRef = firebase.firestore().collection("users");
 
-        // Suchen des Dokuments mit dem gegebenen Benutzernamen
-        const friendQuerySnapshot = await usersRef.where('username', '==', user.username).get();
-        let friendId;
-        if (!friendQuerySnapshot.empty) {
-            const friendDoc = friendQuerySnapshot.docs[0];
-            friendId = friendDoc.id;
-        }
+		// Suchen des Dokuments mit dem gegebenen Benutzernamen
+		const friendQuerySnapshot = await usersRef
+			.where("username", "==", user.username)
+			.get();
+		let friendId;
+		if (!friendQuerySnapshot.empty) {
+			const friendDoc = friendQuerySnapshot.docs[0];
+			friendId = friendDoc.id;
+		}
 
-        if (friendId) {
-            // Das Dokument wurde gefunden, aktualisiere das friendRequests-Objekt
-            const rejectUpdateData = {
-                [`friends.${currentUsername}`]: firebase.firestore.FieldValue.delete()
-            };
+		if (friendId) {
+			// Das Dokument wurde gefunden, aktualisiere das friendRequests-Objekt
+			const rejectUpdateData = {
+				[`friends.${currentUsername}`]: firebase.firestore.FieldValue.delete(),
+			};
 
-            await usersRef.doc(friendId).update(rejectUpdateData);
-        } else {
-            // Das Dokument wurde nicht gefunden, handle den Fehler
-            console.error(`No document found with username: ${user.username}`);
-        }
-        await unFriendUser()
-    }
+			await usersRef.doc(friendId).update(rejectUpdateData);
+		} else {
+			// Das Dokument wurde nicht gefunden, handle den Fehler
+			console.error(`No document found with username: ${user.username}`);
+		}
+		await unFriendUser();
+	}
 
-    async function unFriendUser() {
-        const usersRef = firebase.firestore().collection('users');
+	async function unFriendUser() {
+		const usersRef = firebase.firestore().collection("users");
 
-        // Suchen des Dokuments mit dem gegebenen Benutzernamen
-        const friendQuerySnapshot = await usersRef.where('username', '==', currentUsername).get();
-        let friendId;
-        if (!friendQuerySnapshot.empty) {
-            const friendDoc = friendQuerySnapshot.docs[0];
-            friendId = friendDoc.id;
-        }
+		// Suchen des Dokuments mit dem gegebenen Benutzernamen
+		const friendQuerySnapshot = await usersRef
+			.where("username", "==", currentUsername)
+			.get();
+		let friendId;
+		if (!friendQuerySnapshot.empty) {
+			const friendDoc = friendQuerySnapshot.docs[0];
+			friendId = friendDoc.id;
+		}
 
-        if (friendId) {
-            // Das Dokument wurde gefunden, aktualisiere das friendRequests-Objekt
-            const rejectUpdateData = {
-                [`friends.${user.username}`]: firebase.firestore.FieldValue.delete()
-            };
+		if (friendId) {
+			// Das Dokument wurde gefunden, aktualisiere das friendRequests-Objekt
+			const rejectUpdateData = {
+				[`friends.${user.username}`]: firebase.firestore.FieldValue.delete(),
+			};
 
-            await usersRef.doc(friendId).update(rejectUpdateData);
-        } else {
-            // Das Dokument wurde nicht gefunden, handle den Fehler
-            console.error(`No document found with username: ${currentUsername}`);
-        }
-    }
+			await usersRef.doc(friendId).update(rejectUpdateData);
+		} else {
+			// Das Dokument wurde nicht gefunden, handle den Fehler
+			console.error(`No document found with username: ${currentUsername}`);
+		}
+	}
 
     function checkFollowerDiff(userData) {
         setFollowerDiff(userData.follower.length - userData.followerWhenClicked)
@@ -409,11 +416,16 @@ const Profile = ({route, navigation}) => {
                 followerWhenClicked: fwc
             })
     }
+    const shortDate = {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+    };
 
 
     return (
-
         <SafeAreaView style={styles.container}>
+            <StatusBar barStyle="dark-content" />
             <ScrollView showsVerticalScrollIndicator={false}>
                 {uid === firebase.auth().currentUser.uid && (
                     <TouchableOpacity
@@ -434,370 +446,581 @@ const Profile = ({route, navigation}) => {
                     </TouchableOpacity>
                 )}
 
-                {uid !== firebase.auth().currentUser.uid && (
-                    <TouchableOpacity
-                        style={[styles.titleBar, {marginTop: windowHeight * 0.05}]}
-                        onPress={() => setModalVisible(true)}
-                    >
-                        <Ionicons
-                            style={{marginLeft: windowWidth - 50}}
-                            name={"ellipsis-vertical"}
-                            size={40}
-                        >
-                            {" "}
-                        </Ionicons>
-                    </TouchableOpacity>
-                )}
+				{uid !== firebase.auth().currentUser.uid && (
+					<TouchableOpacity
+						style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
+						onPress={() => setModalVisible(true)}
+					>
+						<Ionicons
+							style={{ marginLeft: windowWidth - 50 }}
+							name={"ellipsis-vertical"}
+							size={40}
+						>
+							{" "}
+						</Ionicons>
+					</TouchableOpacity>
+				)}
 
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}>
-                    <TouchableOpacity style={{width: windowWidth, height: windowHeight}}
-                                      onPress={() => setModalVisible(false)}>
-                    </TouchableOpacity>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <TouchableOpacity onPress={() => changeModal()}
-                                              style={{marginLeft: 20, marginTop: 20}}><Text>melden
-                                ...</Text></TouchableOpacity>
-                            {(currentUser.blockedUsers && !currentUser.blockedUsers.includes(user.username) &&
-                                <TouchableOpacity onPress={() => blockUser()}
-                                                  style={{marginLeft: 20, marginTop: 20}}><Text
-                                    style={{color: 'rgba(255, 0, 0, .87)'}}>blockieren</Text></TouchableOpacity>)}
-                            {(currentUser.blockedUsers && currentUser.blockedUsers.includes(user.username) &&
-                                <TouchableOpacity onPress={() => unblockUser()}
-                                                  style={{marginLeft: 20, marginTop: 20}}><Text
-                                    style={{color: 'rgba(255, 0, 0, .87)'}}>nicht mehr
-                                    blockieren</Text></TouchableOpacity>)}
-                        </View>
-                    </View>
-                </Modal>
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={reportModal}>
-                    <KeyboardAvoidingView style={{flex: 1, flexDirection: 'column', justifyContent: 'center'}}
-                                          behavior={Platform.OS === "ios" ? "padding" : "height" || Platform.OS === "android" ? "padding" : "height"}
-                                          keyboardVerticalOffset={150}
-                                          enabled>
-                        <TouchableOpacity style={{width: windowWidth, height: windowHeight}}
-                                          onPress={() => setReportModal(false)}>
-                        </TouchableOpacity>
-                        <View style={styles.centeredView}>
-                            <View style={styles.reportModalView}>
-                                <Text style={{
-                                    alignSelf: "center",
-                                    fontWeight: "bold",
-                                    fontSize: 20,
-                                    borderBottomWidth: 1,
-                                    flexDirection: "row"
-                                }}>melden</Text>
+				<Modal animationType="slide" transparent={true} visible={modalVisible}>
+					<TouchableOpacity
+						style={{ width: windowWidth, height: windowHeight }}
+						onPress={() => setModalVisible(false)}
+					></TouchableOpacity>
+					<View style={styles.centeredView}>
+						<View style={styles.modalView}>
+							<TouchableOpacity
+								onPress={() => changeModal()}
+								style={{ marginLeft: 20, marginTop: 20 }}
+							>
+								<Text>melden ...</Text>
+							</TouchableOpacity>
+							{currentUser.blockedUsers &&
+								!currentUser.blockedUsers.includes(user.username) && (
+									<TouchableOpacity
+										onPress={() => blockUser()}
+										style={{ marginLeft: 20, marginTop: 20 }}
+									>
+										<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
+											blockieren
+										</Text>
+									</TouchableOpacity>
+								)}
+							{currentUser.blockedUsers &&
+								currentUser.blockedUsers.includes(user.username) && (
+									<TouchableOpacity
+										onPress={() => unblockUser()}
+										style={{ marginLeft: 20, marginTop: 20 }}
+									>
+										<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
+											nicht mehr blockieren
+										</Text>
+									</TouchableOpacity>
+								)}
+						</View>
+					</View>
+				</Modal>
+				<Modal animationType="slide" transparent={true} visible={reportModal}>
+					<KeyboardAvoidingView
+						style={{
+							flex: 1,
+							flexDirection: "column",
+							justifyContent: "center",
+						}}
+						behavior={
+							Platform.OS === "ios"
+								? "padding"
+								: "height" || Platform.OS === "android"
+								? "padding"
+								: "height"
+						}
+						keyboardVerticalOffset={150}
+						enabled
+					>
+						<TouchableOpacity
+							style={{ width: windowWidth, height: windowHeight }}
+							onPress={() => setReportModal(false)}
+						></TouchableOpacity>
+						<View style={styles.centeredView}>
+							<View style={styles.reportModalView}>
+								<Text
+									style={{
+										alignSelf: "center",
+										fontWeight: "bold",
+										fontSize: 20,
+										borderBottomWidth: 1,
+										flexDirection: "row",
+									}}
+								>
+									melden
+								</Text>
 
-                                {reportCategory.includes('Belästigung') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Belästigung'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Belästigung <Ionicons
-                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Belästigung') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Belästigung'
-                                    ])} style={{
-                                        marginLeft: 20,
-                                        marginTop: 15
-                                    }}><Text>Belästigung</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Belästigung") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf("Belästigung"),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>
+											Belästigung <Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Belästigung") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([...reportCategory, "Belästigung"])
+										}
+										style={{
+											marginLeft: 20,
+											marginTop: 15,
+										}}
+									>
+										<Text>Belästigung</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Hassrede') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Hassrede'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Hassrede <Ionicons
-                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Hassrede') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Hassrede'
-                                    ])}
-                                                      style={{
-                                                          marginLeft: 20,
-                                                          marginTop: 15
-                                                      }}><Text>Hassrede</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Hassrede") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf("Hassrede"),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>
+											Hassrede <Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Hassrede") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([...reportCategory, "Hassrede"])
+										}
+										style={{
+											marginLeft: 20,
+											marginTop: 15,
+										}}
+									>
+										<Text>Hassrede</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Gewalt') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Gewalt'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Gewalt <Ionicons
-                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Gewalt') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Gewalt'
-                                    ])} style={{
-                                        marginLeft: 20,
-                                        marginTop: 15
-                                    }}><Text>Gewalt</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Gewalt") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf("Gewalt"),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>
+											Gewalt <Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Gewalt") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([...reportCategory, "Gewalt"])
+										}
+										style={{
+											marginLeft: 20,
+											marginTop: 15,
+										}}
+									>
+										<Text>Gewalt</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Spam') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Spam'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Spam <Ionicons
-                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Spam') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Spam'
-                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Spam</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Spam") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(reportCategory.indexOf("Spam"), 1);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>
+											Spam <Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Spam") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([...reportCategory, "Spam"])
+										}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>Spam</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Betrug') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Betrug'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Betrug <Ionicons
-                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Betrug') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Betrug'
-                                    ])} style={{
-                                        marginLeft: 20,
-                                        marginTop: 15
-                                    }}><Text>Betrug</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Betrug") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf("Betrug"),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>
+											Betrug <Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Betrug") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([...reportCategory, "Betrug"])
+										}
+										style={{
+											marginLeft: 20,
+											marginTop: 15,
+										}}
+									>
+										<Text>Betrug</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Identitätsdiebstahl') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Identitätsdiebstahl'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{
-                                        marginLeft: 20,
-                                        marginTop: 15
-                                    }}><Text>Identitätsdiebstahl <Ionicons
-                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Identitätsdiebstahl') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Identitätsdiebstahl'
-                                    ])} style={{
-                                        marginLeft: 20,
-                                        marginTop: 15
-                                    }}><Text>Identitätsdiebstahl</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Identitätsdiebstahl") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf("Identitätsdiebstahl"),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{
+											marginLeft: 20,
+											marginTop: 15,
+										}}
+									>
+										<Text>
+											Identitätsdiebstahl <Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Identitätsdiebstahl") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([
+												...reportCategory,
+												"Identitätsdiebstahl",
+											])
+										}
+										style={{
+											marginLeft: 20,
+											marginTop: 15,
+										}}
+									>
+										<Text>Identitätsdiebstahl</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Nacktheit oder sexuelle Inhalte') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Nacktheit oder sexuelle Inhalte'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Nacktheit oder sexuelle
-                                        Inhalte <Ionicons
-                                            name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Nacktheit oder sexuelle Inhalte') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Nacktheit oder sexuelle Inhalte'
-                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Nacktheit oder sexuelle
-                                        Inhalte</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Nacktheit oder sexuelle Inhalte") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf(
+													"Nacktheit oder sexuelle Inhalte"
+												),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>
+											Nacktheit oder sexuelle Inhalte{" "}
+											<Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes(
+									"Nacktheit oder sexuelle Inhalte"
+								) && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([
+												...reportCategory,
+												"Nacktheit oder sexuelle Inhalte",
+											])
+										}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>Nacktheit oder sexuelle Inhalte</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Urheberrechtsverletzung') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Urheberrechtsverletzung'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{
-                                        marginLeft: 20,
-                                        marginTop: 15
-                                    }}><Text>Urheberrechtsverletzung <Ionicons
-                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Urheberrechtsverletzung') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Urheberrechtsverletzung'
-                                    ])} style={{
-                                        marginLeft: 20,
-                                        marginTop: 15
-                                    }}><Text>Urheberrechtsverletzung</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Urheberrechtsverletzung") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf("Urheberrechtsverletzung"),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{
+											marginLeft: 20,
+											marginTop: 15,
+										}}
+									>
+										<Text>
+											Urheberrechtsverletzung{" "}
+											<Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Urheberrechtsverletzung") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([
+												...reportCategory,
+												"Urheberrechtsverletzung",
+											])
+										}
+										style={{
+											marginLeft: 20,
+											marginTop: 15,
+										}}
+									>
+										<Text>Urheberrechtsverletzung</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Falsche Informationen') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Falsche Informationen'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Falsche
-                                        Informationen <Ionicons
-                                            name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Falsche Informationen') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Falsche Informationen'
-                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Falsche
-                                        Informationen</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Falsche Informationen") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf("Falsche Informationen"),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>
+											Falsche Informationen{" "}
+											<Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Falsche Informationen") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([
+												...reportCategory,
+												"Falsche Informationen",
+											])
+										}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>Falsche Informationen</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Verletzung der Privatsphäre') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Verletzung der Privatsphäre'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{marginLeft: 20, marginTop: 15}}><Text>Verletzung der
-                                        Privatsphäre <Ionicons
-                                            name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Verletzung der Privatsphäre') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Verletzung der Privatsphäre'
-                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text>Verletzung der
-                                        Privatsphäre</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Verletzung der Privatsphäre") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf("Verletzung der Privatsphäre"),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>
+											Verletzung der Privatsphäre{" "}
+											<Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Verletzung der Privatsphäre") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([
+												...reportCategory,
+												"Verletzung der Privatsphäre",
+											])
+										}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text>Verletzung der Privatsphäre</Text>
+									</TouchableOpacity>
+								)}
 
-                                {reportCategory.includes('Nutzer blockieren') && (
-                                    <TouchableOpacity onPress={() => {
-                                        reportCategory.splice(reportCategory.indexOf('Nutzer blockieren'), 1);
-                                        setReportCategory([...reportCategory])
-                                    }
-                                    } style={{marginLeft: 20, marginTop: 15}}><Text
-                                        style={{color: 'rgba(255, 0, 0, .87)'}}>Nutzer blockieren <Ionicons
-                                        name="checkmark"></Ionicons></Text></TouchableOpacity>
-                                )}
-                                {!reportCategory.includes('Nutzer blockieren') && (
-                                    <TouchableOpacity onPress={() => setReportCategory([
-                                        ...reportCategory,
-                                        'Nutzer blockieren'
-                                    ])} style={{marginLeft: 20, marginTop: 15}}><Text
-                                        style={{color: 'rgba(255, 0, 0, .87)'}}>Nutzer
-                                        blockieren</Text></TouchableOpacity>
-                                )}
+								{reportCategory.includes("Nutzer blockieren") && (
+									<TouchableOpacity
+										onPress={() => {
+											reportCategory.splice(
+												reportCategory.indexOf("Nutzer blockieren"),
+												1
+											);
+											setReportCategory([...reportCategory]);
+										}}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
+											Nutzer blockieren <Ionicons name="checkmark"></Ionicons>
+										</Text>
+									</TouchableOpacity>
+								)}
+								{!reportCategory.includes("Nutzer blockieren") && (
+									<TouchableOpacity
+										onPress={() =>
+											setReportCategory([
+												...reportCategory,
+												"Nutzer blockieren",
+											])
+										}
+										style={{ marginLeft: 20, marginTop: 15 }}
+									>
+										<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
+											Nutzer blockieren
+										</Text>
+									</TouchableOpacity>
+								)}
 
-                                <TouchableOpacity
-                                    style={{
-                                        marginLeft: 20,
-                                        marginTop: 15
-                                    }}><Text>Sonstiges:</Text></TouchableOpacity>
-                                <TextInput
-                                    editable
-                                    multiline
-                                    onChangeText={onChangeText}
-                                    value={text}
-                                    style={styles.input}
-                                >
-                                </TextInput>
-                                <LocalsButton style={{marginTop: 20, alignSelf: "center"}} title={"absenden"}
-                                              onPress={reportUser}></LocalsButton>
-                            </View>
-                        </View>
-                    </KeyboardAvoidingView>
-                </Modal>
+								<TouchableOpacity
+									style={{
+										marginLeft: 20,
+										marginTop: 15,
+									}}
+								>
+									<Text>Sonstiges:</Text>
+								</TouchableOpacity>
+								<TextInput
+									editable
+									multiline
+									onChangeText={onChangeText}
+									value={text}
+									style={styles.input}
+								></TextInput>
+								<LocalsButton
+									style={{ marginTop: 20, alignSelf: "center" }}
+									title={"absenden"}
+									onPress={reportUser}
+								></LocalsButton>
+							</View>
+						</View>
+					</KeyboardAvoidingView>
+				</Modal>
 
-                <View style={{alignSelf: "center"}}>
-                    {currentUser.blockedUsers && user.blockedUsers && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
-                        <View style={styles.profileImage}>
-                            <Image
-                                source={{uri: user.imageUrl}}
-                                style={styles.image}
-                                resizeMode="center"
-                            />
-                        </View>
-                    )}
-                    {currentUser.blockedUsers && user.blockedUsers && (currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) && (
-                        <View style={styles.profileImage}>
-                            <Image
-                                source={require('../../assets/blank_profile.png')}
-                                style={styles.image}
-                                resizeMode="center"
-                            />
-                        </View>
-                    )}
-                    {uid !== firebase.auth().currentUser.uid && currentUser.blockedUsers && user.blockedUsers && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
-                        <>
-                            <TouchableOpacity style={styles.chat} onPress={() => handleFriendClick(user.username)}>
-                                <MaterialIcons name={"chat"} size={20} color={"#FFFFFF"}/>
-                            </TouchableOpacity>
-                            {!currentFriends[user.username] &&
-                                user.username !== currentUsername && (
-                                    <TouchableOpacity
-                                        style={styles.add}
-                                        onPress={() =>
-                                            sendFriendRequest(currentUsername, user.username)
-                                        }
-                                    >
-                                        {friendRequests.includes(currentUsername) ? (
-                                            <MaterialIcons
-                                                name={"schedule"}
-                                                size={60}
-                                                color={"#ffffff"}
-                                            />
-                                        ) : (
-                                            <MaterialIcons name={"add"} size={60} color={"#FFFFFF"}/>
-                                        )}
-                                    </TouchableOpacity>
-                                )}
-                        </>
-                    )}
+				<View style={{ alignSelf: "center" }}>
+					{currentUser.blockedUsers &&
+						user.blockedUsers &&
+						!currentUser.blockedUsers.includes(user.username) &&
+						!user.blockedUsers.includes(currentUsername) && (
+							<View style={styles.profileImage}>
+								<Image
+									source={{ uri: user.imageUrl }}
+									style={styles.image}
+									resizeMode="center"
+								/>
+							</View>
+						)}
+					{currentUser.blockedUsers &&
+						user.blockedUsers &&
+						(currentUser.blockedUsers.includes(user.username) ||
+							user.blockedUsers.includes(currentUsername)) && (
+							<View style={styles.profileImage}>
+								<Image
+									source={require("../../assets/blank_profile.png")}
+									style={styles.image}
+									resizeMode="center"
+								/>
+							</View>
+						)}
+					{uid !== firebase.auth().currentUser.uid &&
+						currentUser.blockedUsers &&
+						user.blockedUsers &&
+						!currentUser.blockedUsers.includes(user.username) &&
+						!user.blockedUsers.includes(currentUsername) && (
+							<>
+								<TouchableOpacity
+									style={styles.chat}
+									onPress={() => handleFriendClick(user.username)}
+								>
+									<MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
+								</TouchableOpacity>
+								{!currentFriends[user.username] &&
+									user.username !== currentUsername && (
+										<TouchableOpacity
+											style={styles.add}
+											onPress={() =>
+												sendFriendRequest(currentUsername, user.username)
+											}
+										>
+											{friendRequests.includes(currentUsername) ? (
+												<MaterialIcons
+													name={"schedule"}
+													size={60}
+													color={"#ffffff"}
+												/>
+											) : (
+												<MaterialIcons
+													name={"add"}
+													size={60}
+													color={"#FFFFFF"}
+												/>
+											)}
+										</TouchableOpacity>
+									)}
+							</>
+						)}
+				</View>
 
-                </View>
-
-                {
-                    user.follower && user.following && currentUser.follower && currentUser.following && user.username && currentUser.blockedUsers && user.blockedUsers && (
-                        <View
-                            style={[styles.infoContainer, {marginTop: windowHeight * 0.01}]}
-                        >
-                            <Text style={[styles.text, {fontWeight: "200", fontSize: 36}]}>
-                                {user.firstName} {user.lastName}
-                            </Text>
-                            <Text style={[styles.text, {fontWeight: "200", fontSize: 14}]}>
-                                @{user.username}
-                            </Text>
-                            {uid !== firebase.auth().currentUser.uid && currentUser.following.includes(uid) === false && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
-                                <TouchableOpacity style={{marginTop: 10}} onPress={setFollower}>
-                                    <Text style={styles.followButton}>Folgen</Text>
-                                </TouchableOpacity>
-                            )}
-                            {currentUser.following.includes(uid) === true && !currentUser.blockedUsers.includes(user.username) && (
-                                <TouchableOpacity style={{marginTop: 10}} onPress={setUnfollow}>
-                                    <Text style={styles.followButton}>Nicht mehr Folgen</Text>
-                                </TouchableOpacity>
-                            )}
-                            {currentUser.blockedUsers.includes(user.username) && (
-                                <TouchableOpacity style={{marginTop: 10}} onPress={unblockUser}>
-                                    <Text style={styles.followButton}>Nicht mehr blockieren</Text>
-                                </TouchableOpacity>
-                            )}
-                            {(user.blockedUsers.includes(currentUsername) &&
-                                <Text></Text>
-                            )}
-                        </View>
-                    )
-                }
+				{user.follower &&
+					user.following &&
+					currentUser.follower &&
+					currentUser.following &&
+					user.username &&
+					currentUser.blockedUsers &&
+					user.blockedUsers && (
+						<View
+							style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
+						>
+							<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
+								{user.firstName} {user.lastName}
+							</Text>
+							<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
+								@{user.username}
+							</Text>
+							{uid !== firebase.auth().currentUser.uid &&
+								currentUser.following.includes(uid) === false &&
+								!currentUser.blockedUsers.includes(user.username) &&
+								!user.blockedUsers.includes(currentUsername) && (
+									<TouchableOpacity
+										style={{ marginTop: 10 }}
+										onPress={setFollower}
+									>
+										<Text style={styles.followButton}>Folgen</Text>
+									</TouchableOpacity>
+								)}
+							{currentUser.following.includes(uid) === true &&
+								!currentUser.blockedUsers.includes(user.username) && (
+									<TouchableOpacity
+										style={{ marginTop: 10 }}
+										onPress={setUnfollow}
+									>
+										<Text style={styles.followButton}>Nicht mehr Folgen</Text>
+									</TouchableOpacity>
+								)}
+							{currentUser.blockedUsers.includes(user.username) && (
+								<TouchableOpacity
+									style={{ marginTop: 10 }}
+									onPress={unblockUser}
+								>
+									<Text style={styles.followButton}>Nicht mehr blockieren</Text>
+								</TouchableOpacity>
+							)}
+							{user.blockedUsers.includes(currentUsername) && <Text></Text>}
+						</View>
+					)}
 
                 {
                     user.follower && user.following && currentUser.follower && currentUser.following && currentUser.blockedUsers && user.blockedUsers && (
                         <View
-                            style={[styles.statsContainer, {marginTop: windowHeight * 0.05}]}
+                            style={[styles.statsContainer, {marginTop: windowHeight * 0.03}]}
                         >
                             <View style={styles.statsBox}>
                                 <Text>Events</Text>
@@ -895,7 +1118,7 @@ const Profile = ({route, navigation}) => {
                     )
                 }
                 {currentUser.blockedUsers && user.blockedUsers && (
-                <View style={{marginTop: windowHeight * 0.05}}>
+                <View style={{marginTop: windowHeight * 0.03}}>
                     {events.length > 0 && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
                         <ScrollView
                             horizontal={true}
@@ -927,7 +1150,7 @@ const Profile = ({route, navigation}) => {
                             styles.recent,
                             {
                                 marginLeft: windowWidth * 0.15,
-                                marginTop: windowHeight * 0.05,
+                                marginTop: windowHeight * 0.03,
                             },
                         ]}
                     >
@@ -965,6 +1188,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+		marginBottom: 65
     },
     text: {
         color: "#000000",
@@ -976,13 +1200,12 @@ const styles = StyleSheet.create({
     titleBar: {
         flexDirection: "row",
         justifyContent: "flex-end",
-        marginTop: 35
     },
     profileImage: {
         width: 200,
         height: 200,
         borderRadius: 100,
-        overflow: "hidden",
+		overflow:'hidden'
     },
     chat: {
         backgroundColor: "#41444B",
