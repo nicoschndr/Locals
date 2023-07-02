@@ -21,22 +21,6 @@ const Login = ({ navigation }) => {
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 
-	useEffect(() => {
-		const unsubscribe = auth.onAuthStateChanged((user) => {
-			if (user) {
-				// Der Benutzer ist angemeldet
-				// Hier können Sie den Benutzer zu einer bestimmten Seite weiterleiten
-				navigation.navigate('Home');
-			} else {
-				// Der Benutzer ist abgemeldet
-				// Hier können Sie den Benutzer zu Ihrer Login-Seite weiterleiten
-				navigation.navigate('Login');
-			}
-		});
-
-		// Aufräumen
-		return unsubscribe;
-	}, []);
 	const login = () => {
 		// Überprüfen, ob die Eingabe eine E-Mail-Adresse ist
 		const isEmail = /\S+@\S+\.\S+/.test(emailOrUsername);
@@ -84,7 +68,7 @@ const Login = ({ navigation }) => {
 		if (isEmail) {
 			// Passwort zurücksetzen
 			auth
-				.sendPasswordResetEmail(emailOrUsername)
+				.sendPasswordResetEmail(JSON.stringify(emailOrUsername))
 				.then(() => {
 					Alert.alert(
 						"Geschaft!",
@@ -105,7 +89,7 @@ const Login = ({ navigation }) => {
 					if (!querySnapshot.empty) {
 						const user = querySnapshot.docs[0];
 						const email = user.data().email;
-						return auth.sendPasswordResetEmail(email);
+						return auth.sendPasswordResetEmail(JSON.stringify(email));
 					} else {
 						throw new Error("Ungültiger Benutzername oder E-Mail-Adresse");
 					}
@@ -143,7 +127,7 @@ const Login = ({ navigation }) => {
 	};
 
 	return (
-		<KeyboardAvoidingView behavior="padding">
+		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
 			<ImageBackground
 				source={require("../../assets/BackGround(h).png")}
 				style={{ width: "100%", height: "100%" }}

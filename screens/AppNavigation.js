@@ -19,6 +19,8 @@ import EditPost from "./appScreens/EditPost";
 import Follower from "./appScreens/Follower";
 import Chatbot from "./appScreens/Chatbot";
 import DrawerFriendList from "../components/DrawerFriendListIcon";
+import Yelling from "./appScreens/Yelling";
+import Categories from "./appScreens/Categories";
 
 import {auth} from "../firebase";
 import {Dimensions, Text, View} from "react-native";
@@ -70,6 +72,8 @@ const MainStackNavigator = () => {
 			<Stack.Screen name="PostEvent" component={PostEvent} />
 			<Stack.Screen name="EventDetails" component={EventDetails} />
 			<Stack.Screen name="EditPost" component={EditPost} />
+			<Stack.Screen name="Yelling" component={Yelling} />
+			<Stack.Screen name="Categories" component={Categories} />
 		</Stack.Navigator>
 	);
 };
@@ -99,7 +103,14 @@ function ProfileDrawerScreen() {
                     drawerLabel: () => <DrawerFriendList />
                 }}
 			/>
-			<Drawer.Screen name="EventDetails" component={EventDetails} />
+			<Drawer.Screen
+				options={{
+					drawerItemStyle: { display: "none" },
+					unmountOnBlur: true,
+				}}
+				name="EventDetails"
+				component={EventDetails}
+			/>
 			<Drawer.Screen name="Settings" component={Settings} />
 			<Drawer.Screen
 				options={{
@@ -133,10 +144,6 @@ function AppNavigation() {
 
 		return () => unsubscribe();
 	}, []);
-
-	if (!isReady) {
-		return null; // Warte auf den Abschluss der Authentifizierungsprüfung
-	}
 
 	return (
 		<NavigationContainer>
@@ -179,12 +186,16 @@ function AppNavigation() {
 						tabBarInactiveTintColor: "#734e61",
 						headerShown: false,
 						tabBarStyle: {
-							backgroundColor: "transparent",
+							backgroundColor: "white",
 							borderTopWidth: 0,
-							position: "absolute",
+							position: "absolute", // Position auf "absolute" setzen
 							bottom: 0,
+							left: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
+							right: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
 							height: 80,
+							width: Dimensions.get('window').width, // Gerätebreite setzen
 						},
+
 					})}
 				>
 					<Tab.Screen
@@ -234,6 +245,10 @@ function AuthScreen() {
 		>
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Register" component={Register} />
+			<Stack.Screen name="Home" component={HomeScreen} options={{
+				drawerItemStyle: { display: "none" },
+				unmountOnBlur: true,
+			}}/>
 		</Stack.Navigator>
 	);
 }

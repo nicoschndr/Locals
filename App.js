@@ -4,10 +4,11 @@ import React, { useEffect, useState } from "react";
 import FirestoreProvider from "./context/FirestoreProvider";
 import { initializeApp } from "firebase/app";
 import { initializeAuth } from "firebase/auth";
-//import { getReactNativePersistence } from "firebase/auth";
-//import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getReactNativePersistence } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { firebaseConfig } from "./firebase";
 LogBox.ignoreAllLogs();
+
 export default function App() {
 	//navigationOptions = {
 	//	headerShown: true,

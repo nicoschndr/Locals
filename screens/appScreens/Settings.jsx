@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import { Ionicons } from "@expo/vector-icons";
 
-const Template = () => {
+const Settings = () => {
 	const navigation = useNavigation();
 	const [oldPassword, setOldPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
@@ -187,7 +187,7 @@ const Template = () => {
 	);
 };
 
-export default Template;
+export default Settings;
 
 // use styles (styles.textContainer for example) to extract and separate the styling from the render function
 const styles = StyleSheet.create({
