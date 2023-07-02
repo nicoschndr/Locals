@@ -29,6 +29,8 @@ import Sidebar from "../components/Sidebar";
 import { HeaderBackButton } from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Onboarding from "./appScreens/Onboarding";
 import { Badge } from "react-native-elements";
 import TabProfileIcon from "../components/TabProfileIcon";
 
@@ -56,7 +58,7 @@ function FriendStackNavigator() {
 const MainStackNavigator = () => {
 	return (
 		<Stack.Navigator
-			initialRouteName="Home"
+			initialRouteName={"Home"}
 			screenOptions={{ headerShown: false }}
 		>
 			<Stack.Screen name="Start" component={HomeScreen} />
@@ -78,14 +80,22 @@ const MainStackNavigator = () => {
 	);
 };
 
-const MapNavigator = () =>{
-	return(
-		<Stack.Navigator screenOptions={{headerShown: false}}>
-			<Stack.Screen name="LiveMap" options={{headerShown: false}} component={LiveMap} />
-			<Stack.Screen name="Profile" options={{headerShown: false}} component={Profile} />
+const MapNavigator = () => {
+	return (
+		<Stack.Navigator screenOptions={{ headerShown: false }}>
+			<Stack.Screen
+				name="LiveMap"
+				options={{ headerShown: false }}
+				component={LiveMap}
+			/>
+			<Stack.Screen
+				name="Profile"
+				options={{ headerShown: false }}
+				component={Profile}
+			/>
 		</Stack.Navigator>
-	)
-}
+	);
+};
 
 function ProfileDrawerScreen() {
 	return (
@@ -147,6 +157,16 @@ function AppNavigation() {
 	const [user, setUser] = useState(null);
 	const [isReady, setIsReady] = useState(false);
 
+	const [onboarded, setOnboarded] = useState();
+	useEffect(() => {
+		getStorage();
+	});
+
+	const getStorage = async () => {
+		const onboarded = await AsyncStorage.getItem("ONBOARDED");
+		setOnboarded(JSON.parse(onboarded));
+	};
+
 	useEffect(() => {
 		const unsubscribe = auth.onAuthStateChanged((user) => {
 			setUser(user);
@@ -199,10 +219,8 @@ function AppNavigation() {
 						tabBarStyle: {
 							backgroundColor: "#efefef",
 							borderTopWidth: 0,
-							position: "absolute", // Position auf "absolute" setzen
+							position: "absolute",
 							bottom: 0,
-							left: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
-							right: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
 							height: 80,
 							width: Dimensions.get("window").width, // Gerätebreite setzen
 						},
@@ -225,10 +243,15 @@ function AppNavigation() {
 					/>
 				</Tab.Navigator>
 			) : (
-				<Stack.Navigator>
+				<Stack.Navigator initialRouteName={onboarded ? "Auth" : "Onboarding"}>
 					<Stack.Screen
 						name="Auth"
 						component={AuthScreen}
+						options={{ headerShown: false }}
+					/>
+					<Stack.Screen
+						name="Onboarding"
+						component={Onboarding}
 						options={{ headerShown: false }}
 					/>
 				</Stack.Navigator>
