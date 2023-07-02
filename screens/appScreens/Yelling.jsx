@@ -545,7 +545,6 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		backgroundColor: "white",
 		paddingVertical: 20,
-		paddingTop: 80,
 	},
 	postModalContainer: {
 		flex: 1,

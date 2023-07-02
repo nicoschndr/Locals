@@ -84,7 +84,7 @@ const Comment = ({
 	);
 };
 
-const Livemap = () => {
+const Livemap = ({navigation}) => {
 	const [location, setLocation] = useState(null);
 	const [events, setEvents] = useState([]);
 	const [modalVisible, setModalVisible] = useState(false);
@@ -768,9 +768,23 @@ const Livemap = () => {
 								</View>
 							)}
 
-							<View style={{ alignItems: "center" }}>
-								<Ionicons name="person-circle" size={32} color="grey" />
-								<Text style={styles.item}>{selectedEvent.creator}</Text>
+							<View style={{ alignItems: "center" }}
+							>
+								<TouchableOpacity
+									onPress={() => {
+										console.log(selectedEvent.userId)
+										navigation.navigate("Profile", {
+											uid: selectedEvent.userId,
+										});
+										setModalVisible(false);
+									}}
+								>
+									<Image
+										style={{ width: 32, height: 32, borderRadius: 16 }}
+										source={{ uri: selectedEvent.imageUrl }}
+									/>
+									<Text style={styles.item}>{selectedEvent.creator}</Text>
+								</TouchableOpacity>
 							</View>
 						</View>
 						<View style={{ padding: 20 }}>

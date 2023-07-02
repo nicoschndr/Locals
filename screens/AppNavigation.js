@@ -78,6 +78,15 @@ const MainStackNavigator = () => {
 	);
 };
 
+const MapNavigator = () =>{
+	return(
+		<Stack.Navigator screenOptions={{headerShown: false}}>
+			<Stack.Screen name="LiveMap" options={{headerShown: false}} component={LiveMap} />
+			<Stack.Screen name="Profile" options={{headerShown: false}} component={Profile} />
+		</Stack.Navigator>
+	)
+}
+
 function ProfileDrawerScreen() {
 	return (
 		<Drawer.Navigator
@@ -204,7 +213,8 @@ function AppNavigation() {
 						name="Home"
 						component={MainStackNavigator}
 					/>
-					<Tab.Screen name="Map" component={LiveMap} />
+					<Tab.Screen name="Map" component={MapNavigator} />
+
 					<Tab.Screen
 						options={{
 							unmountOnBlur: true,
