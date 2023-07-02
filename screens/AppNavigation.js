@@ -18,16 +18,19 @@ import EventDetails from "./appScreens/EventDetails";
 import EditPost from "./appScreens/EditPost";
 import Follower from "./appScreens/Follower";
 import Chatbot from "./appScreens/Chatbot";
+import DrawerFriendList from "../components/DrawerFriendListIcon";
 import Yelling from "./appScreens/Yelling";
 import Categories from "./appScreens/Categories";
 
 import { auth } from "../firebase";
-import { Dimensions } from "react-native";
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import { Dimensions, Text, View } from "react-native";
+import { createDrawerNavigator, DrawerItem } from "@react-navigation/drawer";
 import Sidebar from "../components/Sidebar";
 import { HeaderBackButton } from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
+import { Badge } from "react-native-elements";
+import TabProfileIcon from "../components/TabProfileIcon";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -96,7 +99,11 @@ function ProfileDrawerScreen() {
 			<Drawer.Screen
 				name="FriendList"
 				component={FriendStackNavigator}
-				options={{ headerShown: true }}
+				options={{
+					headerShown: true,
+					unmountOnBlur: true,
+					drawerLabel: () => <DrawerFriendList />,
+				}}
 			/>
 			<Drawer.Screen
 				options={{
@@ -105,14 +112,6 @@ function ProfileDrawerScreen() {
 				}}
 				name="EventDetails"
 				component={EventDetails}
-			/>
-			<Drawer.Screen
-				options={{
-					drawerItemStyle: { display: "none" },
-					unmountOnBlur: true,
-				}}
-				name="EditPost"
-				component={EditPost}
 			/>
 			<Drawer.Screen name="Settings" component={Settings} />
 			<Drawer.Screen
@@ -141,7 +140,6 @@ function AppNavigation() {
 
 	useEffect(() => {
 		const unsubscribe = auth.onAuthStateChanged((user) => {
-			console.log(user); // Add this line to debug user state
 			setUser(user);
 			setIsReady(true);
 		});
@@ -169,7 +167,7 @@ function AppNavigation() {
 								iconName = focused ? "map" : "map-outline";
 							}
 							// PROFILE ICON
-							if (route.name === "Profile") {
+							if (route.name === "Me") {
 								iconName = focused ? "person" : "person-outline";
 							}
 							// FRIENDLIST ICON
@@ -190,16 +188,15 @@ function AppNavigation() {
 						tabBarInactiveTintColor: "#734e61",
 						headerShown: false,
 						tabBarStyle: {
-							backgroundColor: "white",
+							backgroundColor: "#efefef",
 							borderTopWidth: 0,
 							position: "absolute", // Position auf "absolute" setzen
 							bottom: 0,
 							left: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
 							right: 0, // Hinzugefügt, um den gesamten Bildschirm in der Breite zu füllen
 							height: 80,
-							width: Dimensions.get('window').width, // Gerätebreite setzen
+							width: Dimensions.get("window").width, // Gerätebreite setzen
 						},
-
 					})}
 				>
 					<Tab.Screen
@@ -209,8 +206,11 @@ function AppNavigation() {
 					/>
 					<Tab.Screen name="Map" component={LiveMap} />
 					<Tab.Screen
-						options={{ unmountOnBlur: true }}
-						name="Profile"
+						options={{
+							unmountOnBlur: true,
+							tabBarLabel: () => <TabProfileIcon />,
+						}}
+						name="Me"
 						component={ProfileDrawerScreen}
 					/>
 				</Tab.Navigator>
@@ -249,10 +249,14 @@ function AuthScreen() {
 		>
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Register" component={Register} />
-			<Stack.Screen name="Home" component={HomeScreen} options={{
-				drawerItemStyle: { display: "none" },
-				unmountOnBlur: true,
-			}}/>
+			<Stack.Screen
+				name="Home"
+				component={HomeScreen}
+				options={{
+					drawerItemStyle: { display: "none" },
+					unmountOnBlur: true,
+				}}
+			/>
 		</Stack.Navigator>
 	);
 }

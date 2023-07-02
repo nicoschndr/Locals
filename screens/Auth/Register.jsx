@@ -125,31 +125,31 @@ const Register = ({ navigation }) => {
 			await auth.createUserWithEmailAndPassword(email, password);
 
 			await firestore.collection("users").doc(auth.currentUser?.uid).set({
-				email: email,
-				firstName: firstName,
-				lastName: lastName,
-				birthday: birthday,
-				mobile: mobile,
-				address: address,
-				imageUrl: imageUrl,
-				username: username,
-				friends: {},
-				friendRequests: {},
-				follower: [],
-				following: [],
-				blockedUsers: [],
-				reportedBy: {},
-			});
-
-			alert("Konto erfolgreich erstellt");
-			navigation.navigate("Home");
-		} catch (error) {
-			console.log(error);
-			alert(error);
-		} finally {
-			setUploading(false);
-		}
-	};
+					email: email,
+					firstName: firstName,
+					lastName: lastName,
+					birthday: birthday,
+					mobile: mobile,
+					address: address,
+					imageUrl: imageUrl,
+					username: username, // Fügen Sie den Benutzernamen zur Dokumentdaten hinzu
+					friends: {},
+					friendRequests: {},
+					follower: [],
+					following: [],
+					blockedUsers: [],
+					reportedBy: {},
+					followerWhenClicked: 0,
+				});
+				alert("Konto erfolgreich erstellt");
+				navigation.navigate("Home");
+			} catch (error) {
+				console.log(error);
+				alert(error);
+			} finally {
+				setUploading(false);
+			}
+		};
 
 	const handleDateChange = (birthday) => {
 		setBirthday(birthday);
