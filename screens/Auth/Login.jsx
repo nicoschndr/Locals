@@ -68,7 +68,7 @@ const Login = ({ navigation }) => {
 		if (isEmail) {
 			// Passwort zurücksetzen
 			auth
-				.sendPasswordResetEmail(emailOrUsername)
+				.sendPasswordResetEmail(JSON.stringify(emailOrUsername))
 				.then(() => {
 					Alert.alert(
 						"Geschaft!",
@@ -89,7 +89,7 @@ const Login = ({ navigation }) => {
 					if (!querySnapshot.empty) {
 						const user = querySnapshot.docs[0];
 						const email = user.data().email;
-						return auth.sendPasswordResetEmail(email);
+						return auth.sendPasswordResetEmail(JSON.stringify(email));
 					} else {
 						throw new Error("Ungültiger Benutzername oder E-Mail-Adresse");
 					}
@@ -127,7 +127,7 @@ const Login = ({ navigation }) => {
 	};
 
 	return (
-		<KeyboardAvoidingView behavior="padding">
+		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
 			<ImageBackground
 				source={require("../../assets/BackGround(h).png")}
 				style={{ width: "100%", height: "100%" }}
