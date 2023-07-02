@@ -1,4 +1,4 @@
-import {ActivityIndicator, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {ActivityIndicator, Alert, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import LocalsTextInput from "../../components/LocalsTextInput";
@@ -31,6 +31,7 @@ const EditProfile = ({route, navigation}) => {
     const [longitude, setLongitude] = useState(0);
     const [latitude, setLatitude] = useState(0);
     const [clicked, setClicked] = useState(false);
+    const [oldUsername, setOldUsername] = useState('');
 
     const [showPassword, setShowPassword] = useState(false);
     const [currentUser, setCurrentUser] = useState({});
@@ -47,6 +48,7 @@ const EditProfile = ({route, navigation}) => {
                 setMobile(currentUserData.mobile);
                 setAddress(currentUserData.address);
                 setUsername(currentUserData.username);
+                setOldUsername(currentUserData.username);
                 setImageUrl(currentUserData.imageUrl);
             })
 
@@ -58,7 +60,7 @@ const EditProfile = ({route, navigation}) => {
             const imageUrl = await uploadImage(imageUri);
         }
 
-        if (!isUsernameAvailable) {
+        if (!isUsernameAvailable && username !== oldUsername) {
             alert(
                 "Der Benutzername ist bereits vergeben. Bitte wählen Sie einen anderen."
             );
@@ -77,6 +79,15 @@ const EditProfile = ({route, navigation}) => {
                 imageUrl: imageUrl
             })
         navigation.navigate('Profile')
+    }
+
+    async function deleteAccount() {
+        await auth.currentUser.delete();
+        await firestore
+            .collection('users')
+            .doc(auth.currentUser.uid)
+            .delete()
+        navigation.navigate('Login')
     }
 
     const checkUsernameAvailability = async () => {
@@ -112,6 +123,26 @@ const EditProfile = ({route, navigation}) => {
         setBirthday(birthday);
     };
 
+    const showAlert = () => {
+        Alert.alert(
+            'Bestätigen',
+            'Bist du sicher?',
+            [
+                {
+                    text: 'Abbrechen',
+                    style: 'cancel',
+                    onPress: () => console.log('Abgebrochen!'),
+                },
+                {
+                    text: 'Bestätigen',
+                    onPress: deleteAccount,
+                },
+            ],
+            { cancelable: true }
+        );
+    };
+
+
 
     return (
         <ImageBackground
@@ -128,20 +159,23 @@ const EditProfile = ({route, navigation}) => {
                 {!clicked && (
                     <TouchableOpacity onPress={() => setClicked(true)}>
                         <View style={styles.profileImage}>
+
                             <Image
                                 source={{uri: imageUrl}}
                                 style={styles.Pimage}
                                 resizeMode="center"
                             />
                         </View>
+                        <Ionicons style={{position: 'absolute', top:70, left: 140}} size={40} name='create-outline'/>
                     </TouchableOpacity>
                 )}
                 {clicked && (
                     <LocalsImagePicker
                         onImageTaken={(uri) => setImageUri(uri)}
-                        style={styles.image}
+                        style={[styles.image, {marginBottom: -20}]}
                     />
                 )}
+                {clicked && (
                 <View style={{marginTop: 12}}>
                     <Text style={styles.inputTitle}>E-Mail</Text>
                     <LocalsTextInput
@@ -154,6 +188,21 @@ const EditProfile = ({route, navigation}) => {
                     />
                     <Divider style={styles.divider}/>
                 </View>
+                )}
+                {!clicked && (
+                <View>
+                    <Text style={styles.inputTitle}>E-Mail</Text>
+                    <LocalsTextInput
+                        autoCapitalize="none"
+                        autoFocus
+                        inputMode="email"
+                        value={email}
+                        onChangeText={(email) => setEmail(email)}
+                        style={styles.input}
+                    />
+                    <Divider style={styles.divider}/>
+                </View>
+                )}
 
                 <View
                     style={{
@@ -234,7 +283,13 @@ const EditProfile = ({route, navigation}) => {
                     <Divider style={styles.divider}/>
                 </View>
 
-                <TouchableOpacity onPress={() => navigation.navigate('ChangePassword')}><Text style={{fontWeight: 'bold', color: "#C8C8C8", marginTop: 30}}>Passwort ändern</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('ChangePassword')}><Text
+                    style={{fontWeight: 'bold', color: "#C8C8C8", marginTop: 30}}>Passwort
+                    ändern</Text></TouchableOpacity>
+
+                <TouchableOpacity onPress={showAlert}><Text
+                    style={{fontWeight: 'bold', color: "#C8C8C8", marginTop: 20}}>Account löschen
+                </Text></TouchableOpacity>
 
                 {!uploading && (
                     <LocalsButton
@@ -255,7 +310,6 @@ const styles = StyleSheet.create({
     container: {height: "100%", width: "100%"},
     image: {
         width: "100%",
-        marginBottom: 20,
     },
     addressInput: {
         backgroundColor: "transparent",
@@ -277,7 +331,7 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent",
     },
     loginBtn: {
-        marginTop: 40,
+        marginTop: 25,
     },
     password: {
         marginTop: 10,
