@@ -772,10 +772,11 @@ const Livemap = ({navigation}) => {
 							>
 								<TouchableOpacity
 									onPress={() => {
-										setModalVisible(false);
+										console.log(selectedEvent.userId)
 										navigation.navigate("Profile", {
 											uid: selectedEvent.userId,
 										});
+										setModalVisible(false);
 									}}
 								>
 									<Image
