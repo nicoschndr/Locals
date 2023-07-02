@@ -159,6 +159,7 @@ const PostEvent = ({ navigation }) => {
 				category: category,
 				date: date,
 				attendees: [],
+				likedBy: [],
 				userId: auth.currentUser.uid,
 			})
 			.then(() => {
