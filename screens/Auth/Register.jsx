@@ -261,7 +261,7 @@ const Register = ({ navigation }) => {
 						}}
 					>
 						<View style={{ width: "48%" }}>
-							<Text style={styles.inputTitle}>Vormame</Text>
+							<Text style={styles.inputTitle}>Vorname</Text>
 							<LocalsTextInput
 								autoCapitalize
 								value={firstName}

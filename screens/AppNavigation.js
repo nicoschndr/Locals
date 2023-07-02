@@ -21,6 +21,7 @@ import Chatbot from "./appScreens/Chatbot";
 import DrawerFriendList from "../components/DrawerFriendListIcon";
 import Yelling from "./appScreens/Yelling";
 import Categories from "./appScreens/Categories";
+import ChangePassword from "./appScreens/ChangePassword";
 
 import { auth } from "../firebase";
 import { Dimensions, Text, View } from "react-native";
@@ -29,6 +30,8 @@ import Sidebar from "../components/Sidebar";
 import { HeaderBackButton } from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
+import EditProfile from "./appScreens/EditProfile";
+import changePassword from "./appScreens/ChangePassword";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Onboarding from "./appScreens/Onboarding";
 import { Badge } from "react-native-elements";
@@ -76,6 +79,7 @@ const MainStackNavigator = () => {
 			<Stack.Screen name="EditPost" component={EditPost} />
 			<Stack.Screen name="Yelling" component={Yelling} />
 			<Stack.Screen name="Categories" component={Categories} />
+			<Stack.Screen name="ChangePassword" component={ChangePassword} />
 		</Stack.Navigator>
 	);
 };
@@ -148,6 +152,19 @@ function ProfileDrawerScreen() {
 				}}
 				name="Following"
 				component={Following}
+			/>
+			<Drawer.Screen
+				options={{ unmountOnBlur: true }}
+				name="EditProfile"
+				component={EditProfile}
+			/>
+			<Drawer.Screen
+				options={{
+					drawerItemStyle: { display: "none" },
+					unmountOnBlur: true,
+				}}
+				name="ChangePassword"
+				component={changePassword}
 			/>
 		</Drawer.Navigator>
 	);
