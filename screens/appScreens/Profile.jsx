@@ -52,7 +52,7 @@ const Profile = ({route, navigation}) => {
     const uid = route.params?.uid || auth.currentUser.uid;
     const [user, setUser] = useState({});
     const [currentUser, setCurrentUser] = useState({});
-    const [events, setEvents] = useState([]);
+    //const [events, setEvents] = useState([]);
     const [currentUsername, setCurrentUsername] = useState("");
     const [currentFriends, setCurrentFriends] = useState({});
     const [friendRequests, setFriendRequests] = useState([]);
@@ -67,6 +67,8 @@ const Profile = ({route, navigation}) => {
     const [shouldHide, setShouldHide] = React.useState(false);
     const [followerDiff, setFollowerDiff] = useState(0)
     const [unreadMessages, setUnreadMessages] = useState(null);
+
+	const { events } = useContext(FirestoreContext);
 
 
 	React.useLayoutEffect(() => {
@@ -99,7 +101,7 @@ const Profile = ({route, navigation}) => {
             .onSnapshot((doc) => {
                 const userData = doc.data();
                 setUser(userData);
-                getUserPosts(userData.username)
+                //getUserPosts(userData.username)
             })
     }
 
