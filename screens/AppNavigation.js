@@ -99,7 +99,6 @@ function ProfileDrawerScreen() {
                     drawerLabel: () => <DrawerFriendList />
                 }}
 			/>
-			<Drawer.Screen name="Chatbot" component={Chatbot}/>
 			<Drawer.Screen name="EventDetails" component={EventDetails} />
 			<Drawer.Screen name="EditPost" component={EditPost} />
 			<Drawer.Screen name="Settings" component={Settings} />
