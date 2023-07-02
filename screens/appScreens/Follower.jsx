@@ -19,10 +19,13 @@ const Follower = ({route: {params}, navigation}) => {
     const [user, setUser] = useState({});
     const [currentUser, setCurrentUser] = useState({});
     const uid = params.uid;
+    const diff = params.diff;
     const [followerIDs, setFollowingIds] = useState(params.follower);
     const [followers, setUserFollowers] = useState([]);
+    const [newFollowers, setNewFollowers] = useState([]);
     let fllwr = [];
     let fllwng = [];
+    let ue = []
 
     function getUserData() {
         firestore
@@ -55,7 +58,8 @@ const Follower = ({route: {params}, navigation}) => {
                         uid: e.id,
                         ...e.data(),
                     }))
-                    setUserFollowers(f)
+                    setUserFollowers(f.filter((e) => f.indexOf(e) < f.length - diff))
+                    setNewFollowers(f.filter((e) => f.indexOf(e) >= f.length - diff))
                 })
         }
     }
@@ -154,6 +158,46 @@ const Follower = ({route: {params}, navigation}) => {
             {followers.length > 0 && (
                 <View>
                     {followers.map((follower) => (
+                        <View>
+                            <View style={{flexDirection: "row", marginTop: 10, marginLeft: 10}}>
+                                <TouchableOpacity key={follower.uid} onPress={() => {
+                                    navigation.goBack();
+                                    navigation.navigate('Profile', {uid: follower.uid})
+                                }}>
+                                    <Image source={{uri: follower.imageUrl}}
+                                           style={{width: 40, height: 40, borderRadius: 50}}></Image></TouchableOpacity>
+                                <TouchableOpacity key={follower.uid} onPress={() => {
+                                    navigation.goBack();
+                                    navigation.navigate('Profile', {uid: follower.uid})
+                                }}><Text style={{marginLeft: 10, fontWeight: "bold"}}>{follower.username}{"\n"}<Text
+                                    style={{fontWeight: "normal"}}>{follower.firstName + " " + follower.lastName}</Text></Text></TouchableOpacity>
+                                {currentUser.follower.includes(follower.uid) && user.email === auth.currentUser.email && (
+                                    <TouchableOpacity style={[styles.followButton, {
+                                        marginRight: 10,
+                                        marginLeft: "auto",
+                                        alignSelf: "center"
+                                    }]} onPress={() => deleteFollower({follower})}>
+                                        <Text>entfernen</Text>
+                                    </TouchableOpacity>
+                                )}
+                                {!currentUser.follower.includes(follower.uid) && user.email === auth.currentUser.email && (
+                                    <TouchableOpacity style={[styles.followButton, {
+                                        marginRight: 10,
+                                        marginLeft: "auto",
+                                        alignSelf: "center"
+                                    }]} onPress={() => notDeleteFollower({follower})}>
+                                        <Text>rückgängig</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        </View>
+                    ))}
+                    {newFollowers.length > 0 && (
+                    <View>
+                        <Text style={{fontWeight:'bold', alignSelf:'center', marginTop: 20}}>New:</Text>
+                    </View>
+                    )}
+                    {newFollowers.map((follower) => (
                         <View>
                             <View style={{flexDirection: "row", marginTop: 10, marginLeft: 10}}>
                                 <TouchableOpacity key={follower.uid} onPress={() => {

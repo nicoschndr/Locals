@@ -12,22 +12,39 @@ import { DrawerItemList } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import { auth, firebase, firestore } from "../firebase";
 
-const Sidebar = (props) => {
-	const [currentUser, setCurrentUser] = useState({});
+const Sidebar = props => {
 
-	useEffect(() => {
-		getCurrentUserData();
-	}, []);
+    const [currentUser, setCurrentUser] = useState({});
+    const [friendRequests, setFriendRequests] = useState([]);
 
-	function getCurrentUserData() {
-		firestore
-			.collection("users")
-			.doc(auth.currentUser.uid)
-			.get()
-			.then((snapshot) => {
-				setCurrentUser(snapshot.data());
-			});
-	}
+    useEffect(() => {
+        getCurrentUserData();
+        getOpenFriendRequests();
+    }, []);
+
+    function getCurrentUserData() {
+        firestore
+            .collection("users")
+            .doc(auth.currentUser.uid)
+            .onSnapshot((doc) => {
+                const currentUserData = doc.data();
+                setCurrentUser(currentUserData);
+            })
+    }
+    function getOpenFriendRequests() {
+        firestore
+            .collection("users")
+            .doc(uid)
+            .get()
+            .then((snapshot) => {
+                const userData = snapshot.data();
+                const friendRequests = Object.keys(userData.friendRequests || {});
+                setFriendRequests(friendRequests); // Aktualisiere den Zustand mit den offenen Freundesanfragen
+            })
+            .catch((error) => {
+                console.error("Fehler beim Abrufen der Freundschaftsanfragen:", error);
+            });
+    }
 
 	const logout = () => {
 		auth

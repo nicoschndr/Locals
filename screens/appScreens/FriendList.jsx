@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, Button, TextInput, Modal, TouchableOpacity, Alert} from 'react-native';
+import {View, Text, Button, TextInput, Modal, TouchableOpacity, Alert, StyleSheet} from 'react-native';
 import { firebase } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 import {Ionicons} from "@expo/vector-icons";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import { Image } from "react-native";
+import {useFocusEffect} from "@react-navigation/native";
+import {Badge} from "react-native-elements";
 
 async function sendFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
@@ -105,6 +107,7 @@ function FriendList({navigation}) {
 					const userData = doc.data();
 					setFriendRequests(Object.keys(userData.friendRequests || {}));
 					setCurrentUsername(userData.username);
+					getChats(userData.username)
 
 					const friendIds = Object.keys(userData.friends || {});
 					setFriends(friendIds);
@@ -130,6 +133,33 @@ function FriendList({navigation}) {
 			});
 		}
 	}, []);
+
+	useEffect(
+		()=>{
+
+		}, []);
+	let messages = [];
+	const [unreadMessages, setUnreadMessages] = useState([]);
+
+	const getChats = async (username) =>  {
+		try {
+			const chatRef = firebase.firestore().collection('chatRooms')
+
+			const userChats = chatRef
+				.where(`${username}_isTyping`, '==', false)
+				.onSnapshot((snapshot) => {
+					const chats = snapshot.docs.map((doc) => ({
+						...doc.data()
+					}));
+					chats.forEach((c) => c.messages.map((e) => messages.push(e)))
+					setUnreadMessages(messages.filter((e) => e.sender !== username && e.readStatus === false))
+					messages.splice(0, messages.length)
+				});
+
+		}catch (e){
+			console.log(e)
+		}
+	}
 
 	const searchUsers = async () => {
 		const usersRef = firebase.firestore().collection('users');
@@ -159,7 +189,8 @@ function FriendList({navigation}) {
 		navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
 	}
 	return (
-		<View>
+		<View style={{flex: 1,
+			marginBottom: 80,}}>
 			<TouchableOpacity onPress={handleOpenRequests} style={{ position: 'absolute', top: 10, right: 10, zIndex: 999 }}>
 				<Ionicons name="notifications-outline" size={24} color="black" />
 				{friendRequests.length > 0 && (
@@ -210,6 +241,8 @@ function FriendList({navigation}) {
 						/>
 						}
 						<Text style={{ marginLeft: 10 }}>{friendUsername}</Text>
+						{(unreadMessages.filter((e) => e.sender === friendUsername)).length > 0 && (
+						<Badge containerStyle={{position: 'absolute', top: -2, left:40}} status='error' value={(unreadMessages.filter((e) => e.sender === friendUsername)).length}></Badge>)}
 						{index !== friends.length - 1 &&
 						<View style={{ borderBottomWidth: 1, borderBottomColor: '#ec404b', marginTop: 5 }} />
 						}
@@ -253,6 +286,9 @@ function FriendList({navigation}) {
 
 		</View>
 	);
+
 }
+
+
 
 export default FriendList;

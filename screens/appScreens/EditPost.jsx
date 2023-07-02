@@ -10,7 +10,7 @@ import {
 	Button,
 	Pressable,
 	TouchableOpacity,
-	KeyboardAvoidingView,
+	KeyboardAvoidingView, Platform,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -131,7 +131,7 @@ const EditPost = ({ navigation, route }) => {
 
 
 	return (
-		<KeyboardAvoidingView style={styles.container}>
+		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<TouchableOpacity
 					style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
@@ -244,7 +244,7 @@ const EditPost = ({ navigation, route }) => {
 						/> */}
 					</View>
 				</View>
-				<KeyboardAvoidingView style={styles.inputContainer}>
+				<KeyboardAvoidingView style={styles.inputContainer} behavior={Platform.OS === "ios" ? "padding" : ""}>
 					<Text>Category</Text>
 					<DropDownPicker
 						open={open}
@@ -300,6 +300,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		marginHorizontal: 20,
+		marginBottom: 80,
 	},
 	titleBar: {
 		flexDirection: "row",

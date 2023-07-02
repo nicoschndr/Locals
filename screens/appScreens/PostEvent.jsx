@@ -10,7 +10,7 @@ import {
 	TextInput,
 	TouchableOpacity,
 	KeyboardAvoidingView,
-	ActivityIndicator,
+	ActivityIndicator, Platform, PermissionsAndroid, FlatList,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { CheckBox } from "react-native-elements";
@@ -18,13 +18,17 @@ import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { auth, firestore, storage } from "../../firebase";
+
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import LocalsImagePicker from "../../components/LocalsImagePicker";
 import DropDownPicker from "react-native-dropdown-picker";
 import { set } from "react-native-reanimated";
 
+
 const PostEvent = ({ navigation }) => {
 	const windowWidth = Dimensions.get("window").width;
+	const [showDatePicker, setShowDatePicker] = useState(false);
+
 	const windowHeight = Dimensions.get("window").height;
 	const [datePicker, setDatePicker] = useState(false);
 	const [date, setDate] = useState(new Date());
@@ -42,6 +46,8 @@ const PostEvent = ({ navigation }) => {
 	const [advertised, setAdvertised] = useState(false);
 	const [open, setOpen] = useState(false);
 	const [category, setCategory] = useState([""]);
+	const [location, setLocation] = useState(null);
+
 
 	const [items, setItems] = useState([
 		{ label: "Sport", value: "sport" },
@@ -54,6 +60,7 @@ const PostEvent = ({ navigation }) => {
 	useEffect(() => {
 		requestLocationPermission();
 	}, []);
+
 
 	const requestLocationPermission = async () => {
 		if (Platform.OS === "android") {
@@ -74,6 +81,9 @@ const PostEvent = ({ navigation }) => {
 		}
 	};
 
+
+
+
 	const getCurrentLocation = async () => {
 		try {
 			let { status } = await Location.requestForegroundPermissionsAsync();
@@ -92,13 +102,7 @@ const PostEvent = ({ navigation }) => {
 		}
 	};
 
-	const openMap = () => {
-		setShowMap(true);
-	};
 
-	const closeMap = () => {
-		setShowMap(false);
-	};
 
 	const uploadImage = async (uri) => {
 		setUploading(true);
@@ -154,6 +158,8 @@ const PostEvent = ({ navigation }) => {
 				advertised: advertised,
 				category: category,
 				date: date,
+				attendees: [],
+				likedBy: [],
 				userId: auth.currentUser.uid,
 			})
 			.then(() => {
@@ -166,28 +172,42 @@ const PostEvent = ({ navigation }) => {
 				console.log(error);
 			});
 	};
-	function showDatePicker() {
-		setDatePicker(true);
+
+
+
+	const openDatePicker = () => {
+		setShowDatePicker(true);
 	}
 
-	function onDateSelected(event, value) {
-		setDate(value);
-		setDatePicker(false);
+	const closeDatePicker= () => {
+		setShowDatePicker(false);
 	}
 
-	async function getLocation() {
-		let { status } = await Location.requestForegroundPermissionsAsync();
-		if (status !== "granted") {
-			alert("Permission to access location was denied");
-			return;
+	const onDateSelected = (date) => {
+		setDate(date);
+		closeDatePicker();
+	}
+
+	const renderDatePicker = () => {
+		if (showDatePicker) {
+			return (
+				<View>
+					<DateTimePicker
+						value={date}
+						locale="de-DE"
+						mode="date"
+						onChange={(event, date) => onDateSelected(date)}
+					/>
+				</View>
+
+			);
 		}
-
-		let location = await Location.getCurrentPositionAsync({});
-		setLocation(location);
+		return null;
 	}
+
 
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior="padding">
+		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
 			<ScrollView
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps="always"
@@ -222,81 +242,39 @@ const PostEvent = ({ navigation }) => {
 					/>
 				</View>
 
-				<View style={styles.inputContainer}>
-					<Text>
-						Address
-						{/* <Text style={{ fontWeight: "bold" }}> or Set Marker*</Text> */}
-					</Text>
-					<View style={{ flexDirection: "row", alignItems: "center" }}>
-						<GooglePlacesAutocomplete
-							fetchDetails={true}
-							currentLocation={true}
-							currentLocationLabel="Current location"
-							listViewDisplayed={false}
-							onPress={(data, details = null) => {
-								setAddress(details.formatted_address);
-								setLongitude(details.geometry.location.lng);
-								setLatitude(details.geometry.location.lat);
-							}}
-							query={{
-								key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
-							}}
-							styles={{
-								textInput: styles.addressInput,
-								listView: {
-									width: "90%", // Set the width of the suggestions list
-								},
-								container: {
-									width: "100%", // Set the width of the container
-								},
-							}}
-						/>
-						{/* <Ionicons
-							name={"locate-outline"}
-							size={30}
-							onPress={getCurrentLocation}
-							style={{ marginLeft: 10 }}
-						/> */}
-					</View>
-				</View>
-
-				{/* 				<View>
-					{showMap ? (
-						<View style={{ flex: 1 }}>
-							<MapView
-								style={styles.map}
-								initialRegion={{
-									latitude: latitude,
-									longitude: longitude,
-									latitudeDelta: 0.0922,
-									longitudeDelta: 0.0421,
-								}}
-							>
-								<Marker
-									coordinate={{
-										latitude: latitude,
-										longitude: longitude,
+				<FlatList
+					data={[{ key: 'uniqueKey' }]} // Pass an array of objects to `data`, it could be your state or prop
+					renderItem={({ item }) => (
+						<View style={styles.inputContainer}>
+							<Text>Address</Text>
+							<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+								<GooglePlacesAutocomplete
+									fetchDetails={true}
+									currentLocation={true}
+									currentLocationLabel='Current location'
+									listViewDisplayed={false}
+									onPress={(data, details = null) => {
+										setAddress(details.formatted_address);
+										setLongitude(details.geometry.location.lng);
+										setLatitude(details.geometry.location.lat);
 									}}
-									draggable
-									onDragEnd={(e) => {
-										const { latitude, longitude } = e.nativeEvent.coordinate;
-										setLatitude(latitude);
-										setLongitude(longitude);
-										setAddress(`${latitude}, ${longitude}`);
+									query={{
+										key: 'AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI',
+									}}
+									styles={{
+										textInput: styles.addressInput,
+										listView: {
+											width: '90%', // Set the width of the suggestions list
+										},
+										container: {
+											width: '100%', // Set the width of the container
+										},
 									}}
 								/>
-							</MapView>
-
-							<TouchableOpacity style={styles.button} onPress={closeMap}>
-								<Text style={{ color: "#FFFFFF" }}>Karte schließen</Text>
-							</TouchableOpacity>
+							</View>
 						</View>
-					) : (
-						<TouchableOpacity style={styles.button} onPress={openMap}>
-							<Text style={{ color: "#FFFFFF" }}>Karte öffnen</Text>
-						</TouchableOpacity>
 					)}
-				</View> */}
+				/>
 
 				<View style={styles.inputContainer}>
 					<Text>Group Size</Text>
@@ -337,24 +315,16 @@ const PostEvent = ({ navigation }) => {
 					>
 						<Ionicons
 							name={"calendar-outline"}
-							onPress={showDatePicker}
 							size={30}
+							onPress={openDatePicker}
 						/>
-						<DateTimePicker
-							value={date}
-							locale="de-DE"
-							onChange={onDateSelected}
-						/>
-						<View style={{ flexDirection: "row", alignItems: "center" }}>
-							<CheckBox
-								title="Advertised"
-								checked={advertised}
-								onPress={() => setAdvertised(!advertised)}
-							/>
+
+						<View>
+							{renderDatePicker()}
 						</View>
 					</View>
 				</View>
-				<KeyboardAvoidingView style={styles.inputContainer}>
+				<KeyboardAvoidingView style={styles.inputContainer} behavior={Platform.OS === "ios" ? "padding" : ""}>
 					<Text>Category</Text>
 					<DropDownPicker
 						open={open}
@@ -377,20 +347,12 @@ const PostEvent = ({ navigation }) => {
 						style={{ marginTop: 10, width: 300 }}
 					/>
 				</KeyboardAvoidingView>
-				<View
-					style={{
-						// flexDirection: "row",
-						flexDirection: "center",
-						justifyContent: "space-between",
-					}}
-				>
-					{!uploading && (
-						<TouchableOpacity style={styles.button} onPress={uploadPost}>
-							<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
-						</TouchableOpacity>
-					)}
-					{uploading && <ActivityIndicator size="large" color="#fff" />}
-				</View>
+
+				<TouchableOpacity style={styles.button} onPress={uploadPost}>
+					<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
+				</TouchableOpacity>
+
+
 			</ScrollView>
 		</KeyboardAvoidingView>
 	);

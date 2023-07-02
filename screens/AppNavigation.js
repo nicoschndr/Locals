@@ -18,19 +18,24 @@ import EventDetails from "./appScreens/EventDetails";
 import EditPost from "./appScreens/EditPost";
 import Follower from "./appScreens/Follower";
 import Chatbot from "./appScreens/Chatbot";
+import DrawerFriendList from "../components/DrawerFriendListIcon";
 import Yelling from "./appScreens/Yelling";
 import Categories from "./appScreens/Categories";
 import ChangePassword from "./appScreens/ChangePassword";
 
 import { auth } from "../firebase";
-import { Dimensions } from "react-native";
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import { Dimensions, Text, View } from "react-native";
+import { createDrawerNavigator, DrawerItem } from "@react-navigation/drawer";
 import Sidebar from "../components/Sidebar";
 import { HeaderBackButton } from "@react-navigation/stack";
 import Following from "./appScreens/Following";
 import follower from "./appScreens/Follower";
 import EditProfile from "./appScreens/EditProfile";
 import changePassword from "./appScreens/ChangePassword";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Onboarding from "./appScreens/Onboarding";
+import { Badge } from "react-native-elements";
+import TabProfileIcon from "../components/TabProfileIcon";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -56,7 +61,7 @@ function FriendStackNavigator() {
 const MainStackNavigator = () => {
 	return (
 		<Stack.Navigator
-			initialRouteName="Home"
+			initialRouteName={"Home"}
 			screenOptions={{ headerShown: false }}
 		>
 			<Stack.Screen name="Start" component={HomeScreen} />
@@ -75,6 +80,23 @@ const MainStackNavigator = () => {
 			<Stack.Screen name="Yelling" component={Yelling} />
 			<Stack.Screen name="Categories" component={Categories} />
 			<Stack.Screen name="ChangePassword" component={ChangePassword} />
+		</Stack.Navigator>
+	);
+};
+
+const MapNavigator = () => {
+	return (
+		<Stack.Navigator screenOptions={{ headerShown: false }}>
+			<Stack.Screen
+				name="LiveMap"
+				options={{ headerShown: false }}
+				component={LiveMap}
+			/>
+			<Stack.Screen
+				name="Profile"
+				options={{ headerShown: false }}
+				component={Profile}
+			/>
 		</Stack.Navigator>
 	);
 };
@@ -100,7 +122,11 @@ function ProfileDrawerScreen() {
 			<Drawer.Screen
 				name="FriendList"
 				component={FriendStackNavigator}
-				options={{ headerShown: true }}
+				options={{
+					headerShown: true,
+					unmountOnBlur: true,
+					drawerLabel: () => <DrawerFriendList />,
+				}}
 			/>
 			<Drawer.Screen
 				options={{
@@ -109,14 +135,6 @@ function ProfileDrawerScreen() {
 				}}
 				name="EventDetails"
 				component={EventDetails}
-			/>
-			<Drawer.Screen
-				options={{
-					drawerItemStyle: { display: "none" },
-					unmountOnBlur: true,
-				}}
-				name="EditPost"
-				component={EditPost}
 			/>
 			<Drawer.Screen name="Settings" component={Settings} />
 			<Drawer.Screen
@@ -135,11 +153,19 @@ function ProfileDrawerScreen() {
 				name="Following"
 				component={Following}
 			/>
-			<Drawer.Screen options={{unmountOnBlur: true}} name="EditProfile" component={EditProfile}/>
-			<Drawer.Screen options={{
-				drawerItemStyle: { display: "none" },
-				unmountOnBlur: true,
-			}}name='ChangePassword' component={changePassword} />
+			<Drawer.Screen
+				options={{ unmountOnBlur: true }}
+				name="EditProfile"
+				component={EditProfile}
+			/>
+			<Drawer.Screen
+				options={{
+					drawerItemStyle: { display: "none" },
+					unmountOnBlur: true,
+				}}
+				name="ChangePassword"
+				component={changePassword}
+			/>
 		</Drawer.Navigator>
 	);
 }
@@ -148,9 +174,18 @@ function AppNavigation() {
 	const [user, setUser] = useState(null);
 	const [isReady, setIsReady] = useState(false);
 
+	const [onboarded, setOnboarded] = useState();
+	useEffect(() => {
+		getStorage();
+	});
+
+	const getStorage = async () => {
+		const onboarded = await AsyncStorage.getItem("ONBOARDED");
+		setOnboarded(JSON.parse(onboarded));
+	};
+
 	useEffect(() => {
 		const unsubscribe = auth.onAuthStateChanged((user) => {
-			console.log(user); // Add this line to debug user state
 			setUser(user);
 			setIsReady(true);
 		});
@@ -178,7 +213,7 @@ function AppNavigation() {
 								iconName = focused ? "map" : "map-outline";
 							}
 							// PROFILE ICON
-							if (route.name === "Profile") {
+							if (route.name === "Me") {
 								iconName = focused ? "person" : "person-outline";
 							}
 							// FRIENDLIST ICON
@@ -199,11 +234,12 @@ function AppNavigation() {
 						tabBarInactiveTintColor: "#734e61",
 						headerShown: false,
 						tabBarStyle: {
-							backgroundColor: "transparent",
+							backgroundColor: "#efefef",
 							borderTopWidth: 0,
 							position: "absolute",
 							bottom: 0,
 							height: 80,
+							width: Dimensions.get("window").width, // Gerätebreite setzen
 						},
 					})}
 				>
@@ -212,18 +248,27 @@ function AppNavigation() {
 						name="Home"
 						component={MainStackNavigator}
 					/>
-					<Tab.Screen name="Map" component={LiveMap} />
+					<Tab.Screen name="Map" component={MapNavigator} />
+
 					<Tab.Screen
-						options={{ unmountOnBlur: true }}
-						name="Profile"
+						options={{
+							unmountOnBlur: true,
+							tabBarLabel: () => <TabProfileIcon />,
+						}}
+						name="Me"
 						component={ProfileDrawerScreen}
 					/>
 				</Tab.Navigator>
 			) : (
-				<Stack.Navigator>
+				<Stack.Navigator initialRouteName={onboarded ? "Auth" : "Onboarding"}>
 					<Stack.Screen
 						name="Auth"
 						component={AuthScreen}
+						options={{ headerShown: false }}
+					/>
+					<Stack.Screen
+						name="Onboarding"
+						component={Onboarding}
 						options={{ headerShown: false }}
 					/>
 				</Stack.Navigator>
@@ -254,6 +299,14 @@ function AuthScreen() {
 		>
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Register" component={Register} />
+			<Stack.Screen
+				name="Home"
+				component={HomeScreen}
+				options={{
+					drawerItemStyle: { display: "none" },
+					unmountOnBlur: true,
+				}}
+			/>
 		</Stack.Navigator>
 	);
 }
