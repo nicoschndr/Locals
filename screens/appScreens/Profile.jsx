@@ -1124,20 +1124,25 @@ const Profile = ({route, navigation}) => {
                             horizontal={true}
                             showsVerticalScrollIndicator={false}
                             showsHorizontalScrollIndicator={false}
+							style={{
+								paddingHorizontal: 24,
+								paddingVertical: 24,
+							}}
                         >
                             {events.map((event) => (
-                                <TouchableOpacity
-                                    style={styles.mediaImageContainer}
-                                    key={event.id}
-                                    onPress={() => navigation.navigate("EventDetails", {event})}
-                                >
-                                    <Image
-                                        source={{uri: event.imageUrl}}
-                                        style={styles.image}
-                                        resizeMode="center"
-                                    />
-                                    <Text style={styles.imageText}>{event.title}</Text>
-                                </TouchableOpacity>
+								<LocalsEventCard
+									key={event.id}
+									title={event.title}
+									date={event.date
+										?.toDate()
+										?.toLocaleDateString("de-DE", shortDate)}
+									location={event.address}
+									// image={event.imageUrl}
+									category={event.title}
+									onPress={() => navigation.navigate("EventDetails", { event })}
+									style={{ marginRight: 24 }}
+									profile
+								/>
                             ))}
                         </ScrollView>
                     )}
