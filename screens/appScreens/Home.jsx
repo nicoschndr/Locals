@@ -11,6 +11,7 @@ import {
 	StatusBar,
 } from "react-native";
 import { auth, firestore } from "../../firebase";
+import * as Location from "expo-location";
 
 import LocalsEventCard from "../../components/LocalsEventCard";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,12 +29,74 @@ const HomeScreen = ({ navigation }) => {
 	const [showSearch, setShowSearch] = useState(false);
 	const [username, setUsername] = useState("");
 	const [categories, setCategories] = useState([]);
-	const [nearby, setNearby] = useState([]);
+	const [nearbyEvents, setNearbyEvents] = useState([]);
+	const [radius, setRadius] = useState(20);
+	const [location, setLocation] = useState(null);
+
+	useEffect(() => {
+		const filteredEvents = filterEventsByRadius(events, radius);
+		console.log(filteredEvents)
+		setNearbyEvents(filteredEvents);
+	}, [events, radius, location]);
+
+	const filterEventsByRadius = (events, radius) => {
+		if (!location) return events;
+
+		const { latitude, longitude } = location.coords;
+
+		return events.filter((event) => {
+			const eventDistance = getDistanceFromLatLonInKm(
+				latitude,
+				longitude,
+				event.latitude,
+				event.longitude
+			);
+			return eventDistance <= radius;
+		});
+	};
+
+	const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+		const R = 6371; // Radius der Erde in Kilometern
+		const dLat = deg2rad(lat2 - lat1); // deg2rad unten
+		const dLon = deg2rad(lon2 - lon1);
+		const a =
+			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+			Math.cos(deg2rad(lat1)) *
+			Math.cos(deg2rad(lat2)) *
+			Math.sin(dLon / 2) *
+			Math.sin(dLon / 2);
+		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		const d = R * c; // Entfernung in km
+		return d;
+	};
+	const deg2rad = (deg) => {
+		return deg * (Math.PI / 180);
+	};
+
+	useEffect(() => {
+		const getLocation = async () => {
+			try {
+				const { status } = await Location.requestForegroundPermissionsAsync();
+				if (status !== "granted") {
+					console.log("Permission to access location was denied");
+					return;
+				}
+
+				const currentLocation = await Location.getCurrentPositionAsync({});
+				setLocation(currentLocation);
+			} catch (error) {
+				console.error("Error getting current location:", error);
+			}
+		};
+
+		getLocation();
+	}, []);
 
 	const { events } = useContext(FirestoreContext);
 
 	// create contest for events
 	const { setEvents } = useContext(FirestoreContext);
+
 
 	useEffect(() => {
 		filterEventsByCategory(events);
@@ -373,16 +436,12 @@ const HomeScreen = ({ navigation }) => {
 					>
 						In deiner Nähe
 					</Text>
-					<ScrollView
-						contentContainerStyle={{ margin: 24, alignSelf: "center" }}
-					>
-						{events.map((event) => (
+					<ScrollView contentContainerStyle={{ margin: 24, alignSelf: "center" }}>
+						{nearbyEvents.map((event) => (
 							<LocalsEventCard
 								key={event.id}
 								title={event.title}
-								date={event.date
-									?.toDate()
-									?.toLocaleDateString("de-DE", shortDate)}
+								date={event.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}
 								location={event.address}
 								image={event.imageUrl}
 								category={event.title}
@@ -391,6 +450,7 @@ const HomeScreen = ({ navigation }) => {
 							/>
 						))}
 					</ScrollView>
+
 				</View>
 			</ScrollView>
 		</View>
