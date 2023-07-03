@@ -1,5 +1,8 @@
 # Locals-IP2
 
+### Stable Build via Expo
+https://expo.dev/@swld72/Locals_IP2?serviceType=classic&distribution=expo-go
+
 ## Expo Docs
 
 https://docs.expo.dev/overview/
