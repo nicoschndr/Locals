@@ -10,12 +10,12 @@ import { firebaseConfig } from "./firebase";
 LogBox.ignoreAllLogs();
 
 export default function App() {
-	navigationOptions = {
-		headerShown: true,
-		style: {
-			backgroundColor: "transparent",
-		},
-	};
+	//navigationOptions = {
+	//	headerShown: true,
+	//	style: {
+	//		backgroundColor: "transparent",
+	//	},
+	//};
 	// useEffect(async () => {
 	// 	const defaultApp = initializeApp(firebaseConfig);
 	// 	initializeAuth(defaultApp, {

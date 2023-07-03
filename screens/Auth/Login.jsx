@@ -6,13 +6,12 @@ import {
 	Image,
 	ImageBackground,
 	TouchableOpacity,
-	Alert, Platform,
+	Alert,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import LocalsButton from "../../components/LocalsButton";
-import { firestore } from "../../firebase";
-import { auth } from "../../firebase";
+import { auth, firestore } from "../../firebase";
 import { useNavigation } from "@react-navigation/native";
 import { CheckBox, Divider } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
