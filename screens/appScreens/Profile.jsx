@@ -30,12 +30,6 @@ import FastImage from "react-native-fast-image";
 import FirestoreContext from "../../context/FirestoreContext";
 
 const Profile = ({ route, navigation }) => {
-	useEffect(() => {
-		getUserData();
-		getCurrentUserData();
-		getUserPosts();
-	}, []);
-
 	const goToFriendList = () => {
 		navigation.navigate("FriendList");
 	};
@@ -91,6 +85,12 @@ const Profile = ({ route, navigation }) => {
 			currentUsername: currentUsername,
 		});
 	};
+
+	useEffect(() => {
+		getUserPosts();
+		getUserData();
+		getCurrentUserData();
+	}, []);
 
 	function getUserData() {
 		setUser([]);
