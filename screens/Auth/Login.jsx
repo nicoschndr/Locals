@@ -127,7 +127,10 @@ const Login = ({ navigation }) => {
 	};
 
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
+		<KeyboardAvoidingView
+			style={styles.container}
+			behavior={Platform.OS === "ios" ? "padding" : ""}
+		>
 			<ImageBackground
 				source={require("../../assets/BackGround(h).png")}
 				style={{ width: "100%", height: "100%" }}
@@ -201,16 +204,17 @@ const Login = ({ navigation }) => {
 							style={styles.signUpBtn}
 							fontStyle={{ color: "#ec404b" }}
 						/>
-						<View style={styles.google}>
+						{/* <View style={styles.google}>
 							<Text style={{ color: "#fff" }}>oder</Text>
-							{/* google singup */}
+							
 							<TouchableOpacity
 								style={styles.googleIcon}
 								onPress={() => navigation.navigate("Register")}
 							>
 								<Ionicons name="logo-google" size={24} color="#ec404b" />
 							</TouchableOpacity>
-						</View>
+						</View> 
+						*/}
 					</View>
 				</View>
 			</ImageBackground>
