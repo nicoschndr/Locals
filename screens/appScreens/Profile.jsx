@@ -15,61 +15,60 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 	Keyboard,
-	RefreshControl, ImageBackground
+	RefreshControl,
+	ImageBackground,
 } from "react-native";
 import React, { useEffect, useState, useContext } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { auth, firebase, firestore, storage } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
-import {useFocusEffect} from "@react-navigation/native";
-import {Badge} from "react-native-elements";
+import { useFocusEffect } from "@react-navigation/native";
+import { Badge } from "react-native-elements";
 import LocalsEventCard from "../../components/LocalsEventCard";
 import FastImage from "react-native-fast-image";
 
 import FirestoreContext from "../../context/FirestoreContext";
 
-const Profile = ({route, navigation}) => {
+const Profile = ({ route, navigation }) => {
+	useEffect(() => {
+		getUserData();
+		getCurrentUserData();
+		getUserPosts();
+	}, []);
 
-    useEffect(() => {
-        getUserData();
-        getCurrentUserData();
-    }, []);
+	const goToFriendList = () => {
+		navigation.navigate("FriendList");
+	};
 
-    const goToFriendList = () => {
-        navigation.navigate("FriendList");
-    };
-
-    let flwng = [];
-    let flw = [];
-    let blockedUsers = [];
-    let friends = [];
-    let messages = [];
+	let flwng = [];
+	let flw = [];
+	let blockedUsers = [];
+	let friends = [];
+	let messages = [];
 
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
 	const platform = Platform.OS;
 
-    const uid = route.params?.uid || auth.currentUser.uid;
-    const [user, setUser] = useState({});
-    const [currentUser, setCurrentUser] = useState({});
-    //const [events, setEvents] = useState([]);
-    const [currentUsername, setCurrentUsername] = useState("");
-    const [currentFriends, setCurrentFriends] = useState({});
-    const [friendRequests, setFriendRequests] = useState([]);
-    const [chats, setChats] = useState([]);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [reportModal, setReportModal] = useState(false);
-    const [followerSize, setFollowerSize] = useState("");
-    const [followingSize, setFollowingSize] = useState("");
-    const [text, onChangeText] = React.useState('');
-    const [number, onChangeNumber] = React.useState('');
-    const [reportCategory, setReportCategory] = useState([])
-    const [shouldHide, setShouldHide] = React.useState(false);
-    const [followerDiff, setFollowerDiff] = useState(0)
-    const [unreadMessages, setUnreadMessages] = useState(null);
-
-	const { events } = useContext(FirestoreContext);
-
+	const uid = route.params?.uid || auth.currentUser.uid;
+	const [user, setUser] = useState({});
+	const [currentUser, setCurrentUser] = useState({});
+	//const [events, setEvents] = useState([]);
+	const [currentUsername, setCurrentUsername] = useState("");
+	const [currentFriends, setCurrentFriends] = useState({});
+	const [friendRequests, setFriendRequests] = useState([]);
+	const [chats, setChats] = useState([]);
+	const [modalVisible, setModalVisible] = useState(false);
+	const [reportModal, setReportModal] = useState(false);
+	const [followerSize, setFollowerSize] = useState("");
+	const [followingSize, setFollowingSize] = useState("");
+	const [text, onChangeText] = React.useState("");
+	const [number, onChangeNumber] = React.useState("");
+	const [reportCategory, setReportCategory] = useState([]);
+	const [shouldHide, setShouldHide] = React.useState(false);
+	const [followerDiff, setFollowerDiff] = useState(0);
+	const [unreadMessages, setUnreadMessages] = useState(null);
+	const [events, setEvents] = useState([]);
 
 	React.useLayoutEffect(() => {
 		if (uid === firebase.auth().currentUser.uid) {
@@ -93,51 +92,54 @@ const Profile = ({route, navigation}) => {
 		});
 	};
 
-    function getUserData() {
-        setUser([])
-        firestore
-            .collection("users")
-            .doc(uid)
-            .onSnapshot((doc) => {
-                const userData = doc.data();
-                setUser(userData);
-                //getUserPosts(userData.username)
-            })
-    }
+	function getUserData() {
+		setUser([]);
+		firestore
+			.collection("users")
+			.doc(uid)
+			.onSnapshot((doc) => {
+				const userData = doc.data();
+				setUser(userData);
+				//getUserPosts(userData.username)
+			});
+	}
 
-    function getCurrentUserData() {
-        firestore
-            .collection("users")
-            .doc(auth.currentUser.uid)
-            .onSnapshot((doc) => {
-                const currentUserData = doc.data();
-                setCurrentUser(currentUserData);
-                checkFollowerDiff(currentUserData);
-                setCurrentFriends(currentUserData.friends);
-                setFriendRequests(Object.keys(currentUserData.friendRequests));
-                getChats(currentUserData.username);
-            })
-    }
+	function getCurrentUserData() {
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.onSnapshot((doc) => {
+				const currentUserData = doc.data();
+				setCurrentUser(currentUserData);
+				checkFollowerDiff(currentUserData);
+				setCurrentFriends(currentUserData.friends);
+				setFriendRequests(Object.keys(currentUserData.friendRequests));
+				getChats(currentUserData.username);
+			});
+	}
 
-    const getChats = async (username) => {
-            try {
-                const chatRef = firebase.firestore().collection('chatRooms')
+	const getChats = async (username) => {
+		try {
+			const chatRef = firebase.firestore().collection("chatRooms");
 
-                const userChats = chatRef
-                    .where(`${username}_isTyping`, '==', false)
-                    .onSnapshot((snapshot) => {
-                        const chats = snapshot.docs.map((doc) => ({
-                            ...doc.data()
-                        }));
-                        chats.forEach((c) => c.messages.map((e) => messages.push(e)))
-                        setUnreadMessages(messages.filter((e) => e.sender !== username && e.readStatus === false).length)
-                        messages.splice(0, messages.length)
-                    });
-            } catch (e) {
-                console.log(e)
-            }
-    }
-
+			const userChats = chatRef
+				.where(`${username}_isTyping`, "==", false)
+				.onSnapshot((snapshot) => {
+					const chats = snapshot.docs.map((doc) => ({
+						...doc.data(),
+					}));
+					chats.forEach((c) => c.messages.map((e) => messages.push(e)));
+					setUnreadMessages(
+						messages.filter(
+							(e) => e.sender !== username && e.readStatus === false
+						).length
+					);
+					messages.splice(0, messages.length);
+				});
+		} catch (e) {
+			console.log(e);
+		}
+	};
 
 	function getCurrentUserFriends(username) {
 		firestore
@@ -208,24 +210,24 @@ const Profile = ({route, navigation}) => {
 		sendFriendRequest(senderUsername, receiverUsername);
 	}
 
-    function getUserPosts(username) {
-        firestore
-            .collection("events")
-            //where("creator", "==", uid  or user.username
-            .where("creator", "==", username)
-            .onSnapshot((snapshot) => {
-                const posts = snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
-                setEvents(posts);
-            });
-    }
+	function getUserPosts(username) {
+		firestore
+			.collection("events")
+			//where("creator", "==", uid  or user.username
+			.where("creator", "==", user.username || "userId", "==", uid)
+			.onSnapshot((snapshot) => {
+				const posts = snapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data(),
+				}));
+				setEvents(posts);
+			});
+	}
 
-    useEffect(() => {
-        const user = firebase.auth().currentUser;
-        if (user) {
-            const userDocRef = firebase.firestore().collection("users").doc(user.uid);
+	useEffect(() => {
+		const user = firebase.auth().currentUser;
+		if (user) {
+			const userDocRef = firebase.firestore().collection("users").doc(user.uid);
 
 			userDocRef.onSnapshot((doc) => {
 				if (doc.exists) {
@@ -236,19 +238,18 @@ const Profile = ({route, navigation}) => {
 		}
 	}, [friendRequests]);
 
-    function setFollower() {
-        user.follower.forEach((r) => flw.push(r))
-        flw.push(auth.currentUser.uid.toString())
-        firestore
-            .collection("users")
-            .doc(uid)
-            .update({
-                follower: flw
-            }).then(
-            setFollowing
-        )
-        flw = [];
-    }
+	function setFollower() {
+		user.follower.forEach((r) => flw.push(r));
+		flw.push(auth.currentUser.uid.toString());
+		firestore
+			.collection("users")
+			.doc(uid)
+			.update({
+				follower: flw,
+			})
+			.then(setFollowing);
+		flw = [];
+	}
 
 	function setFollowing() {
 		currentUser.following.forEach((r) => flwng.push(r));
@@ -264,20 +265,19 @@ const Profile = ({route, navigation}) => {
 		flwng = [];
 	}
 
-    function setUnfollow() {
-        user.follower.forEach((r) => flw.push(r))
-        const index = flw.indexOf(auth.currentUser.uid.toString())
-        flw.splice(index, 1)
-        firestore
-            .collection("users")
-            .doc(uid)
-            .update({
-                follower: flw
-            }).then(
-            setUnfollowing
-        )
-        flw = [];
-    }
+	function setUnfollow() {
+		user.follower.forEach((r) => flw.push(r));
+		const index = flw.indexOf(auth.currentUser.uid.toString());
+		flw.splice(index, 1);
+		firestore
+			.collection("users")
+			.doc(uid)
+			.update({
+				follower: flw,
+			})
+			.then(setUnfollowing);
+		flw = [];
+	}
 
 	function setUnfollowing() {
 		currentUser.following.forEach((r) => flwng.push(r));
@@ -319,27 +319,24 @@ const Profile = ({route, navigation}) => {
 		onChangeText("");
 	}
 
-    function blockUser() {
-        setUnfollow()
-        unFriendCurrentUser().then()
-        currentUser.blockedUsers.forEach((e) => blockedUsers.push(e))
-        blockedUsers.push(user.username)
-        firestore
-            .collection('users')
-            .doc(auth.currentUser.uid)
-            .update({
-                blockedUsers: blockedUsers
-            })
-        firestore
-            .collection('chatRooms')
-            .doc(currentUser.username+'_'+user.username)
-            .update({
-                messages: []
-            })
-        setModalVisible(false)
-        getCurrentUserData()
-        blockedUsers = []
-    }
+	function blockUser() {
+		setUnfollow();
+		unFriendCurrentUser().then();
+		currentUser.blockedUsers.forEach((e) => blockedUsers.push(e));
+		blockedUsers.push(user.username);
+		firestore.collection("users").doc(auth.currentUser.uid).update({
+			blockedUsers: blockedUsers,
+		});
+		firestore
+			.collection("chatRooms")
+			.doc(currentUser.username + "_" + user.username)
+			.update({
+				messages: [],
+			});
+		setModalVisible(false);
+		getCurrentUserData();
+		blockedUsers = [];
+	}
 
 	function unblockUser() {
 		currentUser.blockedUsers.forEach((e) => blockedUsers.push(e));
@@ -406,47 +403,46 @@ const Profile = ({route, navigation}) => {
 		}
 	}
 
-    function checkFollowerDiff(userData) {
-        setFollowerDiff(userData.follower.length - userData.followerWhenClicked)
-    }
+	function checkFollowerDiff(userData) {
+		setFollowerDiff(userData.follower.length - userData.followerWhenClicked);
+	}
 
-    function pushFollowerWhenClicked(fwc) {
-        firestore
-            .collection('users')
-            .doc(auth.currentUser.uid)
-            .update({
-                followerWhenClicked: fwc
-            })
-    }
-    const shortDate = {
-        year: "numeric",
-        month: "numeric",
-        day: "numeric",
-    };
+	function pushFollowerWhenClicked(fwc) {
+		firestore.collection("users").doc(auth.currentUser.uid).update({
+			followerWhenClicked: fwc,
+		});
+	}
+	const shortDate = {
+		year: "numeric",
+		month: "numeric",
+		day: "numeric",
+	};
 
-
-    return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" />
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {uid === firebase.auth().currentUser.uid && (
-                    <TouchableOpacity
-                        style={styles.titleBar}
-                        onPress={navigation.openDrawer}
-                    >
-                        <Ionicons
-                            style={{marginLeft: windowWidth - 50}}
-                            name={"reorder-three-outline"}
-                            size={40}
-                        >
-                            {" "}
-                        </Ionicons>
-                        {(friendRequests.length > 0 || unreadMessages > 0) && (
-                            <Badge value={friendRequests.length + unreadMessages} status='error'
-                                   containerStyle={{position: 'absolute', top: 5, right: 35}}></Badge>
-                        )}
-                    </TouchableOpacity>
-                )}
+	return (
+		<SafeAreaView style={styles.container}>
+			<StatusBar barStyle="dark-content" />
+			<ScrollView showsVerticalScrollIndicator={false}>
+				{uid === firebase.auth().currentUser.uid && (
+					<TouchableOpacity
+						style={styles.titleBar}
+						onPress={navigation.openDrawer}
+					>
+						<Ionicons
+							style={{ marginLeft: windowWidth - 50 }}
+							name={"reorder-three-outline"}
+							size={40}
+						>
+							{" "}
+						</Ionicons>
+						{(friendRequests.length > 0 || unreadMessages > 0) && (
+							<Badge
+								value={friendRequests.length + unreadMessages}
+								status="error"
+								containerStyle={{ position: "absolute", top: 5, right: 35 }}
+							></Badge>
+						)}
+					</TouchableOpacity>
+				)}
 
 				{uid !== firebase.auth().currentUser.uid && (
 					<TouchableOpacity
@@ -1019,330 +1015,357 @@ const Profile = ({route, navigation}) => {
 						</View>
 					)}
 
-                {
-                    user.follower && user.following && currentUser.follower && currentUser.following && currentUser.blockedUsers && user.blockedUsers && (
-                        <View
-                            style={[styles.statsContainer, {marginTop: windowHeight * 0.03}]}
-                        >
-                            <View style={styles.statsBox}>
-                                <Text>Events</Text>
-                                {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
-                                    <Text>{events.length}</Text>
-                                )}
-                                {((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
-                                    <Text>0</Text>
-                                )}
-                            </View>
-                            <View
-                                style={[
-                                    styles.statsBox,
-                                    {
-                                        borderColor: "DFD8C8",
-                                        borderLeftWidth: 1,
-                                        borderRightWidth: 1,
-                                    },
-                                ]}
-                            >
-                                {auth.currentUser.uid === uid && (
-                                    <TouchableOpacity style={styles.statsBox}
-                                                      onPress={() => {
-                                                          pushFollowerWhenClicked(user.follower.length)
-                                                          navigation.goBack();
-                                                          navigation.navigate('Follower', {
-                                                              uid: uid,
-                                                              follower: currentUser.follower,
-                                                              diff: followerDiff
-                                                          })
-                                                      }}>
-                                        <Text>Follower </Text>
-                                        <Text>{user.follower.length}</Text>
-                                        {followerDiff > 0 && followerDiff && (
-                                            <Badge containerStyle={{position: "absolute", top: -5, right: -15}}
-                                                   status='error' value={followerDiff}></Badge>
-                                        )}
-                                    </TouchableOpacity>
-                                )}
-                                {auth.currentUser.uid !== uid && (
-                                    <TouchableOpacity style={styles.statsBox}
-                                                      onPress={() => {
-                                                          navigation.goBack();
-                                                          navigation.navigate('Follower', {
-                                                              uid: uid,
-                                                              follower: user.follower
-                                                          })
-                                                      }}>
-                                        <Text>Follower</Text>
-                                        {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
-                                            <Text>{user.follower.length}</Text>
-                                        )}
-                                        {((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
-                                            <Text>0</Text>
-                                        )}
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                            {auth.currentUser.uid === uid && (
-                                <TouchableOpacity style={styles.statsBox}
-                                                  onPress={() => {
-                                                      navigation.goBack();
-                                                      navigation.navigate('Following', {
-                                                          uid: uid,
-                                                          following: currentUser.following
-                                                      })
-                                                  }}>
-                                    <View style={styles.statsBox}>
-                                        <Text>Following</Text>
-                                        <Text>{user.following.length}</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            )}
-                            {auth.currentUser.uid !== uid && (
-                                <TouchableOpacity style={styles.statsBox}
-                                                  onPress={() => {
-                                                      navigation.goBack();
-                                                      navigation.navigate('Following', {
-                                                          uid: uid,
-                                                          following: user.following
-                                                      })
-                                                  }}>
-                                    <View style={styles.statsBox}>
-                                        <Text>Following</Text>
-                                        {(!currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) &&
-                                            <Text>{user.following.length}</Text>
-                                        )}
-                                        {((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) &&
-                                            <Text>0</Text>
-                                        )}
-                                    </View>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    )
-                }
-                {currentUser.blockedUsers && user.blockedUsers && (
-                <View style={{marginTop: windowHeight * 0.03}}>
-                    {events.length > 0 && !currentUser.blockedUsers.includes(user.username) && !user.blockedUsers.includes(currentUsername) && (
-                        <ScrollView
-                            horizontal={true}
-                            showsVerticalScrollIndicator={false}
-                            showsHorizontalScrollIndicator={false}
-							style={{
-								paddingHorizontal: 24,
-								paddingVertical: 24,
-							}}
-                        >
-                            {events.map((event) => (
-								<LocalsEventCard
-									key={event.id}
-									title={event.title}
-									date={event.date
-										?.toDate()
-										?.toLocaleDateString("de-DE", shortDate)}
-									location={event.address}
-									// image={event.imageUrl}
-									category={event.title}
-									onPress={() => navigation.navigate("EventDetails", { event })}
-									style={{ marginRight: 24 }}
-									profile
-								/>
-                            ))}
-                        </ScrollView>
-                    )}
-                    {((currentUser.blockedUsers.includes(user.username) || user.blockedUsers.includes(currentUsername)) && (
-                        <View></View>
-                    ))}
-                    <Text
-                        style={[
-                            styles.text,
-                            styles.recent,
-                            {
-                                marginLeft: windowWidth * 0.15,
-                                marginTop: windowHeight * 0.03,
-                            },
-                        ]}
-                    >
-                        Recent Activity
-                    </Text>
+				{user.follower &&
+					user.following &&
+					currentUser.follower &&
+					currentUser.following &&
+					currentUser.blockedUsers &&
+					user.blockedUsers && (
+						<View
+							style={[
+								styles.statsContainer,
+								{ marginTop: windowHeight * 0.03 },
+							]}
+						>
+							<View style={styles.statsBox}>
+								<Text>Events</Text>
+								{!currentUser.blockedUsers.includes(user.username) &&
+									!user.blockedUsers.includes(currentUsername) && (
+										<Text>{events.length}</Text>
+									)}
+								{(currentUser.blockedUsers.includes(user.username) ||
+									user.blockedUsers.includes(currentUsername)) && (
+									<Text>0</Text>
+								)}
+							</View>
+							<View
+								style={[
+									styles.statsBox,
+									{
+										borderColor: "DFD8C8",
+										borderLeftWidth: 1,
+										borderRightWidth: 1,
+									},
+								]}
+							>
+								{auth.currentUser.uid === uid && (
+									<TouchableOpacity
+										style={styles.statsBox}
+										onPress={() => {
+											pushFollowerWhenClicked(user.follower.length);
+											navigation.goBack();
+											navigation.navigate("Follower", {
+												uid: uid,
+												follower: currentUser.follower,
+												diff: followerDiff,
+											});
+										}}
+									>
+										<Text>Follower </Text>
+										<Text>{user.follower.length}</Text>
+										{followerDiff > 0 && followerDiff && (
+											<Badge
+												containerStyle={{
+													position: "absolute",
+													top: -5,
+													right: -15,
+												}}
+												status="error"
+												value={followerDiff}
+											></Badge>
+										)}
+									</TouchableOpacity>
+								)}
+								{auth.currentUser.uid !== uid && (
+									<TouchableOpacity
+										style={styles.statsBox}
+										onPress={() => {
+											navigation.goBack();
+											navigation.navigate("Follower", {
+												uid: uid,
+												follower: user.follower,
+											});
+										}}
+									>
+										<Text>Follower</Text>
+										{!currentUser.blockedUsers.includes(user.username) &&
+											!user.blockedUsers.includes(currentUsername) && (
+												<Text>{user.follower.length}</Text>
+											)}
+										{(currentUser.blockedUsers.includes(user.username) ||
+											user.blockedUsers.includes(currentUsername)) && (
+											<Text>0</Text>
+										)}
+									</TouchableOpacity>
+								)}
+							</View>
+							{auth.currentUser.uid === uid && (
+								<TouchableOpacity
+									style={styles.statsBox}
+									onPress={() => {
+										navigation.goBack();
+										navigation.navigate("Following", {
+											uid: uid,
+											following: currentUser.following,
+										});
+									}}
+								>
+									<View style={styles.statsBox}>
+										<Text>Following</Text>
+										<Text>{user.following.length}</Text>
+									</View>
+								</TouchableOpacity>
+							)}
+							{auth.currentUser.uid !== uid && (
+								<TouchableOpacity
+									style={styles.statsBox}
+									onPress={() => {
+										navigation.goBack();
+										navigation.navigate("Following", {
+											uid: uid,
+											following: user.following,
+										});
+									}}
+								>
+									<View style={styles.statsBox}>
+										<Text>Following</Text>
+										{!currentUser.blockedUsers.includes(user.username) &&
+											!user.blockedUsers.includes(currentUsername) && (
+												<Text>{user.following.length}</Text>
+											)}
+										{(currentUser.blockedUsers.includes(user.username) ||
+											user.blockedUsers.includes(currentUsername)) && (
+											<Text>0</Text>
+										)}
+									</View>
+								</TouchableOpacity>
+							)}
+						</View>
+					)}
+				{currentUser.blockedUsers && user.blockedUsers && (
+					<View style={{ marginTop: windowHeight * 0.03 }}>
+						{events.length > 0 &&
+							!currentUser.blockedUsers.includes(user.username) &&
+							!user.blockedUsers.includes(currentUsername) && (
+								<ScrollView
+									horizontal={true}
+									showsVerticalScrollIndicator={false}
+									showsHorizontalScrollIndicator={false}
+									style={{
+										paddingHorizontal: 24,
+										paddingVertical: 24,
+									}}
+								>
+									{events.map((event) => (
+										<LocalsEventCard
+											key={event.id}
+											title={event.title}
+											date={event.date
+												?.toDate()
+												?.toLocaleDateString("de-DE", shortDate)}
+											location={event.address}
+											// image={event.imageUrl}
+											category={event.title}
+											onPress={() =>
+												navigation.navigate("EventDetails", { event })
+											}
+											style={{ marginRight: 24 }}
+											profile
+										/>
+									))}
+								</ScrollView>
+							)}
+						{(currentUser.blockedUsers.includes(user.username) ||
+							user.blockedUsers.includes(currentUsername)) && <View></View>}
+						<Text
+							style={[
+								styles.text,
+								styles.recent,
+								{
+									marginLeft: windowWidth * 0.15,
+									marginTop: windowHeight * 0.05,
+								},
+							]}
+						>
+							Recent Activity
+						</Text>
 
-                    <View
-                        style={[
-                            styles.recentItem,
-                            {
-                                marginBottom: windowHeight * 0.02,
-                                marginLeft: windowWidth * 0.15,
-                            },
-                        ]}
-                    >
-                        <View style={styles.recentItemIndicator}></View>
-                        <View>
-                            <Text>{events.title}</Text>
-                        </View>
-                    </View>
-                </View>
-                    )}
-            </ScrollView>
-
-        </SafeAreaView>
-
-    )
-
+						<View
+							style={[
+								styles.recentItem,
+								{
+									marginBottom: windowHeight * 0.02,
+									marginLeft: windowWidth * 0.15,
+								},
+							]}
+						>
+							<View style={styles.recentItemIndicator}></View>
+							<View>
+								<Text>{events.title}</Text>
+							</View>
+						</View>
+					</View>
+				)}
+			</ScrollView>
+		</SafeAreaView>
+	);
 };
 
 export default Profile;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-		marginBottom: 65
-    },
-    text: {
-        color: "#000000",
-    },
-    image: {
-        width: 200,
-        height: 200,
-    },
-    titleBar: {
-        flexDirection: "row",
-        justifyContent: "flex-end",
-    },
-    profileImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 100,
-		overflow:'hidden'
-    },
-    chat: {
-        backgroundColor: "#41444B",
-        position: "absolute",
-        top: 20,
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    add: {
-        backgroundColor: "#E63F3F",
-        position: "absolute",
-        borderRadius: 40,
-        top: 135,
-        left: 150,
-    },
-    infoContainer: {
-        alignSelf: "center",
-        alignItems: "center",
-    },
-    statsContainer: {
-        flexDirection: "row",
-        alignSelf: "center",
-    },
-    statsBox: {
-        alignItems: "center",
-        flex: 1,
-    },
-    mediaImageContainer: {
-        width: 200,
-        height: 200,
-        borderRadius: 40,
-        overflow: "hidden",
-        marginHorizontal: 12,
-    },
-    recentItem: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-    },
-    recentItemIndicator: {
-        backgroundColor: "#000000",
-        padding: 4,
-        height: 12,
-        width: 12,
-        borderRadius: 6,
-        marginTop: 3,
-        marginRight: 20,
-    },
-    recent: {
-        marginBottom: 6,
-        fontSize: 10,
-    },
-    Test: {
-        backgroundColor: "#999999",
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
-        marginTop: -50,
-        height: 50,
-        opacity: 0.2,
-    },
-    imageText: {
-        color: "#FFFFFF",
-        alignSelf: "center",
-        textAlign: "center",
-        fontSize: 20,
-        bottom: 50,
-        width: 200,
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 22,
-    },
-    modalView: {
-        backgroundColor: 'white',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        alignItems: 'flex-start',
-        width: Dimensions.get("window").width,
-        height: Dimensions.get("window").height / 2,
-        marginBottom: 0,
-        marginTop: "auto"
-    },
-    reportModalView: {
-        backgroundColor: 'white',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        alignItems: 'flex-start',
-        width: Dimensions.get("window").width,
-        height: Dimensions.get("window").height / 1.2,
-        marginBottom: 0,
-        marginTop: "auto"
-    },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-    },
-    buttonOpen: {
-        backgroundColor: '#F194FF',
-    },
-    buttonClose: {
-        backgroundColor: '#2196F3',
-    },
-    textStyle: {
-        color: 'white',
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    input: {
-        height: Dimensions.get("window").height / 6,
-        width: Dimensions.get("window").width - 40,
-        marginLeft: 20,
-        marginRight: 20,
-        borderWidth: 1,
-        padding: 10,
-        textAlignVertical: "top"
-    },
-    followButton: {
-        paddingLeft: 5,
-        paddingRight: 5,
-        borderRadius: 5,
-        backgroundColor: '#bebebe',
-        borderColor: '#bebebe'
-    }
+	container: {
+		flex: 1,
+		alignItems: "center",
+		justifyContent: "center",
+		marginBottom: 65,
+	},
+	text: {
+		color: "#000000",
+	},
+	image: {
+		width: 200,
+		height: 200,
+	},
+	titleBar: {
+		flexDirection: "row",
+		justifyContent: "flex-end",
+	},
+	profileImage: {
+		width: 200,
+		height: 200,
+		borderRadius: 100,
+		overflow: "hidden",
+	},
+	chat: {
+		backgroundColor: "#41444B",
+		position: "absolute",
+		top: 20,
+		width: 40,
+		height: 40,
+		borderRadius: 20,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	add: {
+		backgroundColor: "#E63F3F",
+		position: "absolute",
+		borderRadius: 40,
+		top: 135,
+		left: 150,
+	},
+	infoContainer: {
+		alignSelf: "center",
+		alignItems: "center",
+	},
+	statsContainer: {
+		flexDirection: "row",
+		alignSelf: "center",
+	},
+	statsBox: {
+		alignItems: "center",
+		flex: 1,
+	},
+	mediaImageContainer: {
+		width: 200,
+		height: 200,
+		borderRadius: 40,
+		overflow: "hidden",
+		marginHorizontal: 12,
+	},
+	recentItem: {
+		flexDirection: "row",
+		alignItems: "flex-start",
+	},
+	recentItemIndicator: {
+		backgroundColor: "#000000",
+		padding: 4,
+		height: 12,
+		width: 12,
+		borderRadius: 6,
+		marginTop: 3,
+		marginRight: 20,
+	},
+	recent: {
+		marginBottom: 6,
+		fontSize: 10,
+	},
+	Test: {
+		backgroundColor: "#999999",
+		borderBottomLeftRadius: 30,
+		borderBottomRightRadius: 30,
+		marginTop: -50,
+		height: 50,
+		opacity: 0.2,
+	},
+	imageText: {
+		color: "#FFFFFF",
+		alignSelf: "center",
+		textAlign: "center",
+		fontSize: 20,
+		bottom: 50,
+		width: 200,
+	},
+	centeredView: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		marginTop: 22,
+	},
+	modalView: {
+		backgroundColor: "white",
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		alignItems: "flex-start",
+		width: Dimensions.get("window").width,
+		height: Dimensions.get("window").height / 2,
+		marginBottom: 0,
+		marginTop: "auto",
+	},
+	reportModalView: {
+		backgroundColor: "white",
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+		alignItems: "flex-start",
+		width: Dimensions.get("window").width,
+		height: Dimensions.get("window").height / 1.2,
+		marginBottom: 0,
+		marginTop: "auto",
+	},
+	button: {
+		borderRadius: 20,
+		padding: 10,
+		elevation: 2,
+	},
+	buttonOpen: {
+		backgroundColor: "#F194FF",
+	},
+	buttonClose: {
+		backgroundColor: "#2196F3",
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
+	},
+	modalText: {
+		marginBottom: 15,
+		textAlign: "center",
+	},
+	input: {
+		height: Dimensions.get("window").height / 6,
+		width: Dimensions.get("window").width - 40,
+		marginLeft: 20,
+		marginRight: 20,
+		borderWidth: 1,
+		padding: 10,
+		textAlignVertical: "top",
+	},
+	followButton: {
+		paddingLeft: 5,
+		paddingRight: 5,
+		borderRadius: 5,
+		backgroundColor: "#bebebe",
+		borderColor: "#bebebe",
+	},
 });
