@@ -182,6 +182,7 @@ export default function Chatbot({ route }) {
 		kultur: "culture",
 		party: "party",
 		konzert: "concert",
+		generell: "general",
 		// Fügen Sie weitere Übersetzungen hinzu
 	};
 
