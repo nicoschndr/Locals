@@ -702,10 +702,10 @@ const Livemap = ({navigation}) => {
 						/>
 						<Ionicons
 							name="chevron-down"
-							size={24}
-							color="white"
-							style={{ position: "absolute", top: 50, left: 20 }}
-							onPress={() => setModalVisible(false)}
+							size={40}
+							color="#ec404b"
+							style={{ position: "absolute", top: 50, left: 20, }}
+							onPress={() => navigation.goBack()}
 						/>
 						<View style={{ padding: 20 }}>
 							<View style={styles.titleContainer}>

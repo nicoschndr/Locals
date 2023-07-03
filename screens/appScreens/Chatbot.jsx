@@ -431,7 +431,7 @@ export default function Chatbot({ route }) {
 				contentContainerStyle={styles.scrollViewContent}
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps="handled"
-				style={{ marginTop: 10 }}
+				style={{ marginTop: 50 }}
 			>
 				<View style={styles.chatContainer}>
 					{/* Chat Output */}
