@@ -88,6 +88,8 @@ const EventDetails = ({ route, navigation }) => {
 	const [impressions, setImpressions] = useState({});
 	const [isEventLiked, setIsEventLiked] = useState(false);
 	const [username, setUsername] = useState(null);
+	const [currentUser, setCurrentUser] = useState({});
+	let rA = [];
 
 
 
@@ -276,8 +278,49 @@ const EventDetails = ({ route, navigation }) => {
 				groupSize: prevState.groupSize - 1,
 				isAttending: true,
 			}));
+			recentActivity('event', 'participate', selectedEvent.id, selectedEvent.title)
 		}
 	};
+
+	function recentActivity(category, action, uid, title) {
+		currentUser.recentActivities.forEach((a) => rA.push(a))
+		if (rA.length === 3) {
+			rA.splice(0, 1)
+			rA.push({
+				category: category,
+				action: action,
+				title: title,
+				uid: uid
+			})
+			firestore
+				.collection('users')
+				.doc(auth.currentUser.uid)
+				.update({
+					recentActivities: rA
+				})
+		} else {
+			rA.push({
+				category: category,
+				action: action,
+				title: title,
+				uid: uid
+			})
+			firestore
+				.collection('users')
+				.doc(auth.currentUser.uid)
+				.update({
+					recentActivities: rA
+				})
+		}
+	}
+	function getCurrentUserData() {
+		firestore
+			.collection("users")
+			.doc(auth.currentUser.uid)
+			.onSnapshot((snapshot) => {
+				setCurrentUser(snapshot.data());
+			});
+	}
 
 	const cancelAttendance = async () => {
 		const user = firebase.auth().currentUser;
@@ -383,6 +426,7 @@ const EventDetails = ({ route, navigation }) => {
 	};
 
 	useEffect(() => {
+		getCurrentUserData();
 		if (selectedEvent) {
 			const eventRef = firebase
 				.firestore()

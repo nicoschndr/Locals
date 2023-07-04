@@ -20,12 +20,17 @@ const Following = ({route: {params}, navigation}) => {
 
     const [user, setUser] = useState({});
     const [currentUser, setCurrentUser] = useState({});
-    const uid = params.uid;
-    const [followingIDs, setFollowingIds] = useState(params.following);
+    const uid = params?.uid;
+    const ruid = params.ruid;
+    const [followingIDs, setFollowingIds] = useState(params?.following);
     const [followingUsers, setFollowingUsers] = useState([]);
     const [unfollowId, setUnfollowId] = useState("");
     let fllwr = [];
     let fllwng = [];
+
+    if (ruid !== undefined) {
+        navigation.navigate('Profile', {uid: ruid})
+    }
 
 
     function getUserData() {
@@ -49,7 +54,7 @@ const Following = ({route: {params}, navigation}) => {
     }
 
     function getFollowingData() {
-        if (followingIDs.length > 0) {
+        if (uid !== undefined && followingIDs.length > 0) {
             firestore
                 .collection('users')
                 .where(firebase.firestore.FieldPath.documentId(), 'in', followingIDs)
