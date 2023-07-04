@@ -1174,6 +1174,7 @@ const Profile = ({ route, navigation }) => {
 											onPress={() =>
 												navigation.navigate("EventDetails", { event })
 											}
+											image={event.imageUrl}
 											style={{ marginRight: 24 }}
 											profile
 										/>

@@ -24,26 +24,34 @@ interface LocalsEventCardProps {
 }
 
 const LocalsEventCard = (props: LocalsEventCardProps) => {
-	const image = props.category
+	// const image = props.category
+	// 	? {
+	// 			uri: "https://source.unsplash.com/random/?" + props.category,
+	// 			cache: FastImage.cacheControl.cacheOnly,
+	// 			priority: FastImage.priority.high,
+	// 	  }
+	// 	: ({
+	// 			uri: props.image || "https://source.unsplash.com/random/?city,night",
+	// 			cache: FastImage.cacheControl.cacheOnly,
+	// 			priority: FastImage.priority.high,
+	// 	  } as unknown as ImageSourcePropType & { cache: Source["cache"] });
+
+	// Prefetching the image on component mount
+	// useEffect(() => {
+	// 	Image.prefetch(props.image);
+	// }, []);
+
+	const image = props.image
 		? {
 				uri: "https://source.unsplash.com/random/?" + props.category,
-				cache: FastImage.cacheControl.cacheOnly,
-				priority: FastImage.priority.high,
 		  }
 		: ({
 				uri: props.image || "https://source.unsplash.com/random/?city,night",
-				cache: FastImage.cacheControl.cacheOnly,
-				priority: FastImage.priority.high,
-		  } as unknown as ImageSourcePropType & { cache: Source["cache"] });
-
-	// Prefetching the image on component mount
-	useEffect(() => {
-		Image.prefetch(image.uri);
-	}, []);
+		  } as ImageSourcePropType);
 
 	return (
 		<AppleCard
-			source={image}
+			source={{ uri: props.image }}
 			largeTitle={props.title}
 			smallTitle={props.date}
 			footnote={props.location}
@@ -73,13 +81,14 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 					height: 240,
 				},
 			]}
-		>
-			<FastImage
-				source={image}
+		/>
+
+		/* <FastImage
+				source={props.image}
 				style={styles.image}
 				resizeMode={FastImage.resizeMode.cover}
-			/>
-		</AppleCard>
+			/> 
+		 </AppleCard> */
 	);
 };
 

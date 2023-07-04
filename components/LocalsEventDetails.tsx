@@ -55,7 +55,7 @@ const LocalsEventDetails: React.FC<LocalsEventDetailsProps> = ({
 		<ScrollView style={{ height: "100%" }}>
 			<Image
 				/* 				source={{ uri: event?.imageUrl || PLACEHOLDER }} */
-				source={{ uri: PLACEHOLDER }}
+				source={{ uri: event.imageUrl }}
 				style={{ width: "100%", height: 400 }}
 			/>
 			<Ionicons

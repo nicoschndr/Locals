@@ -35,7 +35,7 @@ const HomeScreen = ({ navigation }) => {
 
 	useEffect(() => {
 		const filteredEvents = filterEventsByRadius(events, radius);
-		console.log(filteredEvents)
+		console.log(filteredEvents);
 		setNearbyEvents(filteredEvents);
 	}, [events, radius, location]);
 
@@ -62,9 +62,9 @@ const HomeScreen = ({ navigation }) => {
 		const a =
 			Math.sin(dLat / 2) * Math.sin(dLat / 2) +
 			Math.cos(deg2rad(lat1)) *
-			Math.cos(deg2rad(lat2)) *
-			Math.sin(dLon / 2) *
-			Math.sin(dLon / 2);
+				Math.cos(deg2rad(lat2)) *
+				Math.sin(dLon / 2) *
+				Math.sin(dLon / 2);
 		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		const d = R * c; // Entfernung in km
 		return d;
@@ -96,7 +96,6 @@ const HomeScreen = ({ navigation }) => {
 
 	// create contest for events
 	const { setEvents } = useContext(FirestoreContext);
-
 
 	useEffect(() => {
 		filterEventsByCategory(events);
@@ -356,6 +355,7 @@ const HomeScreen = ({ navigation }) => {
 								style={{
 									position: "relative",
 								}}
+								image={event.imageUrl}
 								slim
 							/>
 							{userFriendsEvents.includes(event) ? (
@@ -436,12 +436,16 @@ const HomeScreen = ({ navigation }) => {
 					>
 						In deiner Nähe
 					</Text>
-					<ScrollView contentContainerStyle={{ margin: 24, alignSelf: "center" }}>
+					<ScrollView
+						contentContainerStyle={{ margin: 24, alignSelf: "center" }}
+					>
 						{nearbyEvents.map((event) => (
 							<LocalsEventCard
 								key={event.id}
 								title={event.title}
-								date={event.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}
+								date={event.date
+									?.toDate()
+									?.toLocaleDateString("de-DE", shortDate)}
 								location={event.address}
 								image={event.imageUrl}
 								category={event.title}
@@ -450,7 +454,6 @@ const HomeScreen = ({ navigation }) => {
 							/>
 						))}
 					</ScrollView>
-
 				</View>
 			</ScrollView>
 		</View>
