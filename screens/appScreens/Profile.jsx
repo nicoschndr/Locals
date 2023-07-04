@@ -62,7 +62,12 @@ const Profile = ({ route, navigation }) => {
 	const [shouldHide, setShouldHide] = React.useState(false);
 	const [followerDiff, setFollowerDiff] = useState(0);
 	const [unreadMessages, setUnreadMessages] = useState(null);
-	const [events, setEvents] = useState([]);
+	// const [events, setEvents] = useState([]);
+
+	const { events } = useContext(FirestoreContext);
+	const currentUserEvents = events.filter(
+		(event) => event.creator === user.username
+	);
 
 	React.useLayoutEffect(() => {
 		if (uid === firebase.auth().currentUser.uid) {
@@ -87,7 +92,7 @@ const Profile = ({ route, navigation }) => {
 	};
 
 	useEffect(() => {
-		getUserPosts();
+		// getUserPosts();
 		getUserData();
 		getCurrentUserData();
 	}, []);
@@ -210,15 +215,15 @@ const Profile = ({ route, navigation }) => {
 		sendFriendRequest(senderUsername, receiverUsername);
 	}
 
-	function getUserPosts(username) {
+	function getUserPosts() {
 		firestore
 			.collection("events")
 			//where("creator", "==", uid  or user.username
 			.where("creator", "==", user.username || "userId", "==", uid)
 			.onSnapshot((snapshot) => {
 				const posts = snapshot.docs.map((doc) => ({
-					id: doc.id,
 					...doc.data(),
+					id: doc.id,
 				}));
 				setEvents(posts);
 			});
@@ -1156,7 +1161,7 @@ const Profile = ({ route, navigation }) => {
 										paddingVertical: 24,
 									}}
 								>
-									{events.map((event) => (
+									{currentUserEvents.map((event) => (
 										<LocalsEventCard
 											key={event.id}
 											title={event.title}
