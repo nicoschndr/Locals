@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
+import FirestoreContext from "../context/FirestoreContext";
+import AppLoading from "expo-app-loading";
 
 // Import screen components
 import HomeScreen from "./appScreens/Home";
@@ -175,6 +177,9 @@ function AppNavigation() {
 	const [isReady, setIsReady] = useState(false);
 
 	const [onboarded, setOnboarded] = useState();
+
+	const { events } = useContext(FirestoreContext);
+
 	useEffect(() => {
 		getStorage();
 	});
@@ -192,6 +197,17 @@ function AppNavigation() {
 
 		return () => unsubscribe();
 	}, []);
+
+	const [isLoaded, setIsLoaded] = useState(false);
+
+	useEffect(() => {
+		if (events) {
+			setIsLoaded(true);
+		}
+	}, [events]);
+	if (!isLoaded) {
+		return <AppLoading />;
+	}
 
 	return (
 		<NavigationContainer>

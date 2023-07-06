@@ -8,8 +8,7 @@
 		"userInterfaceStyle": "light",
 		"splash": {
 			"image": "./assets/LocalsPhoneWallpaper.png",
-			"resizeMode": "contain",
-			"backgroundColor": "#ffffff"
+			"resizeMode": "cover"
 		},
 		"assetBundlePatterns": ["**/*"],
 		"ios": {

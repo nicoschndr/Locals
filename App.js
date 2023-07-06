@@ -7,27 +7,15 @@ import { initializeAuth } from "firebase/auth";
 import { getReactNativePersistence } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { firebaseConfig } from "./firebase";
+import { FirestoreContext } from "./context/FirestoreContext";
+import { useContext } from "react";
+
 LogBox.ignoreAllLogs();
 
 export default function App() {
-	//navigationOptions = {
-	//	headerShown: true,
-	//	style: {
-	//		backgroundColor: "transparent",
-	//	},
-	//};
-	// useEffect(async () => {
-	// 	const defaultApp = initializeApp(firebaseConfig);
-	// 	initializeAuth(defaultApp, {
-	// 		persistence: getReactNativePersistence(AsyncStorage),
-	// 	});
-	// }, []);
-
 	return (
 		<FirestoreProvider>
 			<AppNavigation />
 		</FirestoreProvider>
 	);
 }
-
-const styles = StyleSheet.create({});

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { AppleCard } from "react-native-apple-card-views";
 import FastImage, { Source } from "react-native-fast-image";
+import { Asset } from "expo-asset";
 
 interface LocalsEventCardProps {
 	title: string;
