@@ -218,7 +218,7 @@ function AppNavigation() {
 							let iconName;
 							// HOME ICON
 							if (route.name === "Home") {
-								iconName = focused ? "home" : "home-outline";
+								iconName = focused ? "search" : "search-outline";
 							}
 							// NEW POST ICON
 							if (route.name === "PostEvent") {
@@ -245,12 +245,13 @@ function AppNavigation() {
 						},
 						tabBarLabelStyle: {
 							fontSize: 12,
+							display: "none",
 						},
 						tabBarActiveTintColor: "#ec404b",
 						tabBarInactiveTintColor: "#734e61",
 						headerShown: false,
 						tabBarStyle: {
-							backgroundColor: "#efefef",
+							backgroundColor: "#f3f3f3",
 							borderTopWidth: 0,
 							position: "absolute",
 							bottom: 0,
