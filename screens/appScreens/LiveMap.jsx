@@ -84,7 +84,7 @@ const Comment = ({
 	);
 };
 
-const Livemap = ({navigation}) => {
+const Livemap = ({ navigation }) => {
 	const [location, setLocation] = useState(null);
 	const [events, setEvents] = useState([]);
 	const [modalVisible, setModalVisible] = useState(false);
@@ -115,7 +115,6 @@ const Livemap = ({navigation}) => {
 		setCategory(value);
 		setIsModalVisible(false);
 	};
-
 
 	const shortDate = {
 		year: "numeric",
@@ -704,13 +703,17 @@ const Livemap = ({navigation}) => {
 							name="chevron-down"
 							size={40}
 							color="#ec404b"
-							style={{ position: "absolute", top: 50, left: 20, }}
-							onPress={() => navigation.goBack()}
+							style={{ position: "absolute", top: 50, left: 20 }}
+							onPress={() => setModalVisible(false)}
 						/>
 						<View style={{ padding: 20 }}>
 							<View style={styles.titleContainer}>
 								<View style={{ width: "100%" }}>
-									<Text style={styles.date}>{selectedEvent.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}</Text>
+									<Text style={styles.date}>
+										{selectedEvent.date
+											?.toDate()
+											?.toLocaleDateString("de-DE", shortDate)}
+									</Text>
 
 									<View
 										style={{
@@ -768,11 +771,10 @@ const Livemap = ({navigation}) => {
 								</View>
 							)}
 
-							<View style={{ alignItems: "center" }}
-							>
+							<View style={{ alignItems: "center" }}>
 								<TouchableOpacity
 									onPress={() => {
-										console.log(selectedEvent.userId)
+										console.log(selectedEvent.userId);
 										navigation.navigate("Profile", {
 											uid: selectedEvent.userId,
 										});
@@ -883,7 +885,7 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		flex: 1,
-		marginBottom: 80
+		marginBottom: 80,
 	},
 	map: {
 		...StyleSheet.absoluteFillObject,
