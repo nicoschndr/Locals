@@ -7,7 +7,8 @@ import {
 	TouchableOpacity,
 	Platform,
 	ImageBackground,
-	ActivityIndicator, ScrollView,
+	ActivityIndicator,
+	ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import LocalsTextInput from "../../components/LocalsTextInput";
@@ -39,7 +40,6 @@ const Register = ({ navigation }) => {
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
 	const [showDatePicker, setShowDatePicker] = useState(false);
-
 
 	const [showPassword, setShowPassword] = useState(false);
 
@@ -125,31 +125,31 @@ const Register = ({ navigation }) => {
 			await auth.createUserWithEmailAndPassword(email, password);
 
 			await firestore.collection("users").doc(auth.currentUser?.uid).set({
-					email: email,
-					firstName: firstName,
-					lastName: lastName,
-					birthday: birthday,
-					mobile: mobile,
-					address: address,
-					imageUrl: imageUrl,
-					username: username, // Fügen Sie den Benutzernamen zur Dokumentdaten hinzu
-					friends: {},
-					friendRequests: {},
-					follower: [],
-					following: [],
-					blockedUsers: [],
-					reportedBy: {},
-					followerWhenClicked: 0,
-				});
-				alert("Konto erfolgreich erstellt");
-				navigation.navigate("Home");
-			} catch (error) {
-				console.log(error);
-				alert(error);
-			} finally {
-				setUploading(false);
-			}
-		};
+				email: email,
+				firstName: firstName,
+				lastName: lastName,
+				birthday: birthday,
+				mobile: mobile,
+				address: address,
+				imageUrl: imageUrl,
+				username: username, // Fügen Sie den Benutzernamen zur Dokumentdaten hinzu
+				friends: {},
+				friendRequests: {},
+				follower: [],
+				following: [],
+				blockedUsers: [],
+				reportedBy: {},
+				followerWhenClicked: 0,
+			});
+			alert("Konto erfolgreich erstellt");
+			navigation.navigate("Home");
+		} catch (error) {
+			console.log(error);
+			alert(error);
+		} finally {
+			setUploading(false);
+		}
+	};
 
 	const handleDateChange = (birthday) => {
 		setBirthday(birthday);
@@ -159,19 +159,18 @@ const Register = ({ navigation }) => {
 		requestLocationPermission();
 	}, []);
 
-
 	const openDatePicker = () => {
 		setShowDatePicker(true);
-	}
+	};
 
-	const closeDatePicker= () => {
+	const closeDatePicker = () => {
 		setShowDatePicker(false);
-	}
+	};
 
 	const onDateSelected = (birthdate) => {
 		setBirthday(birthdate);
 		closeDatePicker();
-	}
+	};
 
 	const renderDatePicker = () => {
 		if (showDatePicker) {
@@ -184,160 +183,159 @@ const Register = ({ navigation }) => {
 						onChange={(event, date) => onDateSelected(date)}
 					/>
 				</View>
-
 			);
 		}
 		return null;
-	}
+	};
 
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
+		<KeyboardAvoidingView
+			style={styles.container}
+			behavior={Platform.OS === "ios" ? "position" : ""}
+		>
 			<ScrollView>
-
-			<ImageBackground
-				source={require("../../assets/BackGround(h).png")}
-				style={{ alignItems: "center", flex: 1, width: "100%" }}
-			>
-				<TouchableOpacity
-					style={styles.back}
-					onPress={() => navigation.goBack()}
+				<ImageBackground
+					source={require("../../assets/BackGround(h).png")}
+					style={{ alignItems: "center", flex: 1, width: "100%" }}
 				>
-					<Ionicons name="chevron-back" size={24} color="white" />
-				</TouchableOpacity>
-				<View style={styles.inputContainer}>
-					<LocalsImagePicker
-						onImageTaken={(uri) => setImageUri(uri)}
-						style={styles.image}
-					/>
-
-					<View style={{ marginTop: 12 }}>
-						<Text style={styles.inputTitle}>E-Mail</Text>
-						<LocalsTextInput
-							autoCapitalize="none"
-							autoFocus
-							inputMode="email"
-							value={email}
-							onChangeText={(email) => setEmail(email)}
-							style={styles.input}
-						/>
-						<Divider style={styles.divider} />
-					</View>
-					<View style={{ marginTop: 12 }}>
-						<Text style={styles.inputTitle}>Passwort</Text>
-
-						<LocalsTextInput
-							secureTextEntry={!showPassword}
-							value={password}
-							onChangeText={(password) => setPassword(password)}
-							style={styles.input}
-						/>
-					</View>
-					<Divider style={styles.divider} />
-					<CheckBox
-						title="Passwort anzeigen"
-						checked={showPassword}
-						onPress={() => setShowPassword(!showPassword)}
-						containerStyle={{
-							backgroundColor: "transparent",
-							borderWidth: 0,
-							marginLeft: 0,
-							padding: 0,
-							marginBottom: 12,
-						}}
-						textStyle={{
-							color: "#fff",
-							fontSize: 10,
-							fontWeight: "normal",
-							marginLeft: 4,
-						}}
-						checkedColor="#ec404b"
-						size={20}
-					/>
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							marginTop: 12,
-						}}
+					<TouchableOpacity
+						style={styles.back}
+						onPress={() => navigation.goBack()}
 					>
-						<View style={{ width: "48%" }}>
-							<Text style={styles.inputTitle}>Vorname</Text>
-							<LocalsTextInput
-								autoCapitalize
-								value={firstName}
-								onChangeText={(firstName) => setFirstName(firstName)}
-								style={styles.input}
-							/>
-							<Divider style={styles.divider} />
-						</View>
-						<View style={{ width: "48%" }}>
-							<Text style={styles.inputTitle}>Nachname</Text>
-							<LocalsTextInput
-								value={lastName}
-								autoCapitalize
-								onChangeText={(lastName) => setLastName(lastName)}
-								style={styles.input}
-							/>
-							<Divider style={styles.divider} />
-						</View>
-					</View>
-					<View style={{ marginTop: 12 }}>
-						<Text style={styles.inputTitle}>Addresse</Text>
-						<View style={{ flexDirection: "row", alignItems: "center" }}>
-							<GooglePlacesAutocomplete
-								fetchDetails={true}
-								currentLocation={true}
-								currentLocationLabel="Current location"
-								listViewDisplayed={false}
-								onPress={(data, details = null) => {
-									setAddress(details.formatted_address);
-									setLongitude(details.geometry.location.lng);
-									setLatitude(details.geometry.location.lat);
-								}}
-								// limit number of results
+						<Ionicons name="chevron-back" size={24} color="white" />
+					</TouchableOpacity>
+					<View style={styles.inputContainer}>
+						<LocalsImagePicker
+							onImageTaken={(uri) => setImageUri(uri)}
+							style={styles.image}
+						/>
 
-								query={{
-									key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
-									language: "de",
-									components: "country:de",
-								}}
-								styles={{
-									textInput: styles.addressInput,
-									listView: {
-										width: "100%",
-									},
-									container: {
-										width: "100%", // Set the width of the container
-									},
-								}}
-								// input fontcolor white
+						<View style={{ marginTop: 12 }}>
+							<Text style={styles.inputTitle}>E-Mail</Text>
+							<LocalsTextInput
+								autoCapitalize="none"
+								autoFocus
+								inputMode="email"
+								value={email}
+								onChangeText={(email) => setEmail(email)}
+								style={styles.input}
+							/>
+							<Divider style={styles.divider} />
+						</View>
+						<View style={{ marginTop: 12 }}>
+							<Text style={styles.inputTitle}>Passwort</Text>
+
+							<LocalsTextInput
+								secureTextEntry={!showPassword}
+								value={password}
+								onChangeText={(password) => setPassword(password)}
+								style={styles.input}
 							/>
 						</View>
 						<Divider style={styles.divider} />
-					</View>
-					<View style={{ marginTop: 12 }}>
-						<Text style={styles.inputTitle}>Alter</Text>
+						<CheckBox
+							title="Passwort anzeigen"
+							checked={showPassword}
+							onPress={() => setShowPassword(!showPassword)}
+							containerStyle={{
+								backgroundColor: "transparent",
+								borderWidth: 0,
+								marginLeft: 0,
+								padding: 0,
+								marginBottom: 12,
+							}}
+							textStyle={{
+								color: "#fff",
+								fontSize: 10,
+								fontWeight: "normal",
+								marginLeft: 4,
+							}}
+							checkedColor="#ec404b"
+							size={20}
+						/>
 						<View
 							style={{
 								flexDirection: "row",
+								justifyContent: "space-between",
 								marginTop: 12,
-								alignItems: "center",
 							}}
 						>
-							<Ionicons
-								name={"calendar-outline"}
-								size={30}
-								onPress={openDatePicker}
-							/>
-
-							<View>
-								{renderDatePicker()}
+							<View style={{ width: "48%" }}>
+								<Text style={styles.inputTitle}>Vorname</Text>
+								<LocalsTextInput
+									autoCapitalize
+									value={firstName}
+									onChangeText={(firstName) => setFirstName(firstName)}
+									style={styles.input}
+								/>
+								<Divider style={styles.divider} />
+							</View>
+							<View style={{ width: "48%" }}>
+								<Text style={styles.inputTitle}>Nachname</Text>
+								<LocalsTextInput
+									value={lastName}
+									autoCapitalize
+									onChangeText={(lastName) => setLastName(lastName)}
+									style={styles.input}
+								/>
+								<Divider style={styles.divider} />
 							</View>
 						</View>
+						<View style={{ marginTop: 12 }}>
+							<Text style={styles.inputTitle}>Addresse</Text>
+							<View style={{ flexDirection: "row", alignItems: "center" }}>
+								<GooglePlacesAutocomplete
+									fetchDetails={true}
+									currentLocation={true}
+									currentLocationLabel="Current location"
+									listViewDisplayed={false}
+									onPress={(data, details = null) => {
+										setAddress(details.formatted_address);
+										setLongitude(details.geometry.location.lng);
+										setLatitude(details.geometry.location.lat);
+									}}
+									// limit number of results
 
-						<Divider style={styles.divider} />
-					</View>
-					{/* <View style={{ marginTop: 12 }}>
+									query={{
+										key: "AIzaSyAyviffxI6ZlWwof4_vA6S1LjmLrYkjxMI",
+										language: "de",
+										components: "country:de",
+									}}
+									styles={{
+										textInput: styles.addressInput,
+										listView: {
+											width: "100%",
+										},
+										container: {
+											width: "100%", // Set the width of the container
+										},
+									}}
+									// input fontcolor white
+								/>
+							</View>
+							<Divider style={styles.divider} />
+						</View>
+						<View style={{ marginTop: 12 }}>
+							<Text style={styles.inputTitle}>Alter</Text>
+							<View
+								style={{
+									flexDirection: "row",
+									marginTop: 12,
+									alignItems: "center",
+								}}
+							>
+								<Ionicons
+									name={"calendar-outline"}
+									size={30}
+									onPress={openDatePicker}
+								/>
+
+								<View>{renderDatePicker()}</View>
+							</View>
+
+							<Divider style={styles.divider} />
+						</View>
+						{/* <View style={{ marginTop: 12 }}>
 						<Text style={styles.inputTitle}>Mobil-Nr.</Text>
 						<LocalsTextInput
 							inputMode="numeric"
@@ -347,26 +345,26 @@ const Register = ({ navigation }) => {
 						/>
 						<Divider style={styles.divider} />
 					</View> */}
-					<View style={{ marginTop: 12 }}>
-						<Text style={styles.inputTitle}>Username</Text>
-						<LocalsTextInput
-							autoCapitalize="none"
-							value={username}
-							onChangeText={(username) => setUsername(username)}
-							style={styles.input}
-						/>
-						<Divider style={styles.divider} />
+						<View style={{ marginTop: 12 }}>
+							<Text style={styles.inputTitle}>Username</Text>
+							<LocalsTextInput
+								autoCapitalize="none"
+								value={username}
+								onChangeText={(username) => setUsername(username)}
+								style={styles.input}
+							/>
+							<Divider style={styles.divider} />
+						</View>
+						{!uploading && (
+							<LocalsButton
+								title="Registrieren"
+								onPress={register}
+								style={styles.loginBtn}
+							/>
+						)}
+						{uploading && <ActivityIndicator size="large" color="#fff" />}
 					</View>
-					{!uploading && (
-						<LocalsButton
-							title="Registrieren"
-							onPress={register}
-							style={styles.loginBtn}
-						/>
-					)}
-					{uploading && <ActivityIndicator size="large" color="#fff" />}
-				</View>
-			</ImageBackground>
+				</ImageBackground>
 			</ScrollView>
 		</KeyboardAvoidingView>
 	);

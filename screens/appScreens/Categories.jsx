@@ -53,7 +53,7 @@ const Categories = ({ navigation, route }) => {
 
 	const handleRefresh = () => {
 		setRefreshing(true);
-		updateEvents();
+		getEvents();
 		setRefreshing(false);
 	};
 
@@ -113,6 +113,14 @@ const Categories = ({ navigation, route }) => {
 				}}
 			/> */}
 			<ScrollView
+				refreshControl={
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={handleRefresh}
+						// Android offset for RefreshControl
+						progressViewOffset={10}
+					/>
+				}
 				showsHorizontalScrollIndicator={false}
 				showsVerticalScrollIndicator={false}
 			>
