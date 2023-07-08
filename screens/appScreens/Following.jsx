@@ -6,33 +6,89 @@ import {auth, firebase, firestore} from "../../firebase";
 import {scheduleNotificationAsync} from "expo-notifications";
 import {render} from "react-dom";
 
-
+/**
+ * The width of the current device in px.
+ * @type {number}
+ */
 const windowWidth = Dimensions.get("window").width;
+
+/**
+ * The height of the current device in px.
+ * @type {number}
+ */
 const windowHeight = Dimensions.get("window").height;
 
-
+/**
+ * Renders the Following page with the provided props.
+ * @param params the params tha are delivered through the navigation.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered Following page.
+ * @constructor
+ */
 const Following = ({route: {params}, navigation}) => {
+
+    /**
+     * Executes functions once when the component mounts.
+     */
     useEffect(() => {
         getUserData();
         getCurrentUserData();
         getFollowingData();
     }, []);
 
+    /**
+     * The data of the user.
+     */
     const [user, setUser] = useState({});
+
+    /**
+     * The user that is currently logged in.
+     */
     const [currentUser, setCurrentUser] = useState({});
+
+    /**
+     * The firebase uid of the user.
+     */
     const uid = params?.uid;
+
+    /**
+     * the uid of the user the current user wants to navigate to through "recentActivities".
+     */
     const ruid = params.ruid;
+
+    /**
+     * The firebase uid's of all users the current user is following.
+     */
     const [followingIDs, setFollowingIds] = useState(params?.following);
+
+    /**
+     * all users the current user is following.
+     */
     const [followingUsers, setFollowingUsers] = useState([]);
     const [unfollowId, setUnfollowId] = useState("");
+
+    /**
+     * used to cache the followers of the user.
+     * @type {*[]}
+     */
     let fllwr = [];
+
+    /**
+     * used to cache the users that the current user is following.
+     * @type {*[]}
+     */
     let fllwng = [];
 
+    /**
+     * used for the case that the current user wants to navigate to another profile through "recentActivities".
+     */
     if (ruid !== undefined) {
         navigation.navigate('Profile', {uid: ruid})
     }
 
-
+    /**
+     * This function retrieves and updates the user's data from Firestore
+     */
     function getUserData() {
         firestore
             .collection("users")
@@ -43,6 +99,9 @@ const Following = ({route: {params}, navigation}) => {
             })
     }
 
+    /**
+     *This function retrieves and updates the current user's data from Firestore
+     */
     function getCurrentUserData() {
         firestore
             .collection("users")
@@ -53,6 +112,9 @@ const Following = ({route: {params}, navigation}) => {
             });
     }
 
+    /**
+     * retrieve and update the data of all users the current user is following based on their uid's.
+     */
     function getFollowingData() {
         if (uid !== undefined && followingIDs.length > 0) {
             firestore
@@ -69,6 +131,10 @@ const Following = ({route: {params}, navigation}) => {
         }
     }
 
+    /**
+     * responsible for adding a user to the current user's following list.
+     * @param userToFollow The user object representing the user to be followed.
+     */
     function follow(userToFollow) {
         userToFollow.following.follower.forEach((r) => fllwr.push(r))
         firestore
@@ -82,6 +148,10 @@ const Following = ({route: {params}, navigation}) => {
         fllwr = [];
     }
 
+    /**
+     * Responsible for adding a user to the current user's following list.
+     * @param userToFollow The user object representing the user to be followed.
+     */
     function setFollowing(userToFollow) {
         currentUser.following.forEach((r) => fllwng.push(r))
         fllwng.push(userToFollow.following.uid.toString())
@@ -95,6 +165,10 @@ const Following = ({route: {params}, navigation}) => {
         fllwng = [];
     }
 
+    /**
+     * Responsible for removing a user from the current user's following list.
+     * @param userToUnfollow The user object representing the user to be unfollowed.
+     */
     function unfollow(userToUnfollow) {
         userToUnfollow.following.follower.forEach((r) => fllwr.push(r))
         const index = fllwr.indexOf(auth.currentUser.uid.toString())
@@ -111,6 +185,10 @@ const Following = ({route: {params}, navigation}) => {
         fllwr = [];
     }
 
+    /**
+     * Responsible for removing a user from the current user's following list.
+     * @param userToUnfollow The user object representing the user to be unfollowed.
+     */
     function setUnfollowing(userToUnfollow) {
         currentUser.following.forEach((r) => fllwng.push(r))
         const index = fllwng.indexOf(userToUnfollow.following.uid.toString())
@@ -127,8 +205,16 @@ const Following = ({route: {params}, navigation}) => {
         fllwng = [];
     }
 
+    /**
+     * Used to access the navigation object provided by the useNavigation hook. It allows you to navigate between
+     * screens or components within your application.
+     * @type {NavigationProp<ReactNavigation.RootParamList>}
+     */
     const uNavigation = useNavigation();
 
+    /**
+     * renders the Following page.
+     */
     return (
         <ScrollView>
             <View
@@ -201,6 +287,9 @@ const Following = ({route: {params}, navigation}) => {
 
 export default Following;
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
     followButton: {
         paddingLeft: 5,

@@ -8,13 +8,38 @@ import {auth} from "../../firebase";
 
 
 
-
+/**
+* Renders the ChangePassword page with the provided props.
+* @param navigation The navigation object for navigating between screens.
+* @returns {JSX.Element} The rendered ChangePassword page.
+* @constructor
+*/
 const ChangePassword = ({route, navigation}) => {
+
+    /**
+     * The new password that is entered in the specific input field.
+     */
     const [password, setPassword] = useState('');
+
+    /**
+     * The confirmation of the password that is entered in the specific input field.
+     */
     const [confirmPassword, setConfirmPassword] = useState('');
+
+    /**
+     * The height of the user's device in px.
+     */
     const deviceHeight = Dimensions.get("window").height;
+
+    /**
+     * If true the password is shown to the user.
+     */
     const [showPassword, setShowPassword] = useState(false);
 
+    /**
+     * If the password and the confirmation are identical the password is changed in the authentication system.
+     * Otherwise, it triggers an alert.
+     */
     function changePassword(){
         if(password === confirmPassword){
             auth.currentUser.updatePassword(password).then(alert('Das hat geklappt'))
@@ -22,6 +47,10 @@ const ChangePassword = ({route, navigation}) => {
             alert('Passwörter stimmen nicht überein')
         }
     }
+
+    /**
+     * renders the TabProfileIcon component.
+     */
 
     return (
         <ImageBackground
@@ -88,6 +117,9 @@ const ChangePassword = ({route, navigation}) => {
 
 export default ChangePassword;
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
     back: {
         position: "absolute",

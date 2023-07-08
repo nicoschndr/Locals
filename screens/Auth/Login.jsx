@@ -25,12 +25,12 @@ import { Ionicons } from "@expo/vector-icons";
 const Login = ({ navigation }) => {
 
 	/**
-	 * The email or the username that is entered in the login form.
+	 * The email or the username that is entered in the specific input field.
 	 */
 	const [emailOrUsername, setEmailOrUsername] = useState("");
 
 	/**
-	 * The password that is entered in the login form.
+	 * The password that is entered in the specific input field.
 	 */
 	const [password, setPassword] = useState("");
 

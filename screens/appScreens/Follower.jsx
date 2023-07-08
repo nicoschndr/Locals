@@ -4,29 +4,87 @@ import {Ionicons} from "@expo/vector-icons";
 import {useNavigation} from "@react-navigation/native";
 import {auth, firebase, firestore} from "../../firebase";
 
+/**
+ * The width of the current device in px.
+ * @type {number}
+ */
 const windowWidth = Dimensions.get("window").width;
+
+/**
+ * The height of the current device in px.
+ * @type {number}
+ */
 const windowHeight = Dimensions.get("window").height;
 
-
+/**
+ * Renders the Follower page with the provided props.
+ * @param params the params tha are delivered through the navigation.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered Follower page.
+ * @constructor
+ */
 const Follower = ({route: {params}, navigation}) => {
 
+    /**
+     * Executes functions once when the component mounts.
+     */
     useEffect(() => {
         getUserData();
         getCurrentUserData();
         getFollowerData();
     }, []);
 
+    /**
+     * The data of the user.
+     */
     const [user, setUser] = useState({});
+
+    /**
+     * The user that is currently logged in.
+     */
     const [currentUser, setCurrentUser] = useState({});
+
+    /**
+     * The firebase uid of the user.
+     */
     const uid = params.uid;
+
+    /**
+     * The follower difference since the last time the user navigated to this page.
+     */
     const diff = params.diff;
+
+    /**
+     * The firebase uid's of all followers of the user.
+     */
     const [followerIDs, setFollowingIds] = useState(params.follower);
+
+    /**
+     * all followers of the user.
+     */
     const [followers, setUserFollowers] = useState([]);
+
+    /**
+     * The followers that followed sine the last time the user navigated to this page.
+     */
     const [newFollowers, setNewFollowers] = useState([]);
+
+    /**
+     * used to cache the followers of the user.
+     * @type {*[]}
+     */
     let fllwr = [];
+
+    /**
+     * used to cache the users that the current user is following.
+     * @type {*[]}
+     */
     let fllwng = [];
     let ue = []
 
+    /**
+     * This function retrieves and updates the user's data from Firestore
+     */
     function getUserData() {
         firestore
             .collection("users")
@@ -37,6 +95,9 @@ const Follower = ({route: {params}, navigation}) => {
             })
     }
 
+    /**
+     *This function retrieves and updates the current user's data from Firestore
+     */
     function getCurrentUserData() {
         firestore
             .collection("users")
@@ -47,6 +108,9 @@ const Follower = ({route: {params}, navigation}) => {
             });
     }
 
+    /**
+     * retrieve and update the data of all followers of the user based on their uid's.
+     */
     function getFollowerData() {
         if (followerIDs.length > 0) {
             firestore
@@ -64,6 +128,10 @@ const Follower = ({route: {params}, navigation}) => {
         }
     }
 
+    /**
+     * Responsible for removing a follower from the current user's follower list.
+     * @param follower The follower object to be removed from the current user's follower list.
+     */
     function deleteFollower(follower) {
         currentUser.follower.forEach((e) => {
             fllwr.push(e)
@@ -82,6 +150,10 @@ const Follower = ({route: {params}, navigation}) => {
         fllwr = [];
     }
 
+    /**
+     * Responsible for removing the current user from a follower's following list.
+     * @param follower The follower object from which the current user will be removed from the following list.
+     */
     function deleteFollowing(follower) {
         follower.follower.following.forEach((e) => fllwng.push(e))
         const index = fllwng.indexOf(auth.currentUser.uid)
@@ -97,6 +169,11 @@ const Follower = ({route: {params}, navigation}) => {
         fllwng = [];
     }
 
+    /**
+     * Responsible for removing the current user from a follower's following list without deleting the follower entry
+     * from the current user's follower list.
+     * @param follower The follower object from which the current user will be removed from the following list.
+     */
     function notDeleteFollower(follower) {
         follower.follower.following.forEach((e) => fllwng.push(e))
         firestore
@@ -109,6 +186,10 @@ const Follower = ({route: {params}, navigation}) => {
         fllwng = [];
     }
 
+    /**
+     * Responsible for adding a follower to the current user's follower list without deleting the following entry from the follower's following list.
+     * @param follower The follower object to be added to the current user's follower list.
+     */
     function notDeleteFollowing(follower) {
         currentUser.follower.forEach((e) => fllwr.push(e))
         fllwr.push(follower.follower.uid)
@@ -126,6 +207,9 @@ const Follower = ({route: {params}, navigation}) => {
 
     const uNavigation = useNavigation();
 
+    /**
+     * renders the Follower page.
+     */
     return (
         <ScrollView>
             <View
@@ -240,6 +324,9 @@ const Follower = ({route: {params}, navigation}) => {
 
 export default Follower;
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
     followButton: {
         paddingLeft: 5,

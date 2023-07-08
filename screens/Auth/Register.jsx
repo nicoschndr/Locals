@@ -27,13 +27,13 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 /**
  * Renders the Register page with the provided props.
  * @param navigation The navigation object for navigating between screens.
- * @returns {JSX.Element} The rendered TabProfileIcon component.
+ * @returns {JSX.Element} The rendered Register page.
  * @constructor
  */
 const Register = ({ navigation }) => {
 
 	/**
-	 * The email the user entered into the login form.
+	 * The email the user entered into the specific input field.
 	 */
 	const [email, setEmail] = useState("");
 
@@ -48,17 +48,17 @@ const Register = ({ navigation }) => {
 	const [imageUrl, setImageUrl] = useState("");
 
 	/**
-	 * The password the user entered into the login form.
+	 * The password the user entered into the specific input field.
 	 */
 	const [password, setPassword] = useState("");
 
 	/**
-	 * The first name the user entered into the login form.
+	 * The first name the user entered into the specific input field.
 	 */
 	const [firstName, setFirstName] = useState("");
 
 	/**
-	 * The last name the user entered into the login form.
+	 * The last name the user entered into the specific input field.
 	 */
 	const [lastName, setLastName] = useState("");
 
@@ -68,17 +68,17 @@ const Register = ({ navigation }) => {
 	const [birthday, setBirthday] = useState(new Date());
 
 	/**
-	 * The mobile number the user entered into the login form.
+	 * The mobile number the user entered into the specific input field.
 	 */
 	const [mobile, setMobile] = useState("");
 
 	/**
-	 * The address the user entered into the login form.
+	 * The address the user entered into the specific input field.
 	 */
 	const [address, setAddress] = useState("");
 
 	/**
-	 * The username the user entered into the login form.
+	 * The username the user entered into the specific input field.
 	 */
 	const [username, setUsername] = useState("");
 
