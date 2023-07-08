@@ -28,39 +28,28 @@ const Categories = ({ navigation, route }) => {
 	const [showSearch, setShowSearch] = useState(false);
 	const [activeEvents, setActiveEvents] = useState([]);
 	const [categories, setCategories] = useState([]);
+	const [events, setEvents] = useState([]);
 
 	const { category } = route.params;
 
-	// create contest for events
-	const { setEvents } = useContext(FirestoreContext);
-
-	const { events } = useContext(FirestoreContext);
-
-	const filterEventsByCategory = () => {
-		const filteredEvents = events.filter(
-			(event) => event.category === category
-		);
-		setActiveEvents(filteredEvents);
-	};
-
-	useEffect(() => {
-		filterEventsByCategory();
-	}, []);
-
-	const updateEvents = () => {
+	const getEvents = () => {
 		firestore
 			.collection("events")
-			//where date >= today
-			.where("date", ">=", new Date())
+			.where("category", "==", category)
 			.orderBy("date", "asc")
 			.onSnapshot((snapshot) => {
 				const events = snapshot.docs.map((doc) => ({
 					id: doc.id,
 					...doc.data(),
 				}));
+				console.log(events); // Add this line
 				setEvents(events);
 			});
 	};
+
+	useEffect(() => {
+		getEvents();
+	}, []); //
 
 	const handleRefresh = () => {
 		setRefreshing(true);
@@ -111,9 +100,7 @@ const Categories = ({ navigation, route }) => {
 					<AppleHeader
 						largeTitle={category}
 						dateTitle={today}
-						onPress={function (): void {
-							throw new Error("Function not implemented.");
-						}}
+						onPress={() => navigation.navigate("Home")}
 						imageSource={0}
 					/>
 				</View>
@@ -126,9 +113,6 @@ const Categories = ({ navigation, route }) => {
 				}}
 			/> */}
 			<ScrollView
-				refreshControl={
-					<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-				}
 				showsHorizontalScrollIndicator={false}
 				showsVerticalScrollIndicator={false}
 			>
@@ -140,7 +124,7 @@ const Categories = ({ navigation, route }) => {
 					showsHorizontalScrollIndicator={false}
 					showsVerticalScrollIndicator={false}
 				>
-					{activeEvents.map((event) => (
+					{events.map((event) => (
 						<LocalsEventCard
 							key={event.id}
 							title={event.title}
@@ -151,8 +135,9 @@ const Categories = ({ navigation, route }) => {
 							image={event.imageUrl}
 							category={event.title}
 							onPress={() => navigation.navigate("EventDetails", { event })}
-							style={{ marginRight: 24 }}
+							style={{ marginRight: 24, marginBottom: 24 }}
 							small={false}
+							slim={false}
 						/>
 					))}
 				</ScrollView>
