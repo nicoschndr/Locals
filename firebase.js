@@ -36,7 +36,7 @@
 
 // BUILD VERSION
 
-import firebase from "firebase/compat/app";
+const firebase = require("firebase/compat/app");
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import "firebase/compat/storage";
