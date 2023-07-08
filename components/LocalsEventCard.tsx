@@ -110,7 +110,7 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 };
 
 /**
- * Creates a StyleSheet object containing style definitions for component.
+ * Creates a StyleSheet object containing style definitions for the component.
  */
 const styles = StyleSheet.create({
 	container: {

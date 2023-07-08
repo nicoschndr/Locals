@@ -16,17 +16,38 @@ import { useNavigation } from "@react-navigation/native";
 import { CheckBox, Divider } from "react-native-elements";
 import { Ionicons } from "@expo/vector-icons";
 
+/**
+ * Renders a TabProfileIcon component with the provided props.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered Login Page.
+ * @constructor
+ */
 const Login = ({ navigation }) => {
+
+	/**
+	 * The email or the username that is entered in the login form.
+	 */
 	const [emailOrUsername, setEmailOrUsername] = useState("");
+
+	/**
+	 * The password that is entered in the login form.
+	 */
 	const [password, setPassword] = useState("");
+
+	/**
+	 * If true the password is shown to the user.
+	 */
 	const [showPassword, setShowPassword] = useState(false);
 
+	/**
+	 * Handles user authentication and signing in a user based on their email or username.
+	 */
 	const login = () => {
-		// Überprüfen, ob die Eingabe eine E-Mail-Adresse ist
+		// Check if input is an email address
 		const isEmail = /\S+@\S+\.\S+/.test(emailOrUsername);
 
 		if (isEmail) {
-			// Anmeldung mit E-Mail-Adresse
+			// Login with email
 			auth
 				.signInWithEmailAndPassword(emailOrUsername, password)
 				.then(() => {
@@ -37,7 +58,7 @@ const Login = ({ navigation }) => {
 					alert(error.message);
 				});
 		} else {
-			// Anmeldung mit Benutzernamen
+			// Login with username
 			const usersRef = firestore.collection("users");
 			usersRef
 				.where("username", "==", emailOrUsername)
@@ -61,12 +82,15 @@ const Login = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * Handles the process of resetting a user's password based on their email or username.
+	 */
 	const forgotPassword = () => {
-		// Überprüfen, ob die Eingabe eine E-Mail-Adresse ist
+		// Check if input is an email address.
 		const isEmail = /\S+@\S+\.\S+/.test(emailOrUsername);
 
 		if (isEmail) {
-			// Passwort zurücksetzen
+			// reset password
 			auth
 				.sendPasswordResetEmail(JSON.stringify(emailOrUsername))
 				.then(() => {
@@ -80,7 +104,7 @@ const Login = ({ navigation }) => {
 					Alert.alert("Upsii", error.message);
 				});
 		} else {
-			// Benutzername zurücksetzen
+			// reset username
 			const usersRef = firestore.collection("users");
 			usersRef
 				.where("username", "==", emailOrUsername)
@@ -108,6 +132,9 @@ const Login = ({ navigation }) => {
 	};
 
 	// alert window for reset password with two options
+	/**
+	 * Responsible for displaying a confirmation alert to the user, asking if they want to reset their password.
+	 */
 	const resetPassword = () => {
 		Alert.alert(
 			"Passwort zurücksetzen",
@@ -126,6 +153,9 @@ const Login = ({ navigation }) => {
 		);
 	};
 
+	/**
+	 * renders the Login Page.
+	 */
 	return (
 		<KeyboardAvoidingView
 			style={styles.container}
@@ -224,6 +254,9 @@ const Login = ({ navigation }) => {
 
 export default Login;
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

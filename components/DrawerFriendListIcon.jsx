@@ -16,6 +16,12 @@ import {auth, firebase, firestore} from "../firebase";
 import {Badge} from "react-native-elements";
 import {useFocusEffect} from "@react-navigation/native";
 
+/**
+ * Renders the DrawerFriendList component with the provided props.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered TabProfileIcon component.
+ * @constructor
+ */
 const DrawerFriendList = (navigation) => {
 
     /**

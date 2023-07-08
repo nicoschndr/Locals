@@ -169,7 +169,7 @@ const LocalsEventDetails: React.FC<LocalsEventDetailsProps> = ({
 };
 
 /**
- * Creates a StyleSheet object containing style definitions for component.
+ * Creates a StyleSheet object containing style definitions for the component.
  */
 const styles = StyleSheet.create({
 	date: {

@@ -68,7 +68,7 @@ const LocalsTextInput: React.FC<LocalsTextInputProps> = ({
 };
 
 /**
- * Creates a StyleSheet object containing style definitions for component.
+ * Creates a StyleSheet object containing style definitions for the component.
  */
 const styles = StyleSheet.create({
 	container: {

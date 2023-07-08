@@ -49,7 +49,7 @@ const TemplateButton: React.FC<TemplateButtonProps> = ({
 };
 
 /**
- * Creates a StyleSheet object containing style definitions for component.
+ * Creates a StyleSheet object containing style definitions for the component.
  */
 const styles = StyleSheet.create({
 	primary: {

@@ -24,26 +24,83 @@ import { Ionicons } from "@expo/vector-icons";
 import { set } from "react-native-reanimated";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
+/**
+ * Renders the Register page with the provided props.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered TabProfileIcon component.
+ * @constructor
+ */
 const Register = ({ navigation }) => {
+
+	/**
+	 * The email the user entered into the login form.
+	 */
 	const [email, setEmail] = useState("");
+
+	/**
+	 * The link to the picture the user picked from his gallery.
+	 */
 	const [imageUri, setImageUri] = useState("");
+
+	/**
+	 * The link to firestore where the picture is saved.
+	 */
 	const [imageUrl, setImageUrl] = useState("");
+
+	/**
+	 * The password the user entered into the login form.
+	 */
 	const [password, setPassword] = useState("");
+
+	/**
+	 * The first name the user entered into the login form.
+	 */
 	const [firstName, setFirstName] = useState("");
+
+	/**
+	 * The last name the user entered into the login form.
+	 */
 	const [lastName, setLastName] = useState("");
+
+	/**
+	 * The birthday the user selected in the date picker.
+	 */
 	const [birthday, setBirthday] = useState(new Date());
 
+	/**
+	 * The mobile number the user entered into the login form.
+	 */
 	const [mobile, setMobile] = useState("");
+
+	/**
+	 * The address the user entered into the login form.
+	 */
 	const [address, setAddress] = useState("");
+
+	/**
+	 * The username the user entered into the login form.
+	 */
 	const [username, setUsername] = useState("");
+
+	/**
+	 * If true the picked picture is uploaded into firestore.
+	 */
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
+
+	/**
+	 * If true the date picker is shown.
+	 */
 	const [showDatePicker, setShowDatePicker] = useState(false);
 
-
+	/**
+	 * If true the password is shown.
+	 */
 	const [showPassword, setShowPassword] = useState(false);
 
-	// upload image to firebase storage and return the image url
+	/**
+	 * Upload image to firebase storage and return the image url.
+	 */
 	const uploadImage = async (uri) => {
 		setUploading(true);
 		const response = await fetch(uri);
@@ -58,6 +115,10 @@ const Register = ({ navigation }) => {
 		return url;
 	};
 
+	/**
+	 * Checks if the username the user entered is already used by another user.
+	 * @returns {Promise<boolean>} true if it is used by another user, false if not.
+	 */
 	const checkUsernameAvailability = async () => {
 		const snapshot = await firestore
 			.collection("users")
@@ -73,6 +134,11 @@ const Register = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * requesting the user's permission to access their fine location and, if granted, calling the getCurrentLocation
+	 * function to retrieve the current location.
+	 * @returns {Promise<void>}
+	 */
 	const requestLocationPermission = async () => {
 		if (Platform.OS === "android") {
 			try {
@@ -92,6 +158,10 @@ const Register = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * Gets the current location of the user.
+	 * @returns {Promise<void>}
+	 */
 	const getCurrentLocation = async () => {
 		try {
 			let { status } = await Location.requestForegroundPermissionsAsync();
@@ -110,6 +180,11 @@ const Register = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * Responsible for registering a new user by creating an account, checking username availability, uploading an
+	 * image, and storing user information in the Firestore database.
+	 * @returns {Promise<void>}
+	 */
 	const register = async () => {
 		try {
 			const isUsernameAvailable = await checkUsernameAvailability();
@@ -155,24 +230,45 @@ const Register = ({ navigation }) => {
 		setBirthday(birthday);
 	};
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
 		requestLocationPermission();
 	}, []);
 
-
+	/**
+	 * Responsible for setting the showDatePicker state variable to true, which triggers the display of the date picker
+	 * component.
+	 */
 	const openDatePicker = () => {
 		setShowDatePicker(true);
 	}
 
+	/**
+	 * Responsible for setting the showDatePicker state variable to false, which toggles the display of the date picker
+	 * component.
+	 */
 	const closeDatePicker= () => {
 		setShowDatePicker(false);
 	}
 
+	/**
+	 * Is triggered when the date is selected in the date picker. It set the birthday in the state variable and then
+	 * cloases the date picker.
+	 * @param birthdate birthday of the user that wants to register.
+	 */
 	const onDateSelected = (birthdate) => {
 		setBirthday(birthdate);
 		closeDatePicker();
 	}
 
+	/**
+	 * Responsible for conditionally rendering a date picker component based on the value of the showDatePicker state
+	 * variable.
+	 * @returns {JSX.Element|null} The date picker component wrapped in a <View> component if showDatePicker is true.
+	 * Returns null if showDatePicker is false.
+	 */
 	const renderDatePicker = () => {
 		if (showDatePicker) {
 			return (
@@ -190,6 +286,9 @@ const Register = ({ navigation }) => {
 		return null;
 	}
 
+	/**
+	 * renders the Register page.
+	 */
 	return (
 		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
 			<ScrollView>
@@ -374,6 +473,9 @@ const Register = ({ navigation }) => {
 
 export default Register;
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
 	container: { height: "100%", width: "100%" },
 	image: {

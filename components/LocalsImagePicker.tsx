@@ -111,7 +111,7 @@ const LocalsImagePicker: React.FC<LocalsImagePickerProps> = ({
 export default LocalsImagePicker;
 
 /**
- * Creates a StyleSheet object containing style definitions for component.
+ * Creates a StyleSheet object containing style definitions for the component.
  */
 const styles = StyleSheet.create({
 	buttonContainer: {
