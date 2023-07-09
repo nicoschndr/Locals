@@ -11,6 +11,8 @@ import {auth} from "../../firebase";
 /**
 * Renders the ChangePassword page with the provided props.
 * @param navigation The navigation object for navigating between screens.
+ * @param route An object representing the current route information provided by the React Navigation library or similar
+ * navigation framework.
 * @returns {JSX.Element} The rendered ChangePassword page.
 * @constructor
 */

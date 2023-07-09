@@ -4,8 +4,23 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth, firestore } from "../../firebase";
 import LocalsButton from "../../components/LocalsButton";
 
+/**
+* Renders the Onboarding page with the provided props.
+* @param navigation The navigation object for navigating between screens.
+* @returns {JSX.Element} The rendered Onboarding page.
+* @constructor
+*/
 const Onboarding = ({ navigation }) => {
+
+	/**
+	 * Identifier for the page the user is looking at.
+	 */
 	const [currentPage, setCurrentPage] = useState(0);
+
+	/**
+	 * The five Onboarding screens with their content.
+	 * @type {[{image: *, subtitle: string, id: number, title: string},{image: *, subtitle: string, id: number, title: string},{image: *, subtitle: string, id: number, title: string},{image: *, subtitle: string, id: number, title: string},{image: *, subtitle: string, id: number, title: string}]}
+	 */
 	const pages = [
 		{
 			id: 0,
@@ -43,12 +58,19 @@ const Onboarding = ({ navigation }) => {
 		},
 	];
 
+	/**
+	 * When the user clicks on the button which says "next", the page identifier is incremented.
+	 */
 	const handleNext = () => {
 		if (currentPage < pages.length - 1) {
 			setCurrentPage(currentPage + 1);
 		}
 	};
 
+	/**
+	 * Renders each Oboarding page with their content, meaning image and text.
+	 * @returns {unknown[]}
+	 */
 	const renderOnboardingPages = () => {
 		return pages.map((page, index) => (
 			<View style={styles.pageContainer}>
@@ -68,11 +90,19 @@ const Onboarding = ({ navigation }) => {
 		));
 	};
 
+	/**
+	 * When the Onboarding s complete, that is saved in the Async storage to make sure the user only sees the
+	 * onboarding once.
+	 * @returns {Promise<void>}
+	 */
 	const setStorage = async () => {
 		await AsyncStorage.setItem("ONBOARDED", "true");
 		navigation.navigate("Auth");
 	};
 
+	/**
+	 * renders the Onboarding page.
+	 */
 	return (
 		<View style={styles.container}>
 			<View style={styles.onboardingContainer}>{renderOnboardingPages()}</View>
@@ -101,6 +131,9 @@ const Onboarding = ({ navigation }) => {
 	);
 };
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

@@ -100,6 +100,7 @@ const Register = ({ navigation }) => {
 
 	/**
 	 * Upload image to firebase storage and return the image url.
+	 * @param uri The URI of the image to be uploaded.
 	 */
 	const uploadImage = async (uri) => {
 		setUploading(true);

@@ -10,32 +10,96 @@ import React, {useEffect, useState} from "react";
 import Register from "../Auth/Register";
 import {auth, firestore, storage} from "../../firebase";
 
+/**
+* Renders the Edit Profile page with the provided props.
+* @param navigation The navigation object for navigating between screens.
+ * @param route An object representing the current route information provided by the React Navigation library or similar
+ * navigation framework.
+* @returns {JSX.Element} The rendered EditProfile page.
+* @constructor
+*/
 const EditProfile = ({route, navigation}) => {
+
+    /**
+     * Executes functions once when the component mounts.
+     */
     useEffect(() => {
         getCurrentUserData();
     }, []);
 
 
+    /**
+     * The email that the user entered inn the specific input field.
+     */
     const [email, setEmail] = useState("");
+
+    /**
+     * The link to the picture the user picked from his gallery.
+     */
     const [imageUri, setImageUri] = useState("");
+
+    /**
+     * The link to firestore where the picture is saved.
+     */
     const [imageUrl, setImageUrl] = useState("");
     const [password, setPassword] = useState("");
+
+    /**
+     * The first name that the user entered inn the specific input field.
+     */
     const [firstName, setFirstName] = useState("");
+
+    /**
+     * The last name that the user entered inn the specific input field.
+     */
     const [lastName, setLastName] = useState("");
+
+    /**
+     * The birthday the user selected in the date picker.
+     */
     const [birthday, setBirthday] = useState("");
+
+    /**
+     * The mobile that the user entered inn the specific input field.
+     */
     const [mobile, setMobile] = useState("");
+
+    /**
+     * The address that the user entered inn the specific input field.
+     */
     const [address, setAddress] = useState("");
+
+    /**
+     * The username that the user entered inn the specific input field.
+     */
     const [username, setUsername] = useState("");
+
+    /**
+     * If true the picked picture is uploaded into firestore.
+     */
     const [uploading, setUploading] = useState(false);
     const [transferred, setTransferred] = useState(0);
     const [longitude, setLongitude] = useState(0);
     const [latitude, setLatitude] = useState(0);
+
+    /**
+     * true if the user clicked on the edit button on the Profile image. Then renders the image picker.
+     */
     const [clicked, setClicked] = useState(false);
+
+    /**
+     * The username of the user before changing.
+     */
     const [oldUsername, setOldUsername] = useState('');
 
     const [showPassword, setShowPassword] = useState(false);
     const [currentUser, setCurrentUser] = useState({});
 
+
+    /**
+     * This function  retrieves and updates the current user's data from Firestore in real-time. It listens for changes
+     * to the user's document and performs various operations based on the retrieved data.
+     */
     function getCurrentUserData() {
         firestore
             .collection("users")
@@ -54,6 +118,9 @@ const EditProfile = ({route, navigation}) => {
 
     }
 
+    /**
+     * Responsible for updating the user's profile information, including the username and profile image.
+     */
     async function change() {
         const isUsernameAvailable = await checkUsernameAvailability();
         if(imageUri !== ""){
@@ -81,6 +148,9 @@ const EditProfile = ({route, navigation}) => {
         navigation.navigate('Profile')
     }
 
+    /**
+     * Responsible for deleting the current user's account from the authentication system and firestore.
+     */
     async function deleteAccount() {
         await auth.currentUser.delete();
         await firestore
@@ -90,6 +160,10 @@ const EditProfile = ({route, navigation}) => {
         navigation.navigate('Login')
     }
 
+    /**
+     * Checks if the username the user entered is already used by another user.
+     * @returns {Promise<boolean>} true if it is used by another user, false if not.
+     */
     const checkUsernameAvailability = async () => {
         const snapshot = await firestore
             .collection("users")
@@ -105,6 +179,11 @@ const EditProfile = ({route, navigation}) => {
         }
     };
 
+
+    /**
+     * Upload image to firebase storage and return the image url.
+     * @param uri The URI of the image to be uploaded.
+     */
     const uploadImage = async (uri) => {
         setUploading(true);
         const response = await fetch(uri);
@@ -119,10 +198,18 @@ const EditProfile = ({route, navigation}) => {
         return url;
     };
 
+    /**
+     * When the user selects his birthday the data is saved in the birthday state variable.
+     * @param birthday
+     */
     const handleDateChange = (birthday) => {
         setBirthday(birthday);
     };
 
+    /**
+     * Responsible for displaying an alert, which will on confirm delete the user's account. Just to make sure the user
+     * really wants to do that.
+     */
     const showAlert = () => {
         Alert.alert(
             'Bestätigen',
@@ -142,8 +229,9 @@ const EditProfile = ({route, navigation}) => {
         );
     };
 
-
-
+    /**
+     * renders the EditProfile page.
+     */
     return (
         <ImageBackground
             source={require("../../assets/BackGround(h).png")}
@@ -306,6 +394,9 @@ const EditProfile = ({route, navigation}) => {
 
 export default EditProfile;
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
     container: {height: "100%", width: "100%"},
     image: {
