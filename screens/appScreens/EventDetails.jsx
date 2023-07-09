@@ -315,6 +315,11 @@ const EventDetails = ({ route, navigation }) => {
 			});
 	}
 
+	const getEventHost = async () => {
+		const userRef = await firestore.collection("users").doc(event.userId).get();
+		setUser(userRef.data());
+	};
+
 	const cancelAttendance = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -416,6 +421,7 @@ const EventDetails = ({ route, navigation }) => {
 	};
 
 	useEffect(() => {
+		getEventHost();
 		getCurrentUserData();
 		if (selectedEvent) {
 			const eventRef = firebase
@@ -651,7 +657,7 @@ const EventDetails = ({ route, navigation }) => {
 							>
 								<Image
 									style={{ width: 32, height: 32, borderRadius: 16 }}
-									source={{ uri: event.imageUrl }}
+									source={{ uri: user.imageUrl }}
 								/>
 								<Text style={styles.item}>{selectedEvent.creator}</Text>
 							</TouchableOpacity>
