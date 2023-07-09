@@ -10,7 +10,8 @@ import {
 	Button,
 	Pressable,
 	TouchableOpacity,
-	KeyboardAvoidingView, Platform,
+	KeyboardAvoidingView,
+	Platform,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,6 +29,14 @@ import DropDownPicker from "react-native-dropdown-picker";
 
 import { set } from "react-native-reanimated";
 
+/**
+ * Renders the EditPost screen which allows the user to edit an existing post.
+ * @param {object} navigation - Stack navigation object used to navigate between screens
+ * @param {object} route - Route object used to pass data between screens
+ * @returns {JSX.Element} - EditPost screen components
+ * @constructor
+ * @component
+ */
 const EditPost = ({ navigation, route }) => {
 	const windowWidth = Dimensions.get("window").width;
 	const windowHeight = Dimensions.get("window").height;
@@ -44,6 +53,18 @@ const EditPost = ({ navigation, route }) => {
 	const [category, setCategory] = useState([""]);
 
 	const [open, setOpen] = useState(false);
+	/**
+	 * Array of objects containing the category name and value
+	 * @type {object[]}
+	 * @property {string} label - Category name
+	 * @property {string} value - Category value
+	 * @constant
+	 * @default
+	 * @memberof EditPost
+	 * @inner
+	 * @private
+	 * @name items
+	 */
 	const [items, setItems] = useState([
 		{ label: "Sport", value: "sport" },
 		{ label: "Culture", value: "culture" },
@@ -67,6 +88,16 @@ const EditPost = ({ navigation, route }) => {
 		setDate(event.date);
 	}, [event]);
 
+	/**
+	 * Uploads the image to firebase storage
+	 * @param {string} uri - Image uri
+	 * @returns {string} - Image url
+	 * @memberof EditPost
+	 * @inner
+	 * @private
+	 * @async
+	 * @name uploadImage
+	 */
 	const uploadImage = async (uri) => {
 		setUploading(true);
 		const response = await fetch(uri);
@@ -81,6 +112,25 @@ const EditPost = ({ navigation, route }) => {
 		const url = await snapshot.ref.getDownloadURL();
 		return url;
 	};
+
+	/**
+	 * Updates the post in the firestore database
+	 * @memberof EditPost
+	 * @inner
+	 * @private
+	 * @async
+	 * @name updatePost
+	 * @returns {void}
+	 * @fires firestore
+	 * @fires storage
+	 * @fires auth
+	 * @fires alert
+	 * @fires navigation
+	 * @fires setTimeout
+	 * @fires console.log
+	 * @fires uploadImage
+	 * @fires firestore
+	 */
 
 	const updatePost = async () => {
 		// Upload image only if imageUri has been changed
@@ -129,9 +179,11 @@ const EditPost = ({ navigation, route }) => {
 		setDatePicker(false);
 	}
 
-
 	return (
-		<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : ""}>
+		<KeyboardAvoidingView
+			style={styles.container}
+			behavior={Platform.OS === "ios" ? "padding" : ""}
+		>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<TouchableOpacity
 					style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
@@ -244,7 +296,10 @@ const EditPost = ({ navigation, route }) => {
 						/> */}
 					</View>
 				</View>
-				<KeyboardAvoidingView style={styles.inputContainer} behavior={Platform.OS === "ios" ? "padding" : ""}>
+				<KeyboardAvoidingView
+					style={styles.inputContainer}
+					behavior={Platform.OS === "ios" ? "padding" : ""}
+				>
 					<Text>Category</Text>
 					<DropDownPicker
 						open={open}

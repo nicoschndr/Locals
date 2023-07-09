@@ -23,9 +23,27 @@ import LocalsEventDetails from "../../components/LocalsEventDetails";
 
 import LocalsButton from "../../components/LocalsButton";
 
+/**
+ * used to create an animated marker component.
+ * @type {Animated.AnimatedComponent<MapMarker>}
+ */
 const Marker = Animated.createAnimatedComponent(DefaultMarker);
 
 // TODO: auslagern in eigene Datei
+
+/**
+ * is used to render a single comment in a comment section.
+ * @param comment The comment data.
+ * @param replies An array of reply comments.
+ * @param goToComment A function to navigate to a specific comment.
+ * @param openReplyInput A function to open the reply input for a comment.
+ * @param highlighted Indicates whether the comment is currently highlighted.
+ * @param setHighlighted A function to set the highlighted state of the comment.
+ * @param likeComment A function to handle liking or unliking a comment.
+ * @param username The username of the current user.
+ * @returns {JSX.Element} the rendered comment section
+ * @constructor
+ */
 const Comment = ({
 	comment,
 	replies,
@@ -36,6 +54,10 @@ const Comment = ({
 	likeComment,
 	username,
 }) => {
+
+	/**
+	 * is used to handle liking or unliking a comment.
+	 */
 	const handleLikeComment = () => {
 		likeComment(comment.id);
 	};
@@ -84,31 +106,124 @@ const Comment = ({
 	);
 };
 
+/**
+ * Renders the LiveMap page with the provided props.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered LiveMap page.
+ * @constructor
+ */
 const Livemap = ({ navigation }) => {
+
+	/**
+	 * Represents the user's current location. It is updated with the user's location coordinates.
+	 */
 	const [location, setLocation] = useState(null);
+
+	/**
+	 * Represents the list of events. It is updated with an array of event objects.
+	 */
 	const [events, setEvents] = useState([]);
+
+	/**
+	 * Controls the visibility of a modal component.
+	 */
 	const [modalVisible, setModalVisible] = useState(false);
+
+	/**
+	 * Represents the currently selected event object. It contains information about the event, including the list of
+	 * attendees.
+	 */
 	const [selectedEvent, setSelectedEvent] = useState({ attendees: [] });
+
+	/**
+	 * Represents the list of comments associated with a particular event. It is updated with an array of comment
+	 * objects.
+	 */
 	const [comments, setComments] = useState([]);
+
+	/**
+	 * Represents the text content of a new comment to be posted.
+	 */
 	const [newCommentText, setNewCommentText] = useState("");
+
+	/**
+	 * Represents the comment object that the user wants to reply to. It is updated with the selected comment object.
+	 */
 	const [replyToComment, setReplyToComment] = useState(null);
+
+	/**
+	 * Represents the text content of a reply to a specific comment. It is updated with the reply text.
+	 */
 	const [replyToCommentText, setReplyToCommentText] = useState(null);
+
+	/**
+	 * Provides a reference to the ScrollView component. It can be used to scroll to a specific position within the
+	 * ScrollView.
+	 * @type {React.MutableRefObject<undefined>}
+	 */
 	const scrollViewRef = useRef();
 	const commentRefs = useRef({});
+
+	/**
+	 * Represents the positions of the comments within the ScrollView. It is updated with the positions of the comments
+	 * relative to the top of the ScrollView.
+	 */
 	const [commentPositions, setCommentPositions] = useState({});
+
+	/**
+	 * Controls the visibility of comments within the UI.
+	 */
 	const [showComments, setShowComments] = useState(false);
+
+	/**
+	 * Represents whether the user has liked the selected event.
+	 */
 	const [isEventLiked, setIsEventLiked] = useState(false);
+
+	/**
+	 * Represents the username of the user. It is updated with the user's username.
+	 */
 	const [username, setUsername] = useState(null);
+
+	/**
+	 * Represents the username of the user. It is updated with the user's username.
+	 */
 	const [impressions, setImpressions] = useState({});
+
+	/**
+	 * Stores the opacity value for marker animation. It is initialized as an Animated value with a value of 0.
+	 */
 	const [markerOpacity, setMarkerOpacity] = useState(new Animated.Value(0));
+
+	/**
+	 * Stores the radius value. It is initialized as 30.
+	 */
 	const [radius, setRadius] = useState(30);
+
+	/**
+	 *  Stores the value of the slider. It is initialized as 30.
+	 */
 	const [sliderValue, setSliderValue] = useState(30);
 	const [showRadius, setShowRadius] = useState(false);
+
+	/**
+	 * Indicates whether the slider is active or not. It is initialized as false.
+	 */
 	const [isSliderActive, setIsSliderActive] = useState(false);
 
+	/**
+	 * Stores the selected category. It is initialized as an empty string.
+	 */
 	const [category, setCategory] = useState("");
+
+	/**
+	 * Indicates whether the modal is visible or not. It is initialized as false.
+	 */
 	const [isModalVisible, setIsModalVisible] = useState(false);
 
+	/**
+	 * Stores the user data. It is initialized as an empty object.
+	 */
 	const [user, setUser] = useState({});
 
 	const handleCategorySelect = (value) => {
@@ -116,6 +231,10 @@ const Livemap = ({ navigation }) => {
 		setIsModalVisible(false);
 	};
 
+	/**
+	 * represents a date format configuration used to display dates in a short format.
+	 * @type {{month: string, year: string, day: string}}
+	 */
 	const shortDate = {
 		year: "numeric",
 		month: "numeric",
@@ -132,6 +251,10 @@ const Livemap = ({ navigation }) => {
 		}));
 	};
 
+	/**
+	 * is used to fetch and retrieve the username of the currently authenticated user.
+	 * @returns {Promise<any>}
+	 */
 	const getUsername = async () => {
 		const user = auth.currentUser;
 		if (!user) {
@@ -144,12 +267,21 @@ const Livemap = ({ navigation }) => {
 		return username;
 	};
 
+	/**
+	 * is triggered when an event is pressed or selected
+	 * @param event The event object representing the selected event.
+	 */
 	const handleEventPress = (event) => {
 		updateImpressions(event.id);
 		setSelectedEvent(event);
 		setModalVisible(true);
 	};
 
+	/**
+	 *  is used to update the impressions count for a specific event
+	 * @param eventId The unique identifier of the event for which to update the impressions count.
+	 * @returns {Promise<void>}
+	 */
 	const updateImpressions = async (eventId) => {
 		setImpressions((prevImpressions) => {
 			const eventImpressions = prevImpressions[eventId] || 0;
@@ -164,6 +296,10 @@ const Livemap = ({ navigation }) => {
 		});
 	};
 
+	/**
+	 *  is used to toggle the like status of the selected event
+	 * @returns {Promise<void>}
+	 */
 	const toggleEventLike = async () => {
 		const username = await getUsername();
 
@@ -178,6 +314,10 @@ const Livemap = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * is used to like the selected event
+	 * @returns {Promise<void>}
+	 */
 	const likeEvent = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -202,6 +342,10 @@ const Livemap = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * is used to unlike the selected event
+	 * @returns {Promise<void>}
+	 */
 	const unlikeEvent = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -225,6 +369,10 @@ const Livemap = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 *  is used to indicate that the user is attending the selected event.
+	 * @returns {Promise<void>}
+	 */
 	const attendEvent = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -250,6 +398,10 @@ const Livemap = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * is used to cancel the user's attendance for the selected event
+	 * @returns {Promise<void>}
+	 */
 	const cancelAttendance = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -274,6 +426,10 @@ const Livemap = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * is used to toggle the user's attendance status for the selected event
+	 * @returns {Promise<void>}
+	 */
 	const toggleAttendance = async () => {
 		const username = await getUsername();
 
@@ -288,7 +444,15 @@ const Livemap = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * asynchronous function that requests permission to access the device's location and sets up a location
+		 * subscription. The subscription updates the location state whenever a new location is received.
+		 */
 		(async () => {
 			let { status } = await Location.requestForegroundPermissionsAsync();
 			if (status !== "granted") {
@@ -313,11 +477,19 @@ const Livemap = ({ navigation }) => {
 		})();
 	}, []);
 
+	/**
+	 * is used to open the reply input for a comment.
+	 * @param commentId the id of the comment
+	 * @param commentText the content of the comment
+	 */
 	const openReplyInput = (commentId, commentText) => {
 		setReplyToComment(commentId);
 		setReplyToCommentText(commentText);
 	};
 
+	/**
+	 *  is used to open the maps application with the location of the selected event
+	 */
 	const openMapsApp = () => {
 		const { latitude, longitude } = selectedEvent;
 
@@ -329,6 +501,10 @@ const Livemap = ({ navigation }) => {
 		Linking.openURL(url);
 	};
 
+	/**
+	 * is used to add a comment to the selected event
+	 * @returns {Promise<void>}
+	 */
 	const addComment = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -354,6 +530,11 @@ const Livemap = ({ navigation }) => {
 		setReplyToComment(null);
 	};
 
+	/**
+	 * is used to like or unlike a comment within the selected event
+	 * @param commentId the id of the comment
+	 * @returns {Promise<void>}
+	 */
 	const likeComment = async (commentId) => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -383,7 +564,14 @@ const Livemap = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 *  is used to retrieve and display comments for the selected event.
+		 */
 		if (selectedEvent) {
 			const eventRef = firebase
 				.firestore()
@@ -407,6 +595,12 @@ const Livemap = ({ navigation }) => {
 		}
 	}, [selectedEvent]);
 
+	/**
+	 * is used to construct a tree-like structure for organizing comments and their replies. It takes an array of
+	 * comments as input and returns the comment tree structure.
+	 * @param comments the comments for an event
+	 * @returns {*[]}
+	 */
 	const buildCommentTree = (comments) => {
 		let commentMap = {};
 		let commentTree = [];
@@ -432,7 +626,15 @@ const Livemap = ({ navigation }) => {
 		return commentTree.reverse();
 	};
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * responsible for fetching and subscribing to real-time updates of events from the Firestore database
+		 * @returns {Promise<void>}
+		 */
 		const fetchEvents = async () => {
 			const username = await getUsername();
 			const eventsRef = firebase.firestore().collection("events");
@@ -464,6 +666,12 @@ const Livemap = ({ navigation }) => {
 		fetchEvents();
 	}, [radius]);
 
+	/**
+	 * component rendering function used to render a single comment item in a list. It takes an object with the item
+	 * property as its parameter.
+	 * @param item represents a comment object
+	 * @returns {JSX.Element}
+	 */
 	const renderComment = ({ item }) => (
 		<Comment
 			comment={item}
@@ -475,6 +683,10 @@ const Livemap = ({ navigation }) => {
 		/>
 	);
 
+	/**
+	 *  responsible for scrolling the comment list to a specific comment with the given commentId.
+	 * @param commentId the id of the comment
+	 */
 	const goToComment = (commentId) => {
 		const position = commentPositions[commentId];
 		if (position && scrollViewRef.current) {
@@ -482,6 +694,12 @@ const Livemap = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * is used to filter a list of events based on a given radius.
+	 * @param events all events
+	 * @param radius the given radius
+	 * @returns {*}
+	 */
 	const filterEventsByRadius = (events, radius) => {
 		if (!location) return events;
 
@@ -505,6 +723,15 @@ const Livemap = ({ navigation }) => {
 		return uniqueCategories;
 	}
 
+	/**
+	 *  is used to calculate the distance between two sets of latitude and longitude coordinates. It follows the
+	 *  Haversine formula to calculate the distance based on the curvature of the Earth
+	 * @param lat1 The latitude of the first point in decimal degrees.
+	 * @param lon1 The longitude of the first point in decimal degrees.
+	 * @param lat2 The latitude of the second point in decimal degrees.
+	 * @param lon2 The longitude of the second point in decimal degrees.
+	 * @returns {number} the distance
+	 */
 	const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
 		const R = 6371; // Radius der Erde in Kilometern
 		const dLat = deg2rad(lat2 - lat1); // deg2rad unten
@@ -520,10 +747,19 @@ const Livemap = ({ navigation }) => {
 		return d;
 	};
 
+	/**
+	 * used to convert degrees to radians
+	 * @param deg The value in degrees to be converted to radians.
+	 * @returns {number} the value in radians
+	 */
 	const deg2rad = (deg) => {
 		return deg * (Math.PI / 180);
 	};
 
+	/**
+	 * retrieves user data from the Firestore database based on the userId of a selected event
+	 * @returns {Promise<void>}
+	 */
 	const getUser = async () => {
 		const userRef = await firestore
 			.collection("users")
@@ -532,6 +768,9 @@ const Livemap = ({ navigation }) => {
 		setUser(userRef.data());
 	};
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
 		getUser();
 	}, []);
@@ -551,12 +790,23 @@ const Livemap = ({ navigation }) => {
 		Linking.openURL(url);
 	};
 
+	/**
+	 * the filtered events
+	 * @type {*}
+	 */
 	const filteredEventsByRadius = filterEventsByRadius(events, radius);
 
+	/**
+	 * is used to filter events based on the selected category.
+	 * @type {*}
+	 */
 	const filteredEvents = category
 		? filteredEventsByRadius.filter((event) => event.category === category)
 		: filteredEventsByRadius;
 
+	/**
+	 * renders the LiveMap page.
+	 */
 	return (
 		<View style={styles.container}>
 			{location && (
@@ -873,6 +1123,9 @@ const Livemap = ({ navigation }) => {
 	);
 };
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
 	sliderContainer: {
 		position: "absolute",
