@@ -79,7 +79,7 @@ We hope you enjoy using the app to discover new events and activities in your ar
 
 ## Publishing the App
 
-To publish the app to Expo Go, you can use the `expo-cli publish`` command. This will create a new release of the app and make it available to users who have the Expo Go app installed.
+To publish the app to Expo Go, you can use the `expo-cli publish` command. This will create a new release of the app and make it available to users who have the Expo Go app installed.
 
 To access the published app, follow these steps:
 
