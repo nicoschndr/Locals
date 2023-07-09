@@ -74,8 +74,6 @@ The app also includes several other screens that you can use to explore events a
 
 - **Profile**: This screen displays your user profile, where you can view your created events, your activity history, and access your friends list to message other users within the Locals community. You can also edit your profile information and settings.
 
-- **Post**: This screen allows you to create a post to share with other users and with the whole Locals community. After creating a post, you can view it on the Yell screen.
-
 - **Create Event**: This screen allows you to create an event to share with other users and with the whole Locals community. You can include text, images, and a location to your event, and choose whether to make it public or visible only to your friends. After creating an event, other users can find in on the map and the explore screen.
 
 - **Event Detail**: This screen displays detailed information about an event, including the event name, date, time, location, and a longer description. You can also see a map of the event location and get directions to the event using your device's maps app. If you're interested you can also leave a comment on the event to plan with other users or event related ask questions.
