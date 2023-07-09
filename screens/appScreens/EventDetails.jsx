@@ -1146,6 +1146,7 @@ const styles = StyleSheet.create({
 	commentsContainer: {
 		padding: 20,
 		marginBottom: 20,
+		marginTop: 40,
 	},
 	header: {
 		fontSize: 24,
