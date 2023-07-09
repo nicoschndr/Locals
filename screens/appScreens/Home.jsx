@@ -32,6 +32,7 @@ const HomeScreen = ({ navigation }) => {
 	const [nearbyEvents, setNearbyEvents] = useState([]);
 	const [radius, setRadius] = useState(20);
 	const [location, setLocation] = useState(null);
+	const [fullStorage, setFullStorage] = useState(false);
 
 	useEffect(() => {
 		const filteredEvents = filterEventsByRadius(events, radius);
@@ -88,7 +89,7 @@ const HomeScreen = ({ navigation }) => {
 				console.error("Error getting current location:", error);
 			}
 		};
-
+		checkTrafficAvailability();
 		getLocation();
 	}, []);
 
@@ -250,6 +251,29 @@ const HomeScreen = ({ navigation }) => {
 			});
 	};
 
+	const checkTrafficAvailability = async () => {
+		try {
+			// Verwende die Firebase Storage API, um Informationen über den verbleibenden Traffic abzurufen
+			const storageRef = firebase.storage().ref();
+
+			// Rufe die Nutzungsinformationen des Storage ab
+			const { usage } = await storageRef.child("/").getMetadata();
+
+			// Überprüfe, ob noch ausreichend Traffic vorhanden ist
+			const remainingTraffic = usage.limit - usage.size;
+			const threshold = 100000; // Schwellenwert für verbleibenden Traffic
+
+			if (remainingTraffic < threshold) {
+				setFullStorage(true);
+			}
+
+			return remainingTraffic > threshold;
+		} catch (error) {
+			console.error("Error checking traffic availability:", error);
+			return false;
+		}
+	};
+
 	return (
 		<View style={styles.container}>
 			<StatusBar barStyle="dark-content" />
@@ -355,7 +379,11 @@ const HomeScreen = ({ navigation }) => {
 								style={{
 									position: "relative",
 								}}
-								image={event.imageUrl}
+								image={
+									fullStorage
+										? event.imageUrl
+										: "https://source.unsplash.com/random/?" + event.category
+								}
 								slim
 							/>
 							{userFriendsEvents.includes(event) ? (
@@ -420,7 +448,11 @@ const HomeScreen = ({ navigation }) => {
 									})
 								}
 								style={{ marginRight: 24 }}
-								image={event.imageUrl}
+								image={
+									fullStorage
+										? event.imageUrl
+										: "https://source.unsplash.com/random/?" + event.category
+								}
 								small
 							/>
 						))}
@@ -447,7 +479,11 @@ const HomeScreen = ({ navigation }) => {
 									?.toDate()
 									?.toLocaleDateString("de-DE", shortDate)}
 								location={event.address}
-								image={event.imageUrl}
+								image={
+									fullStorage
+										? event.imageUrl
+										: "https://source.unsplash.com/random/?" + event.category
+								}
 								category={event.title}
 								onPress={() => navigation.navigate("EventDetails", { event })}
 								style={{ marginBottom: 24 }}

@@ -264,6 +264,8 @@ const PostEvent = ({ navigation }) => {
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps="always"
 			>
+				{uploading && <ActivityIndicator size="large" color="#fff" />}
+
 				<TouchableOpacity
 					style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
 					onPress={() => navigation.goBack()}
@@ -403,7 +405,6 @@ const PostEvent = ({ navigation }) => {
 				<TouchableOpacity style={styles.button} onPress={uploadPost}>
 					<Text style={{ color: "#FFFFFF" }}>Post Event</Text>
 				</TouchableOpacity>
-				{uploading && <ActivityIndicator size="large" color="#fff" />}
 			</ScrollView>
 		</KeyboardAvoidingView>
 	);
