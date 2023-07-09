@@ -8,6 +8,12 @@ import { Image } from "react-native";
 import {useFocusEffect} from "@react-navigation/native";
 import {Badge} from "react-native-elements";
 
+/**
+ * used to send a friend request from one user to another.
+ * @param senderUsername The username of the user sending the friend request.
+ * @param receiverUsername The username of the user receiving the friend request.
+ * @returns {Promise<void>}
+ */
 async function sendFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
 
@@ -28,7 +34,12 @@ async function sendFriendRequest(senderUsername, receiverUsername) {
 	}
 }
 
-
+/**
+ * used to accept a friend request from one user to another.
+ * @param senderUsername The username of the user who sent the friend request.
+ * @param receiverUsername The username of the user who received the friend request.
+ * @returns {Promise<void>}
+ */
 async function acceptFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
 
@@ -61,7 +72,12 @@ async function acceptFriendRequest(senderUsername, receiverUsername) {
 }
 
 
-
+/**
+ * used to reject a friend request from one user to another.
+ * @param senderUsername The username of the user who sent the friend request.
+ * @param receiverUsername The username of the user who received the friend request.
+ * @returns {Promise<void>}
+ */
 async function rejectFriendRequest(senderUsername, receiverUsername) {
 	const usersRef = firebase.firestore().collection('users');
 
@@ -86,19 +102,59 @@ async function rejectFriendRequest(senderUsername, receiverUsername) {
 	}
 }
 
+/**
+ * Renders the FriendList page with the provided props.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered FriendList page.
+ * @constructor
+ */
 function FriendList({navigation}) {
+
+	/**
+	 * The friends of the current user
+	 */
 	const [friends, setFriends] = useState([]);
+
+	/**
+	 * the friend requests of the current user.
+	 */
 	const [friendRequests, setFriendRequests] = useState([]);
+
+	/**
+	 * The text that is searched for
+	 */
 	const [searchTerm, setSearchTerm] = useState('');
+
+	/**
+	 * The results of the search with the dearch term.
+	 */
 	const [searchResults, setSearchResults] = useState([]);
+
+	/**
+	 * username of the current user.
+	 */
 	const [currentUsername, setCurrentUsername] = useState('');
+
+	/**
+	 * indicates if the modal is visible or not.
+	 */
 	const [modalVisible, setModalVisible] = useState(false);
 
+	/**
+	 * the data of all friend of the user.
+	 */
 	const [friendData, setFriendData] = useState({});
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
 		const user = firebase.auth().currentUser;
 
+		/**
+		 * sets up a Firestore realtime listener to listen for changes in a user document and update the corresponding
+		 * state variables accordingly.
+		 */
 		if (user) {
 			const userDocRef = firebase.firestore().collection('users').doc(user.uid);
 
@@ -134,13 +190,32 @@ function FriendList({navigation}) {
 		}
 	}, []);
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(
 		()=>{
 
 		}, []);
+
+	/**
+	 * used to cache all messages of chats where the current user is part of
+	 * @type {*[]}
+	 */
 	let messages = [];
+
+	/**
+	 * the unread messages of the current user
+	 */
 	const [unreadMessages, setUnreadMessages] = useState([]);
 
+	/**
+	 * This function  retrieves chat data for the User that is logged in from a Firebase Firestore collection.
+	 * It filters the chats based on the provided username and retrieves the chats where the user is not typing (Which
+	 * is every Chat where the user is part of). It also calculates the unread messages for the user.
+	 * @param username The username of the user for whom chat data is being retrieved
+	 * @returns {Promise<void>}
+	 */
 	const getChats = async (username) =>  {
 		try {
 			const chatRef = firebase.firestore().collection('chatRooms')
@@ -161,6 +236,10 @@ function FriendList({navigation}) {
 		}
 	}
 
+	/**
+	 * used to search for user with the search term
+	 * @returns {Promise<void>}
+	 */
 	const searchUsers = async () => {
 		const usersRef = firebase.firestore().collection('users');
 		const lowercaseSearchTerm = searchTerm.toLowerCase();
@@ -176,18 +255,31 @@ function FriendList({navigation}) {
 		setSearchResults(searchResults);
 	};
 
-
+	/**
+	 * if called the friend request modal is opened
+	 */
 	const handleOpenRequests = () => {
 		setModalVisible(true);
 	}
 
+	/**
+	 * if called the friend request modal is closed
+	 */
 	const handleCloseModal = () => {
 		setModalVisible(false);
 	}
 
+	/**
+	 * if the user clicks on a friend he is navigated to the chat with this friend.
+	 * @param friendUsername
+	 */
 	const handleFriendClick = (friendUsername) => {
 		navigation.navigate('Chat', { friendUsername: friendUsername, currentUsername: currentUsername });
 	}
+
+	/**
+	 * renders the FriendList page.
+	 */
 	return (
 		<View style={{flex: 1,
 			marginBottom: 80,}}>
