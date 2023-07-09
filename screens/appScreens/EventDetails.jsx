@@ -77,6 +77,15 @@ const Comment = ({
 	);
 };
 
+/**
+ * Renders the detailsscreen of an event with all its information
+ * @param {Object} route - The route object contains the event object
+ * @param {Object} navigation - The navigation object is used to navigate between screens
+ * @returns {JSX.Element} - Returns the event details screen
+ * @constructor
+ * @component
+ */
+
 const EventDetails = ({ route, navigation }) => {
 	const { event } = route.params;
 	const [selectedEvent, setSelectedEvent] = useState({ attendees: [] });
@@ -95,6 +104,15 @@ const EventDetails = ({ route, navigation }) => {
 	const [fullStorage, setFullStorage] = useState(false);
 	let rA = [];
 
+	/**
+	 * Gets the event by its id
+	 * @param {string} id - The id of the event
+	 * @returns {Promise<void>} - Returns the event object
+	 * @async
+	 * @function
+	 * @inner
+	 * @name getEventById
+	 */
 	const getEventById = async (id) => {
 		const user = auth.currentUser;
 		if (!user) {
@@ -164,6 +182,15 @@ const EventDetails = ({ route, navigation }) => {
 			});
 	};
 
+	/**
+	 * Gets the username of the current user
+	 * @returns {Promise<string>} - Returns the username of the current user
+	 * @async
+	 * @function
+	 * @inner
+	 * @name getUsername
+	 * @throws {Error} - User not authenticated
+	 */
 	const getUsername = async () => {
 		const user = auth.currentUser;
 		if (!user) {
@@ -176,6 +203,17 @@ const EventDetails = ({ route, navigation }) => {
 		return username;
 	};
 
+	/**
+	 * Updates the impressions of an event
+	 * @param {string} eventId - The id of the event
+	 * @returns {Promise<void>} - Returns the updated impressions
+	 * @async
+	 * @function
+	 * @inner
+	 * @name updateImpressions
+	 * @throws {Error} - User not authenticated
+	 * @throws {Error} - No such event
+	 */
 	const updateImpressions = async (eventId) => {
 		setImpressions((prevImpressions) => {
 			const eventImpressions = prevImpressions[eventId] || 0;
@@ -190,6 +228,14 @@ const EventDetails = ({ route, navigation }) => {
 		});
 	};
 
+	/**
+	 * Toggles the like of an event
+	 * @returns {Promise<void>} - Returns the updated event
+	 * @async
+	 * @function
+	 * @inner
+	 * @name toggleEventLike
+	 */
 	const toggleEventLike = async () => {
 		console.log(selectedEvent.likedBy);
 		const username = await getUsername();
@@ -204,6 +250,14 @@ const EventDetails = ({ route, navigation }) => {
 		}
 	};
 
+	/**
+	 * Likes an event
+	 * @returns {Promise<void>} - Returns the updated event
+	 * @async
+	 * @function
+	 * @inner
+	 * @name likeEvent
+	 */
 	const likeEvent = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -228,6 +282,14 @@ const EventDetails = ({ route, navigation }) => {
 		}
 	};
 
+	/**
+	 * Unlikes an event
+	 * @returns {Promise<void>} - Returns the updated event
+	 * @async
+	 * @function
+	 * @inner
+	 * @name unlikeEvent
+	 */
 	const unlikeEvent = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -251,6 +313,14 @@ const EventDetails = ({ route, navigation }) => {
 		}
 	};
 
+	/**
+	 * Attends an event
+	 * @returns {Promise<void>} - Returns the updated event
+	 * @async
+	 * @function
+	 * @inner
+	 * @name attendEvent
+	 */
 	const attendEvent = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -282,6 +352,18 @@ const EventDetails = ({ route, navigation }) => {
 		}
 	};
 
+	/**
+	 * Adds an activity to the recent activities of the current user
+	 * @param {string} category - The category of the activity
+	 * @param {string} action - The action of the activity
+	 * @param {string} uid - The id of the activity
+	 * @param {string} title - The title of the activity
+	 * @returns {Promise<void>} - Returns the updated recent activities
+	 * @async
+	 * @function
+	 * @inner
+	 * @name recentActivity
+	 */
 	function recentActivity(category, action, uid, title) {
 		currentUser.recentActivities.forEach((a) => rA.push(a));
 		if (rA.length === 3) {
@@ -307,6 +389,15 @@ const EventDetails = ({ route, navigation }) => {
 			});
 		}
 	}
+
+	/**
+	 * Gets the current user data
+	 * @returns {Promise<void>} - Returns the current user data
+	 * @async
+	 * @function
+	 * @inner
+	 * @name getCurrentUserData
+	 */
 	function getCurrentUserData() {
 		firestore
 			.collection("users")
@@ -316,11 +407,27 @@ const EventDetails = ({ route, navigation }) => {
 			});
 	}
 
+	/**
+	 * Gets the event host
+	 * @returns {Promise<void>} - Returns the event host
+	 * @async
+	 * @function
+	 * @inner
+	 * @name getEventHost
+	 */
 	const getEventHost = async () => {
 		const userRef = await firestore.collection("users").doc(event.userId).get();
 		setUser(userRef.data());
 	};
 
+	/**
+	 * Cancels the attendance of an event
+	 * @returns {Promise<void>} - Returns the updated event
+	 * @async
+	 * @function
+	 * @inner
+	 * @name cancelAttendance
+	 */
 	const cancelAttendance = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -345,6 +452,14 @@ const EventDetails = ({ route, navigation }) => {
 		}
 	};
 
+	/**
+	 * Toggles the attendance of an event
+	 * @returns {Promise<void>} - Returns the updated event
+	 * @async
+	 * @function
+	 * @inner
+	 * @name toggleAttendance
+	 */
 	const toggleAttendance = async () => {
 		const username = await getUsername();
 
@@ -359,6 +474,13 @@ const EventDetails = ({ route, navigation }) => {
 		}
 	};
 
+	/**
+	 * Opens the maps app
+	 * @returns {void}
+	 * @function
+	 * @inner
+	 * @name openMapsApp
+	 */
 	const openMapsApp = () => {
 		const { latitude, longitude } = selectedEvent;
 
@@ -370,6 +492,14 @@ const EventDetails = ({ route, navigation }) => {
 		Linking.openURL(url);
 	};
 
+	/**
+	 * Adds a comment to an event
+	 * @returns {Promise<void>} - Returns the updated event
+	 * @async
+	 * @function
+	 * @inner
+	 * @name addComment
+	 */
 	const addComment = async () => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -392,6 +522,15 @@ const EventDetails = ({ route, navigation }) => {
 		setReplyToComment(null);
 	};
 
+	/**
+	 * Likes a comment
+	 * @param {string} commentId - The id of the comment
+	 * @returns {Promise<void>} - Returns the updated comment
+	 * @async
+	 * @function
+	 * @inner
+	 * @name likeComment
+	 */
 	const likeComment = async (commentId) => {
 		const user = firebase.auth().currentUser;
 		const username = await getUsername();
@@ -447,6 +586,14 @@ const EventDetails = ({ route, navigation }) => {
 		}
 	}, []);
 
+	/**
+	 * Builds the comment tree
+	 * @param {Object} comments - The comments object
+	 * @returns {Object} - Returns the comment tree
+	 * @function
+	 * @inner
+	 * @name buildCommentTree
+	 */
 	const buildCommentTree = (comments) => {
 		let commentMap = {};
 		let commentTree = [];
@@ -472,6 +619,24 @@ const EventDetails = ({ route, navigation }) => {
 		return commentTree.reverse();
 	};
 
+	/**
+	 * Renders a comment
+	 * @param {Object} item - The comment object
+	 * @returns {JSX.Element} - Returns the comment
+	 * @function
+	 * @inner
+	 * @name renderComment
+	 * @component
+	 * @example
+	 * <Comment
+	 * 	comment={item}
+	 * 	replies={item.replies}
+	 * 	goToComment={goToComment}
+	 * 	openReplyInput={openReplyInput}
+	 * 	likeComment={likeComment}
+	 * 	username={username}
+	 * />
+	 */
 	const renderComment = ({ item }) => (
 		<Comment
 			comment={item}
@@ -501,8 +666,21 @@ const EventDetails = ({ route, navigation }) => {
 		setReplyToCommentText(commentText);
 	};
 
-	//TODO: attend to event from `LiveMap.jsx`
-
+	/**
+	 * Deletes an event
+	 * @returns {void}
+	 * @function
+	 * @inner
+	 * @name deleteEvent
+	 * @component
+	 * @example
+	 * <Ionicons
+	 * 	name="trash-outline"
+	 * 	size={24}
+	 * 	color="red"
+	 * 	onPress={deleteEvent}
+	 * />
+	 */
 	const deleteEvent = () => {
 		Alert.alert(
 			"Delete Event",
@@ -536,11 +714,6 @@ const EventDetails = ({ route, navigation }) => {
 		);
 	};
 
-	const getUser = async () => {
-		const userRef = await firestore.collection("users").doc(event.userId).get();
-		setUser(userRef.data());
-	};
-
 	useEffect(() => {
 		const fetchUsernameAndEvent = async () => {
 			await getEventById(route.params.event.id);
@@ -548,27 +721,14 @@ const EventDetails = ({ route, navigation }) => {
 		fetchUsernameAndEvent();
 	}, []);
 
-	const showActionSheet = () => {
-		const options = ["Edit", "Delete", "Cancel"];
-		const destructiveButtonIndex = 1;
-		const cancelButtonIndex = 2;
-
-		ActionSheetIOS.showActionSheetWithOptions(
-			{
-				options,
-				cancelButtonIndex,
-				destructiveButtonIndex,
-			},
-			(buttonIndex) => {
-				if (buttonIndex === 0) {
-					navigation.navigate("EditPost", { event });
-				} else if (buttonIndex === 1) {
-					deleteEvent();
-				}
-			}
-		);
-	};
-
+	/**
+	 * Checks the traffic availability
+	 * @returns {Promise<boolean>} - Returns true if there is enough traffic available
+	 * @async
+	 * @function
+	 * @inner
+	 * @name checkTrafficAvailability
+	 */
 	const checkTrafficAvailability = async () => {
 		try {
 			// Verwende die Firebase Storage API, um Informationen über den verbleibenden Traffic abzurufen

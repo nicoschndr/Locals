@@ -410,6 +410,9 @@ const HomeScreen = ({ navigation }) => {
 
 	/**
 	 * @property {Function} checkTrafficAvailability - A function that checks the traffic availability.
+	 * @description Checks the traffic availability.
+	 * @returns {Boolean} A boolean indicating whether the traffic is available.
+	 *
 	 */
 	const checkTrafficAvailability = async () => {
 		try {
