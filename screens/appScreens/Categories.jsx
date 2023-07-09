@@ -44,64 +44,40 @@ const Categories = ({ navigation, route }) => {
 	 */
 	const [activeEvents, setActiveEvents] = useState([]);
 	const [categories, setCategories] = useState([]);
+	const [events, setEvents] = useState([]);
+	const [fullStorage, setFullStorage] = useState(false);
 
 	/**
 	 * The category that was delivered as payload of the route.
 	 */
 	const { category } = route.params;
 
-	/**
-	 * create context for events to lower firebase traffic.
-	 */
-	const { setEvents } = useContext(FirestoreContext);
-
-	/**
-	 * context of all events.
-	 */
-	const { events } = useContext(FirestoreContext);
-
-	/**
-	 * filters all events by the delivered category and sets them in the state variable activeEvents.
-	 */
-	const filterEventsByCategory = () => {
-		const filteredEvents = events.filter(
-			(event) => event.category === category
-		);
-		setActiveEvents(filteredEvents);
-	};
-
-	/**
-	 * Executes functions once when the component mounts.
-	 */
-	useEffect(() => {
-		filterEventsByCategory();
-	}, []);
-
-	/**
-	 * Responsible for fetching and updating the list of events from the Firestore database based on a specified
-	 * condition.
-	 */
-	const updateEvents = () => {
+	const getEvents = () => {
 		firestore
 			.collection("events")
-			//where date >= today
-			.where("date", ">=", new Date())
+			.where("category", "==", category)
 			.orderBy("date", "asc")
 			.onSnapshot((snapshot) => {
 				const events = snapshot.docs.map((doc) => ({
 					id: doc.id,
 					...doc.data(),
 				}));
+				console.log(events); // Add this line
 				setEvents(events);
 			});
 	};
+
+	useEffect(() => {
+		getEvents();
+		checkTrafficAvailability();
+	}, []); //
 
 	/**
 	 * Sets refreshing true until the events are updated.
 	 */
 	const handleRefresh = () => {
 		setRefreshing(true);
-		updateEvents();
+		getEvents();
 		setRefreshing(false);
 	};
 
@@ -128,6 +104,29 @@ const Categories = ({ navigation, route }) => {
 	 * represents today's date.
 	 */
 	const today = new Date().toLocaleDateString("de-DE", options);
+
+	const checkTrafficAvailability = async () => {
+		try {
+			// Verwende die Firebase Storage API, um Informationen über den verbleibenden Traffic abzurufen
+			const storageRef = firebase.storage().ref();
+
+			// Rufe die Nutzungsinformationen des Storage ab
+			const { usage } = await storageRef.child("/").getMetadata();
+
+			// Überprüfe, ob noch ausreichend Traffic vorhanden ist
+			const remainingTraffic = usage.limit - usage.size;
+			const threshold = 100000; // Schwellenwert für verbleibenden Traffic
+
+			if (remainingTraffic < threshold) {
+				setFullStorage(true);
+			}
+
+			return remainingTraffic > threshold;
+		} catch (error) {
+			console.error("Error checking traffic availability:", error);
+			return false;
+		}
+	};
 
 	/**
 	 * renders the Categories page.
@@ -161,9 +160,7 @@ const Categories = ({ navigation, route }) => {
 					<AppleHeader
 						largeTitle={category}
 						dateTitle={today}
-						onPress={function (): void {
-							throw new Error("Function not implemented.");
-						}}
+						onPress={() => navigation.navigate("Home")}
 						imageSource={0}
 					/>
 				</View>
@@ -177,7 +174,12 @@ const Categories = ({ navigation, route }) => {
 			/> */}
 			<ScrollView
 				refreshControl={
-					<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={handleRefresh}
+						// Android offset for RefreshControl
+						progressViewOffset={10}
+					/>
 				}
 				showsHorizontalScrollIndicator={false}
 				showsVerticalScrollIndicator={false}
@@ -190,7 +192,7 @@ const Categories = ({ navigation, route }) => {
 					showsHorizontalScrollIndicator={false}
 					showsVerticalScrollIndicator={false}
 				>
-					{activeEvents.map((event) => (
+					{events.map((event) => (
 						<LocalsEventCard
 							key={event.id}
 							title={event.title}
@@ -198,11 +200,16 @@ const Categories = ({ navigation, route }) => {
 								?.toDate()
 								?.toLocaleDateString("de-DE", shortDate)}
 							location={event.address}
-							image={event.imageUrl}
+							image={
+								fullStorage
+									? event.imageUrl
+									: "https://source.unsplash.com/random/?" + event.category
+							}
 							category={event.title}
 							onPress={() => navigation.navigate("EventDetails", { event })}
-							style={{ marginRight: 24 }}
+							style={{ marginRight: 24, marginBottom: 24 }}
 							small={false}
+							slim={false}
 						/>
 					))}
 				</ScrollView>

@@ -8,33 +8,36 @@ import {
 	ActionSheetIOS,
 	Alert,
 	TouchableOpacity,
-	Linking, FlatList, TextInput, Button, Animated, Platform,
+	Linking,
+	FlatList,
+	TextInput,
+	Button,
+	Animated,
+	Platform,
 } from "react-native";
-import React, {useEffect, useRef, useState} from "react";
-import {AntDesign, Ionicons} from "@expo/vector-icons";
+import React, { useEffect, useRef, useState } from "react";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import LocalsButton from "../../components/LocalsButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-gesture-handler";
 import { auth, firebase, firestore } from "../../firebase";
 
 const Comment = ({
-					 comment,
-					 replies,
-					 goToComment,
-					 openReplyInput,
-					 highlighted,
-					 setHighlighted,
-					 likeComment,
-					 username,
-				 }) => {
+	comment,
+	replies,
+	goToComment,
+	openReplyInput,
+	highlighted,
+	setHighlighted,
+	likeComment,
+	username,
+}) => {
 	const handleLikeComment = () => {
 		likeComment(comment.id);
 	};
 
 	return (
-		<TouchableOpacity
-			style={styles.commentContainer}
-		>
+		<TouchableOpacity style={styles.commentContainer}>
 			<Text style={styles.commentText}>
 				{comment.username}: {comment.commentText}
 			</Text>
@@ -89,12 +92,10 @@ const EventDetails = ({ route, navigation }) => {
 	const [isEventLiked, setIsEventLiked] = useState(false);
 	const [username, setUsername] = useState(null);
 	const [currentUser, setCurrentUser] = useState({});
+	const [fullStorage, setFullStorage] = useState(false);
 	let rA = [];
 
-
-
 	const getEventById = async (id) => {
-
 		const user = auth.currentUser;
 		if (!user) {
 			throw new Error("User not authenticated");
@@ -103,7 +104,6 @@ const EventDetails = ({ route, navigation }) => {
 		const userDoc = await userRef.get();
 		const username = userDoc.data().username;
 		setUsername(username);
-
 
 		// Verbindung zur Firestore-Datenbank
 		const db = firebase.firestore();
@@ -128,45 +128,40 @@ const EventDetails = ({ route, navigation }) => {
 		const commentsSnapshot = await commentsRef.get();
 
 		// Konvertieren der Snapshot-Daten in ein einfacher zu handhabendes Format
-		const comments = commentsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+		const comments = commentsSnapshot.docs.map((doc) => ({
+			id: doc.id,
+			...doc.data(),
+		}));
 
 		// Hinzufügen der id und comments zum event Objekt
 		event = {
 			id: doc.id,
 			comments,
-			...event
+			...event,
 		};
 		event.isAttending = Array.isArray(event.attendees)
 			? event.attendees.includes(username)
 			: false;
 
-		setSelectedEvent(event)
+		setSelectedEvent(event);
 
-			console.log(true)
-			const eventRef3 = firebase
-				.firestore()
-				.collection("events")
-				.doc(event.id);
+		console.log(true);
+		const eventRef3 = firebase.firestore().collection("events").doc(event.id);
 
-
-			eventRef3
-				.collection("comments")
-				.orderBy("timestamp", "asc")
-				.onSnapshot((snapshot) => {
-					const commentData = snapshot.docs.map((doc) => {
-						return {
-							id: doc.id,
-							...doc.data(),
-						};
-
-					});
-
-
-					const commentTree = buildCommentTree(commentData);
-					setComments(commentTree);
+		eventRef3
+			.collection("comments")
+			.orderBy("timestamp", "asc")
+			.onSnapshot((snapshot) => {
+				const commentData = snapshot.docs.map((doc) => {
+					return {
+						id: doc.id,
+						...doc.data(),
+					};
 				});
 
-
+				const commentTree = buildCommentTree(commentData);
+				setComments(commentTree);
+			});
 	};
 
 	const getUsername = async () => {
@@ -196,7 +191,7 @@ const EventDetails = ({ route, navigation }) => {
 	};
 
 	const toggleEventLike = async () => {
-		console.log(selectedEvent.likedBy)
+		console.log(selectedEvent.likedBy);
 		const username = await getUsername();
 		if (
 			selectedEvent &&
@@ -278,39 +273,38 @@ const EventDetails = ({ route, navigation }) => {
 				groupSize: prevState.groupSize - 1,
 				isAttending: true,
 			}));
-			recentActivity('event', 'participate', selectedEvent.id, selectedEvent.title)
+			recentActivity(
+				"event",
+				"participate",
+				selectedEvent.id,
+				selectedEvent.title
+			);
 		}
 	};
 
 	function recentActivity(category, action, uid, title) {
-		currentUser.recentActivities.forEach((a) => rA.push(a))
+		currentUser.recentActivities.forEach((a) => rA.push(a));
 		if (rA.length === 3) {
-			rA.splice(0, 1)
+			rA.splice(0, 1);
 			rA.push({
 				category: category,
 				action: action,
 				title: title,
-				uid: uid
-			})
-			firestore
-				.collection('users')
-				.doc(auth.currentUser.uid)
-				.update({
-					recentActivities: rA
-				})
+				uid: uid,
+			});
+			firestore.collection("users").doc(auth.currentUser.uid).update({
+				recentActivities: rA,
+			});
 		} else {
 			rA.push({
 				category: category,
 				action: action,
 				title: title,
-				uid: uid
-			})
-			firestore
-				.collection('users')
-				.doc(auth.currentUser.uid)
-				.update({
-					recentActivities: rA
-				})
+				uid: uid,
+			});
+			firestore.collection("users").doc(auth.currentUser.uid).update({
+				recentActivities: rA,
+			});
 		}
 	}
 	function getCurrentUserData() {
@@ -321,6 +315,11 @@ const EventDetails = ({ route, navigation }) => {
 				setCurrentUser(snapshot.data());
 			});
 	}
+
+	const getEventHost = async () => {
+		const userRef = await firestore.collection("users").doc(event.userId).get();
+		setUser(userRef.data());
+	};
 
 	const cancelAttendance = async () => {
 		const user = firebase.auth().currentUser;
@@ -376,10 +375,7 @@ const EventDetails = ({ route, navigation }) => {
 		const username = await getUsername();
 
 		if (user && selectedEvent) {
-			const eventRef = firebase
-				.firestore()
-				.collection("events")
-				.doc(event.id);
+			const eventRef = firebase.firestore().collection("events").doc(event.id);
 			await updateImpressions(selectedEvent.id);
 
 			const commentData = {
@@ -426,13 +422,13 @@ const EventDetails = ({ route, navigation }) => {
 	};
 
 	useEffect(() => {
+		getEventHost();
 		getCurrentUserData();
 		if (selectedEvent) {
 			const eventRef = firebase
 				.firestore()
 				.collection("events")
 				.doc(selectedEvent.id);
-
 
 			eventRef
 				.collection("comments")
@@ -443,9 +439,7 @@ const EventDetails = ({ route, navigation }) => {
 							id: doc.id,
 							...doc.data(),
 						};
-
 					});
-
 
 					const commentTree = buildCommentTree(commentData);
 					setComments(commentTree);
@@ -478,7 +472,6 @@ const EventDetails = ({ route, navigation }) => {
 		return commentTree.reverse();
 	};
 
-
 	const renderComment = ({ item }) => (
 		<Comment
 			comment={item}
@@ -507,7 +500,6 @@ const EventDetails = ({ route, navigation }) => {
 		setReplyToComment(commentId);
 		setReplyToCommentText(commentText);
 	};
-
 
 	//TODO: attend to event from `LiveMap.jsx`
 
@@ -556,7 +548,6 @@ const EventDetails = ({ route, navigation }) => {
 		fetchUsernameAndEvent();
 	}, []);
 
-
 	const showActionSheet = () => {
 		const options = ["Edit", "Delete", "Cancel"];
 		const destructiveButtonIndex = 1;
@@ -578,6 +569,32 @@ const EventDetails = ({ route, navigation }) => {
 		);
 	};
 
+	const checkTrafficAvailability = async () => {
+		try {
+			// Verwende die Firebase Storage API, um Informationen über den verbleibenden Traffic abzurufen
+			const storageRef = firebase.storage().ref();
+
+			// Rufe die Nutzungsinformationen des Storage ab
+			const { usage } = await storageRef.child("/").getMetadata();
+
+			// Überprüfe, ob noch ausreichend Traffic vorhanden ist
+			const remainingTraffic = usage.limit - usage.size;
+			const threshold = 100000; // Schwellenwert für verbleibenden Traffic
+
+			if (remainingTraffic < threshold) {
+				setFullStorage(true);
+			}
+
+			return remainingTraffic > threshold;
+		} catch (error) {
+			console.error("Error checking traffic availability:", error);
+			return false;
+		}
+	};
+
+	useEffect(() => {
+		checkTrafficAvailability();
+	}, []);
 
 	return (
 		<View style={styles.container}>
@@ -586,22 +603,27 @@ const EventDetails = ({ route, navigation }) => {
 					<Image
 						style={{ width: "100%", height: 400 }}
 						// source={{ uri: event.imageUrl }}
-						source={{
-							uri:
-								"https://source.unsplash.com/random/?" + selectedEvent.title,
-						}}
+						image={
+							fullStorage
+								? event.imageUrl
+								: "https://source.unsplash.com/random/?" + event.category
+						}
 					/>
 					<Ionicons
 						name="chevron-down"
 						size={40}
 						color="#ec404b"
-						style={{ position: "absolute", top: 50, left: 20, }}
+						style={{ position: "absolute", top: 50, left: 20 }}
 						onPress={() => navigation.goBack()}
 					/>
 					<View style={{ padding: 20 }}>
 						<View style={styles.titleContainer}>
 							<View style={{ width: "100%" }}>
-								<Text style={styles.date}>{selectedEvent.date?.toDate()?.toLocaleDateString("de-DE", shortDate)}</Text>
+								<Text style={styles.date}>
+									{selectedEvent.date
+										?.toDate()
+										?.toLocaleDateString("de-DE", shortDate)}
+								</Text>
 
 								<View
 									style={{
@@ -630,7 +652,6 @@ const EventDetails = ({ route, navigation }) => {
 									)}
 								</View>
 							</View>
-
 						</View>
 					</View>
 					<View style={styles.infoContainer}>
@@ -656,18 +677,21 @@ const EventDetails = ({ route, navigation }) => {
 							</View>
 						)}
 
-						<View style={{ alignItems: "center" }}
-						>
+						<View style={{ alignItems: "center" }}>
 							<TouchableOpacity
 								onPress={() =>
-								navigation.navigate("Profile", {
-									uid: event.userId,
-								})
-							}
+									navigation.navigate("Profile", {
+										uid: event.userId,
+									})
+								}
 							>
 								<Image
 									style={{ width: 32, height: 32, borderRadius: 16 }}
-									source={{ uri: event.imageUrl }}
+									image={
+										fullStorage
+											? user.imageUrl
+											: "https://source.unsplash.com/random/?" + event.category
+									}
 								/>
 								<Text style={styles.item}>{selectedEvent.creator}</Text>
 							</TouchableOpacity>
@@ -690,9 +714,7 @@ const EventDetails = ({ route, navigation }) => {
 					{event.description && (
 						<View style={{ padding: 20 }}>
 							<Text style={styles.header}>About</Text>
-							<Text style={{ color: "grey" }}>
-								{event.description}
-							</Text>
+							<Text style={{ color: "grey" }}>{event.description}</Text>
 						</View>
 					)}
 					<View style={styles.commentsContainer}>
@@ -740,8 +762,7 @@ const EventDetails = ({ route, navigation }) => {
 				</View>
 			)}
 		</View>
-
-);
+	);
 };
 
 export default EventDetails;
@@ -770,7 +791,7 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		flex: 1,
-		marginBottom: 80
+		marginBottom: 80,
 	},
 	map: {
 		...StyleSheet.absoluteFillObject,

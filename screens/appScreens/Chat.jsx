@@ -1,8 +1,16 @@
-import React, {useState, useEffect, useRef, useLayoutEffect} from 'react';
-import {View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Button} from 'react-native';
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import {
+	View,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	StyleSheet,
+	ScrollView,
+	Button,
+} from "react-native";
 import { firebase } from "../../firebase";
-import {Ionicons, MaterialIcons} from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 /**
  * Renders the Chat page with the provided props.
@@ -26,7 +34,7 @@ export default function Chat({ route }) {
 	/**
 	 * The text message of the current user.
 	 */
-	const [message, setMessage] = useState('');
+	const [message, setMessage] = useState("");
 
 	/**
 	 * indicates if the other participant of the chat is currently typing.
@@ -70,11 +78,27 @@ export default function Chat({ route }) {
 		 * Defining the header of the navigation component.
 		 */
 		navigation.setOptions({
-			headerTitle: () => (<Text style={{marginLeft: 30, marginBottom: 15, fontSize: 20, fontWeight: "bold"}}>{friendUsername}</Text>),
-			headerLeft: () => (
-				<TouchableOpacity onPress={()=>{handleTyping(false); navigation.goBack()}}>
+			headerTitle: () => (
+				<Text
+					style={{
+						marginLeft: 30,
+						marginBottom: 15,
+						fontSize: 20,
+						fontWeight: "bold",
+					}}
+				>
+					{friendUsername}
+				</Text>
+			),
+			headerRight: () => (
+				<TouchableOpacity
+					onPress={() => {
+						handleTyping(false);
+						navigation.goBack();
+					}}
+				>
 					<Ionicons
-						style={{ marginRight:  - 90 }}
+						style={{ marginRight: -90 }}
 						name={"arrow-back-outline"}
 						size={40}
 					>
@@ -84,7 +108,10 @@ export default function Chat({ route }) {
 			),
 			headerRight: () => (
 				<Button
-					onPress={()=> {deleteChat(); handleTyping(false)}}
+					onPress={() => {
+						deleteChat();
+						handleTyping(false);
+					}}
 					title="Chat löschen"
 					color="#ff0000"
 				/>
@@ -108,8 +135,10 @@ export default function Chat({ route }) {
 		 * The firestore reference to the document where the chat data is saved.
 		 * @type {firebase.firestore.DocumentReference<firebase.firestore.DocumentData>}
 		 */
-		const chatRoomRef = firebase.firestore().collection('chatRooms')
-			.doc(sortedUsernames.join('_'));
+		const chatRoomRef = firebase
+			.firestore()
+			.collection("chatRooms")
+			.doc(sortedUsernames.join("_"));
 
 		/**
 		 * Responsible for retrieving and monitoring a chat room's data from the Firestore database.
@@ -121,7 +150,7 @@ export default function Chat({ route }) {
 				await chatRoomRef.set({
 					messages: [],
 					[`${currentUsername}_isTyping`]: false,
-					[`${friendUsername}_isTyping`]: false
+					[`${friendUsername}_isTyping`]: false,
 				});
 				chatRoomSnapshot = await chatRoomRef.get();
 			}
@@ -141,7 +170,6 @@ export default function Chat({ route }) {
 					}
 				}
 			});
-
 		};
 
 		getChatRoom();
@@ -151,11 +179,14 @@ export default function Chat({ route }) {
 	 * Executes functions once when the component mounts.
 	 */
 	useEffect(() => {
+
 		/**
 		 * Reference to a Firestore document that stores typing indicators for a specific user.
 		 * @type {firebase.firestore.DocumentReference<firebase.firestore.DocumentData>}
 		 */
-		const typingRef = firebase.firestore().collection('typingIndicators')
+		const typingRef = firebase
+			.firestore()
+			.collection("typingIndicators")
 			.doc(currentUsername);
 
 		/**
@@ -190,7 +221,10 @@ export default function Chat({ route }) {
 	 */
 	const deleteChat = async () => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
-		const chatRoomRef = firebase.firestore().collection('chatRooms').doc(sortedUsernames.join('_'));
+		const chatRoomRef = firebase
+			.firestore()
+			.collection("chatRooms")
+			.doc(sortedUsernames.join("_"));
 
 		const chatRoomSnapshot = await chatRoomRef.get();
 		if (chatRoomSnapshot.exists) {
@@ -199,15 +233,17 @@ export default function Chat({ route }) {
 				...msg,
 				deletedBy: {
 					...msg.deletedBy,
-					[currentUsername]: true
-				}
+					[currentUsername]: true,
+				},
 			}));
 
-			await chatRoomRef.update({
-				messages: updatedMessages,
-			}).catch((error) => {
-				console.log('Error setting deletedBy:', error);
-			});
+			await chatRoomRef
+				.update({
+					messages: updatedMessages,
+				})
+				.catch((error) => {
+					console.log("Error setting deletedBy:", error);
+				});
 		}
 	};
 
@@ -218,8 +254,10 @@ export default function Chat({ route }) {
 	 */
 	const sendMessage = async () => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
-		const chatRoomRef = firebase.firestore().collection('chatRooms')
-			.doc(sortedUsernames.join('_'));
+		const chatRoomRef = firebase
+			.firestore()
+			.collection("chatRooms")
+			.doc(sortedUsernames.join("_"));
 
 		const newMessage = {
 			sender: currentUsername,
@@ -244,14 +282,16 @@ export default function Chat({ route }) {
 				}
 				return msg;
 			});
-			await chatRoomRef.update({
-				messages: [...updatedMessages, newMessage],
-			}).catch((error) => {
-				console.log('Error sending message:', error);
-			});
+			await chatRoomRef
+				.update({
+					messages: [...updatedMessages, newMessage],
+				})
+				.catch((error) => {
+					console.log("Error sending message:", error);
+				});
 		}
 
-		setMessage('');
+		setMessage("");
 		setInputHeight(0);
 		inputRef.current.clear();
 		inputRef.current.blur();
@@ -267,7 +307,10 @@ export default function Chat({ route }) {
 	const markMessageAsRead = async (msg, index) => {
 		if (msg.sender !== currentUsername && !msg.readStatus) {
 			const sortedUsernames = [currentUsername, friendUsername].sort();
-			const chatRoomRef = firebase.firestore().collection('chatRooms').doc(sortedUsernames.join('_'));
+			const chatRoomRef = firebase
+				.firestore()
+				.collection("chatRooms")
+				.doc(sortedUsernames.join("_"));
 
 			const chatRoomSnapshot = await chatRoomRef.get();
 			if (chatRoomSnapshot.exists) {
@@ -278,18 +321,20 @@ export default function Chat({ route }) {
 							...currentMsg,
 							readStatus: true,
 							deletedBy: {
-								...currentMsg.deletedBy
-							}
+								...currentMsg.deletedBy,
+							},
 						};
 					}
 					return currentMsg;
 				});
 
-				await chatRoomRef.update({
-					messages: newMessages
-				}).catch((error) => {
-					console.log('Error updating read status:', error);
-				});
+				await chatRoomRef
+					.update({
+						messages: newMessages,
+					})
+					.catch((error) => {
+						console.log("Error updating read status:", error);
+					});
 			}
 		}
 	};
@@ -302,14 +347,18 @@ export default function Chat({ route }) {
 	 */
 	const handleTyping = async (isTyping) => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
-		const chatRoomRef = firebase.firestore().collection('chatRooms')
-			.doc(sortedUsernames.join('_'));
+		const chatRoomRef = firebase
+			.firestore()
+			.collection("chatRooms")
+			.doc(sortedUsernames.join("_"));
 
-		await chatRoomRef.update({
-			[`${currentUsername}_isTyping`]: isTyping
-		}).catch((error) => {
-			console.log('Error updating typing status:', error);
-		});
+		await chatRoomRef
+			.update({
+				[`${currentUsername}_isTyping`]: isTyping,
+			})
+			.catch((error) => {
+				console.log("Error updating typing status:", error);
+			});
 	};
 
 	/**
@@ -320,22 +369,29 @@ export default function Chat({ route }) {
 			<ScrollView
 				ref={scrollViewRef}
 				contentContainerStyle={styles.messageContainer}
-				onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+				onContentSizeChange={() =>
+					scrollViewRef.current.scrollToEnd({ animated: true })
+				}
 			>
 				{messages.map((msg, index) => {
-
 					markMessageAsRead(msg, index);
 
 					const messageBubbleStyle = [
 						styles.messageBubble,
-						msg.sender === currentUsername ? styles.rightMessage : styles.leftMessage,
+						msg.sender === currentUsername
+							? styles.rightMessage
+							: styles.leftMessage,
 					];
 
 					return (
 						<View key={index} style={messageBubbleStyle}>
 							<Text style={styles.messageText}>{msg.content}</Text>
-							<Text style={styles.timestampText}>{formatTimestamp(msg.timestamp)}</Text>
-							{msg.readStatus && msg.sender === currentUsername && <MaterialIcons name="done-all" size={16} color="#2a9df4" />}
+							<Text style={styles.timestampText}>
+								{formatTimestamp(msg.timestamp)}
+							</Text>
+							{msg.readStatus && msg.sender === currentUsername && (
+								<MaterialIcons name="done-all" size={16} color="#2a9df4" />
+							)}
 						</View>
 					);
 				})}
@@ -375,7 +431,7 @@ const formatTimestamp = (timestamp) => {
 	const date = new Date(timestamp);
 	const hours = date.getHours();
 	const minutes = date.getMinutes();
-	return `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+	return `${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
 };
 
 /**
@@ -384,7 +440,7 @@ const formatTimestamp = (timestamp) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		justifyContent: 'center',
+		justifyContent: "center",
 		marginBottom: 80,
 	},
 	messageContainer: {
@@ -399,13 +455,13 @@ const styles = StyleSheet.create({
 		paddingVertical: 8,
 	},
 	leftMessage: {
-		alignSelf: 'flex-start',
-		backgroundColor: '#505050',
+		alignSelf: "flex-start",
+		backgroundColor: "#505050",
 		borderBottomLeftRadius: 0,
 	},
 	rightMessage: {
-		alignSelf: 'flex-end',
-		backgroundColor: '#ec404b',
+		alignSelf: "flex-end",
+		backgroundColor: "#ec404b",
 		borderBottomRightRadius: 0,
 	},
 	noTopBorderRadius: {
@@ -413,17 +469,17 @@ const styles = StyleSheet.create({
 		borderTopRightRadius: 0,
 	},
 	messageText: {
-		color: 'white',
+		color: "white",
 	},
 	timestampText: {
 		fontSize: 12,
-		color: '#c2c2c2',
-		alignSelf: 'flex-end',
+		color: "#c2c2c2",
+		alignSelf: "flex-end",
 		marginTop: 4,
 	},
 	inputContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
+		flexDirection: "row",
+		alignItems: "center",
 		paddingHorizontal: 16,
 		paddingVertical: 8,
 	},
@@ -434,7 +490,7 @@ const styles = StyleSheet.create({
 		marginRight: 8,
 		paddingHorizontal: 8,
 		borderWidth: 1,
-		borderColor: 'gray',
+		borderColor: "gray",
 		borderRadius: 15,
 	},
 });

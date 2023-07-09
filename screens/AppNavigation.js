@@ -26,7 +26,7 @@ import Categories from "./appScreens/Categories";
 import ChangePassword from "./appScreens/ChangePassword";
 
 import { auth } from "../firebase";
-import { Dimensions, Text, View } from "react-native";
+import { Dimensions, Platform, Text, View } from "react-native";
 import { createDrawerNavigator, DrawerItem } from "@react-navigation/drawer";
 import Sidebar from "../components/Sidebar";
 import { HeaderBackButton } from "@react-navigation/stack";
@@ -266,11 +266,20 @@ function AppNavigation() {
 						component={MainStackNavigator}
 					/>
 					<Tab.Screen name="Map" component={MapNavigator} />
-
 					<Tab.Screen
 						options={{
 							unmountOnBlur: true,
 							tabBarLabel: () => <TabProfileIcon />,
+							tabBarInactiveTintColor: "#f3f3f3",
+							tabBarActiveTintColor: "#f3f3f3",
+							// transparent tabBarLabel
+							tabBarStyle: {
+								backgroundColor: "transparent",
+								borderTopWidth: 0,
+								position: "absolute",
+								bottom: 0,
+								height: 80,
+							},
 						}}
 						name="Me"
 						component={ProfileDrawerScreen}
