@@ -28,32 +28,119 @@ import LocalsImagePicker from "../../components/LocalsImagePicker";
 import DropDownPicker from "react-native-dropdown-picker";
 import { set } from "react-native-reanimated";
 
+/**
+ * Renders the PostEvent page with the provided props.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered PostEvent page.
+ * @constructor
+ */
 const PostEvent = ({ navigation }) => {
+
+    /**
+     * The width of the current device.
+     * @type {number}
+     */
 	const windowWidth = Dimensions.get("window").width;
+
+    /**
+     * indicates if the date picker is shown or not.
+     */
 	const [showDatePicker, setShowDatePicker] = useState(false);
 
+    /**
+     * The height of the current device.
+     * @type {number}
+     */
 	const windowHeight = Dimensions.get("window").height;
 	const [datePicker, setDatePicker] = useState(false);
-	const [date, setDate] = useState(new Date());
+
+    /**
+     * The date that was picked in the date picker.
+     */
+    const [date, setDate] = useState(new Date());
+
+    /**
+     * The link to the picture the user picked from his gallery.
+     */
 	const [imageUri, setImageUri] = useState("");
+
+    /**
+     * If true the picked picture is uploaded into firestore.
+     */
 	const [uploading, setUploading] = useState(false);
 	const [transferred, setTransferred] = useState(0);
+
+    /**
+     * The title of the event the user entered into specific input field.
+     */
 	const [title, setTitle] = useState("");
+
+    /**
+     * The address of the event the user entered into specific input field.
+     */
 	const [address, setAddress] = useState("");
+
+    /**
+     * The group size of the event the user entered into specific input field.
+     */
 	const [groupSize, setGroupSize] = useState("");
+
+    /**
+     * The description of the event the user entered into specific input field.
+     */
 	const [description, setDescription] = useState("");
+
+    /**
+     * The gender of the event the user entered into specific input field.
+     */
 	const [gender, setGender] = useState("");
+
+    /**
+     * The latitude of the event
+     */
 	const [latitude, setLatitude] = useState(0);
+
+    /**
+     * The longitude of the event
+     */
 	const [longitude, setLongitude] = useState(0);
 	const [showMap, setShowMap] = useState(false);
+
+    /**
+     * indicates if an event is advertised
+     */
 	const [advertised, setAdvertised] = useState(false);
+
+    /**
+     * indicates if the selection of the event category is visible.
+     */
 	const [open, setOpen] = useState(false);
+
+    /**
+     * The category of the event the user picked (can be multiple)
+     */
 	const [category, setCategory] = useState(null);
 	const [location, setLocation] = useState(null);
-	const [currentUser, setCurrentUser] = useState({});
-	const [createdEvent, setCreatedEvent] = useState({});
-	let rA = [];
+    /**
+     * The user tha is currently logged in.
+     */
+    const [currentUser, setCurrentUser] = useState({});
 
+    /**
+     * The event that is being created.
+     */
+    const [createdEvent, setCreatedEvent] = useState({});
+
+    /**
+     * used to cache the recent activities of the current user.
+     * @type {*[]}
+     */
+    let rA = [];
+
+    /**
+     * represents a list of items with their corresponding labels and values. The setItems function is used to
+     * update the items state.
+     */
 	const [items, setItems] = useState([
 		{ label: "Sport", value: "sport" },
 		{ label: "Culture", value: "culture" },
@@ -62,11 +149,20 @@ const PostEvent = ({ navigation }) => {
 		{ label: "Party", value: "party" },
 	]);
 
+    /**
+     * Executes functions once when the component mounts.
+     */
 	useEffect(() => {
 		requestLocationPermission();
 		getCurrentUserData();
 	}, []);
 
+
+    /**
+     * requesting the user's permission to access their fine location and, if granted, calling the getCurrentLocation
+     * function to retrieve the current location.
+     * @returns {Promise<void>}
+     */
 	const requestLocationPermission = async () => {
 		if (Platform.OS === "android") {
 			try {
@@ -86,6 +182,11 @@ const PostEvent = ({ navigation }) => {
 		}
 	};
 
+
+    /**
+     * Gets the current location of the user.
+     * @returns {Promise<void>}
+     */
 	const getCurrentLocation = async () => {
 		try {
 			let { status } = await Location.requestForegroundPermissionsAsync();
@@ -104,6 +205,11 @@ const PostEvent = ({ navigation }) => {
 		}
 	};
 
+
+    /**
+     * Upload image to firebase storage and return the image url.
+     * @param uri The URI of the image to be uploaded.
+     */
 	const uploadImage = async (uri) => {
 		setUploading(true);
 		const response = await fetch(uri);
@@ -134,6 +240,11 @@ const PostEvent = ({ navigation }) => {
 			return false;
 		}
 	};
+
+    /**
+     * used to upload a post to the "events" collection in Firestore.
+     * @returns {Promise<void>}
+     */
 	const uploadPost = async () => {
 		const imageUrl = await uploadImage(imageUri);
 
@@ -174,6 +285,10 @@ const PostEvent = ({ navigation }) => {
 			});
 	};
 
+    /**
+     * This function  retrieves and updates the current user's data from Firestore in real-time. It listens for changes
+     * to the user's document and performs various operations based on the retrieved data.
+     */
 	function getCurrentUserData() {
 		firestore
 			.collection("users")
@@ -184,6 +299,10 @@ const PostEvent = ({ navigation }) => {
 			});
 	}
 
+    /**
+     * used to get a specific event by searching for its title.
+     * @param title the title of the event
+     */
 	function getEventByTitle(title) {
 		firestore
 			.collection("events")
@@ -199,6 +318,15 @@ const PostEvent = ({ navigation }) => {
 			});
 	}
 
+
+    /**
+     * responsible for adding a recent activity of the user. If there would be more than three, the oldest is removed
+     * from the list.
+     * @param category The category of the activity (event or user)
+     * @param action The action the user took (in case of the postEvent page: create)
+     * @param uid The uid of the event
+     * @param title the title of the event
+     */
 	function recentActivity(category, action, uid, title) {
 		console.log(title);
 		currentUser.recentActivities.forEach((a) => rA.push(a));
@@ -227,19 +355,33 @@ const PostEvent = ({ navigation }) => {
 		setCreatedEvent({});
 	}
 
+    /**
+     * if called the date picker is shown
+     */
 	const openDatePicker = () => {
 		setShowDatePicker(true);
 	};
 
+    /**
+     * if called the date picker is closed
+     */
 	const closeDatePicker = () => {
 		setShowDatePicker(false);
 	};
 
+    /**
+     * updates the date when the user selected one and then closes the date pciker.
+     * @param date the selected date of the event
+     */
 	const onDateSelected = (date) => {
 		setDate(date);
 		closeDatePicker();
 	};
 
+    /**
+     * renders the date picker
+     * @returns {JSX.Element|null}
+     */
 	const renderDatePicker = () => {
 		if (showDatePicker) {
 			return (
@@ -413,6 +555,9 @@ const PostEvent = ({ navigation }) => {
 
 export default PostEvent;
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
 	addressInput: {
 		backgroundColor: "transparent",

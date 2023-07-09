@@ -16,16 +16,57 @@ import { useNavigation } from "@react-navigation/native";
 import LocalsTextInput from "../../components/LocalsTextInput";
 import { Ionicons } from "@expo/vector-icons";
 
+/**
+ * Renders the Settings page.
+ * @returns {JSX.Element} The rendered settings page.
+ * @constructor
+ */
 const Settings = () => {
+
+	/**
+	 * navigation prop provided by React Navigation that allows navigating between screens and accessing
+	 * navigation-related functionality.
+	 * @type {NavigationProp<ReactNavigation.RootParamList>}
+	 */
 	const navigation = useNavigation();
+
+	/**
+	 * old password of the user.
+	 */
 	const [oldPassword, setOldPassword] = useState("");
+
+	/**
+	 * new password of the user.
+	 */
 	const [newPassword, setNewPassword] = useState("");
+
+	/**
+	 * confirmation of the new password.
+	 */
 	const [confirmPassword, setConfirmPassword] = useState("");
+
+	/**
+	 * indicates if the modal is visible or not.
+	 */
 	const [modalVisible, setModalVisible] = useState(false);
 
+	/**
+	 * Width of the current device in px.
+	 * @type {number}
+	 */
 	const windowWidth = Dimensions.get("window").width;
+
+	/**
+	 * Height of the current device in px.
+	 * @type {number}
+	 */
 	const windowHeight = Dimensions.get("window").height;
 
+	/**
+	 * responsible for changing the user's password by reauthenticating the user and updating their password with a
+	 * new one.
+	 * @returns {Promise<void>}
+	 */
 	const changePassword = async () => {
 		// Überprüfen Sie, ob das neue Passwort und das Bestätigungspasswort gleich sind
 		if (newPassword !== confirmPassword) {
@@ -52,6 +93,9 @@ const Settings = () => {
 		}
 	};
 
+	/**
+	 * Responsible for logging out the user by signing them out of the current session.
+	 */
 	const logout = () => {
 		auth
 			.signOut()
@@ -63,6 +107,10 @@ const Settings = () => {
 			});
 	};
 
+	/**
+	 * Responsible for deleting the user's account, including their data and associated image.
+	 * @returns {Promise<void>}
+	 */
 	const deleteAccount = async () => {
 		const imageUrl = await firebase
 			.firestore()
@@ -92,6 +140,10 @@ const Settings = () => {
 			});
 	};
 
+	/**
+	 * Responsible for displaying a prompt to confirm the deletion of the user's account.
+	 * @constructor
+	 */
 	const DeleteAccountPrompt = () => {
 		Alert.alert(
 			"Account löschen",
@@ -112,6 +164,9 @@ const Settings = () => {
 		);
 	};
 
+	/**
+	 * renders the Settings page.
+	 */
 	return (
 		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
 			<TouchableOpacity
@@ -190,6 +245,9 @@ const Settings = () => {
 export default Settings;
 
 // use styles (styles.textContainer for example) to extract and separate the styling from the render function
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
 	textContainer: {
 		margin: 16,

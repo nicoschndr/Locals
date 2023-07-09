@@ -11,6 +11,9 @@ import { AppleCard } from "react-native-apple-card-views";
 import FastImage, { Source } from "react-native-fast-image";
 import { Asset } from "expo-asset";
 
+/**
+ * This interface defines the props (properties) accepted by the LocalsEventCard component.
+ */
 interface LocalsEventCardProps {
 	title: string;
 	date: string;
@@ -24,6 +27,12 @@ interface LocalsEventCardProps {
 	profile?: boolean;
 }
 
+/**
+ * This function defines a function component LocalsEventCard that renders a LocalsEventCard component based on the
+ * provided props.
+ * @param props Object containing various configuration properties for the LocalsEventCard.
+ * @constructor
+ */
 const LocalsEventCard = (props: LocalsEventCardProps) => {
 	// const image = props.category
 	// 	? {
@@ -42,6 +51,10 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 	// 	Image.prefetch(props.image);
 	// }, []);
 
+	/**
+	 * This function defines a function imageSource that generates an image source object based on the provided props.
+	 * It takes an object props as an argument, which can have two properties: image and category.
+	 */
 	const image = props.image
 		? {
 				uri: "https://source.unsplash.com/random/?" + props.category,
@@ -50,6 +63,9 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 				uri: props.image || "https://source.unsplash.com/random/?city,night",
 		  } as ImageSourcePropType);
 
+	/**
+	 * Renders an AppleCard component with the provided props.
+	 */
 	return (
 		<AppleCard
 			source={{ uri: props.image }}
@@ -93,6 +109,9 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 	);
 };
 
+/**
+ * Creates a StyleSheet object containing style definitions for the component.
+ */
 const styles = StyleSheet.create({
 	container: {
 		flexDirection: "row",

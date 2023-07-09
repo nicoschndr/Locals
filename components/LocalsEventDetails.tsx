@@ -12,6 +12,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { firestore } from "../firebase";
 
+/**
+ * This interface defines the props (properties) accepted by the LocalsEventDetails component.
+ */
 interface LocalsEventDetailsProps {
 	event?: any;
 	onBackPress: () => void;
@@ -21,13 +24,30 @@ interface LocalsEventDetailsProps {
 //TODO: like event from `LiveMap.jsx`
 //TODO: comment to event from `LiveMap.jsx`
 
+/**
+ * Renders a LocalsEventDetails component with the provided props.
+ * @param event The event details object.
+ * @param onBackPress The function to be called when the back button is pressed.
+ * @constructor
+ */
 const LocalsEventDetails: React.FC<LocalsEventDetailsProps> = ({
 	event,
 	onBackPress,
 }) => {
+
+	/**
+	 * This state variable represents the User.
+	 */
 	const [user, setUser] = useState({});
+
+	/**
+	 * The placeholder URL for the event image. It is generated based on the event title.
+	 */
 	const PLACEHOLDER = "https://source.unsplash.com/random/?" + event.title;
 
+	/**
+	 * This function opens the map with the location of the event.
+	 */
 	const openMaps = () => {
 		const scheme = Platform.select({
 			ios: "maps:0,0?q=",
@@ -43,14 +63,25 @@ const LocalsEventDetails: React.FC<LocalsEventDetailsProps> = ({
 		Linking.openURL(url);
 	};
 
+	/**
+	 * Retrieves the user document from the "users" collection in Firestore using the event's userId.
+	 * Sets the retrieved user data using the setUser function.
+	 */
 	const getUser = async () => {
 		const userRef = await firestore.collection("users").doc(event.userId).get();
 		setUser(userRef.data());
 	};
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
 		getUser();
 	}, []);
+
+	/**
+	 * Renders the LocalsEventDetails component.
+	 */
 	return (
 		<ScrollView style={{ height: "100%" }}>
 			<Image
@@ -137,6 +168,9 @@ const LocalsEventDetails: React.FC<LocalsEventDetailsProps> = ({
 	);
 };
 
+/**
+ * Creates a StyleSheet object containing style definitions for the component.
+ */
 const styles = StyleSheet.create({
 	date: {
 		fontSize: 16,

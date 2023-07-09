@@ -14,6 +14,12 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { firebase, firestore, auth } from "../../firebase";
 import * as Location from "expo-location";
 
+/**
+ * used to format a timestamp into a localized string representation.
+ * @param timestamp The timestamp object to be formatted.
+ * @returns {string} returns a formatted string representation of the timestamp. If the timestamp parameter is not valid
+ * or does not have a toDate method, an empty string is returned.
+ */
 const formatTimestamp = (timestamp) => {
 	if (timestamp && timestamp.toDate) {
 		const date = timestamp.toDate();
@@ -42,24 +48,82 @@ const formatTimestamp = (timestamp) => {
 	}
 };
 
+/**
+ * Renders the Yelling page with the provided props.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered Yelling page.
+ * @constructor
+ */
 const Yell = ({ navigation }) => {
+
+	/**
+	 * the text input of the user
+	 */
 	const [textInput, setTextInput] = useState("");
+
+	/**
+	 * indicates if the modal is visible or not
+	 */
 	const [modalVisible, setModalVisible] = useState(false);
+
+	/**
+	 * indicates if the select modal is visible or not
+	 */
 	const [modalSelectVisible, setModalSelectVisible] = useState(false);
 
+	/**
+	 * the username of the current user.
+	 */
 	const [username, setUsername] = useState("");
+
+	/**
+	 * the posts of the current user.
+	 */
 	const [posts, setPosts] = useState([]);
+
+	/**
+	 * the selected background color of the post
+	 */
 	const [selectedColor, setSelectedColor] = useState("white");
+
+	/**
+	 * the post that is clicked on
+	 */
 	const [selectedPost, setSelectedPost] = useState(null);
+
+	/**
+	 * the text of a comment
+	 */
 	const [commentInput, setCommentInput] = useState("");
+
+	/**
+	 * comments of a post
+	 */
 	const [comments, setComments] = useState([]);
+
+	/**
+	 * the height of the text input
+	 */
 	const [inputHeight, setInputHeight] = useState(0);
 
+	/**
+	 * event handler used to handle the click event on a post.
+	 * @param post The post object that was clicked.
+	 */
 	const handlePostClick = (post) => {
 		setSelectedPost(post);
 		setModalSelectVisible(true);
 	};
+
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 *  sets up a Firestore realtime listener to listen for changes in the comments collection of a selected post
+		 *  and update the comments state variable
+		 */
 		if (selectedPost) {
 			const unsubscribe = firestore
 				.collection("posts")
@@ -79,6 +143,10 @@ const Yell = ({ navigation }) => {
 		}
 	}, [selectedPost]);
 
+
+	/**
+	 * used to handle the submission of a comment on a selected post.
+	 */
 	const handleSubmitComment = () => {
 		if (commentInput.trim() !== "") {
 			const comment = {
@@ -101,6 +169,10 @@ const Yell = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * used to handle the reporting of a post.
+	 * @param postId The ID of the post to be reported.
+	 */
 	const handleReport = (postId) => {
 		firestore
 			.collection("posts")
@@ -134,6 +206,10 @@ const Yell = ({ navigation }) => {
 			});
 	};
 
+	/**
+	 * used to report a specific post.
+	 * @param postId The ID of the post to be reported.
+	 */
 	const reportPost = (postId) => {
 		const reportData = {
 			username: username,
@@ -155,7 +231,15 @@ const Yell = ({ navigation }) => {
 			});
 	};
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * sets up an onAuthStateChanged listener to listen for changes in the user authentication state.
+		 * @type {Unsubscribe}
+		 */
 		const unsubscribe = auth.onAuthStateChanged((user) => {
 			if (user) {
 				firestore
@@ -179,7 +263,17 @@ const Yell = ({ navigation }) => {
 		return () => unsubscribe();
 	}, []);
 
+
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * sets up a Firestore realtime listener to listen for changes in the "posts" collection and update the posts
+		 * state variable accordingly.
+		 * @type {() => void}
+		 */
 		const unsubscribe = firestore
 			.collection("posts")
 			.orderBy("timestamp", "desc")
@@ -195,6 +289,10 @@ const Yell = ({ navigation }) => {
 		return () => unsubscribe();
 	}, []);
 
+	/**
+	 * used to submit a text post to the Firestore "posts" collection.
+	 * @returns {Promise<void>}
+	 */
 	const submitText = async () => {
 		if (textInput.trim() !== "") {
 			try {
@@ -232,6 +330,11 @@ const Yell = ({ navigation }) => {
 		}
 	};
 
+	/**
+	 * array of objects representing a predefined color palette.
+	 * @type {[{color: string, name: string},{color: string, name: string},{color: string, name: string},
+	 * {color: string, name: string},{color: string, name: string},null,null,null,null,null,null,null,null,null]}
+	 */
 	const colorPalette = [
 		{ name: "Crimson", color: "#DC143C" },
 		{ name: "DarkRed", color: "#8B0000" },
@@ -249,10 +352,18 @@ const Yell = ({ navigation }) => {
 		{ name: "MediumVioletRed", color: "#C71585" },
 	];
 
+	/**
+	 * used to handle the selection of a color from the
+	 * @param color The selected color.
+	 */
 	const handleColorSelection = (color) => {
 		setSelectedColor(color);
 	};
 
+	/**
+	 * used to handle the liking or unliking of a post.
+	 * @param postId The ID of the post.
+	 */
 	const handleLike = (postId) => {
 		const postRef = firestore.collection("posts").doc(postId);
 
@@ -271,11 +382,24 @@ const Yell = ({ navigation }) => {
 			}
 		});
 	};
+
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * used to select a random color from the colorPalette array.
+		 * @type {string}
+		 */
 		const randomColor =
 			colorPalette[Math.floor(Math.random() * colorPalette.length)].color;
 		setSelectedColor(randomColor);
 	}, [modalVisible]);
+
+	/**
+	 * renders the Yelling page.
+	 */
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -513,6 +637,9 @@ const Yell = ({ navigation }) => {
 	);
 };
 
+/**
+ * Creates a StyleSheet object containing style definitions for component.
+ */
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

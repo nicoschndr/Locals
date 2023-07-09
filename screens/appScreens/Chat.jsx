@@ -12,18 +12,71 @@ import { firebase } from "../../firebase";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
+/**
+ * Renders the Chat page with the provided props.
+ * @param route The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered Chat page.
+ * @constructor
+ */
 export default function Chat({ route }) {
+
+	/**
+	 * Used to handle navigation actions within a component.
+	 * @type {NavigationProp<ReactNavigation.RootParamList>}
+	 */
 	const navigation = useNavigation();
+
+	/**
+	 * The usernames of both participants of the chat.
+	 */
 	const { friendUsername, currentUsername } = route.params;
+
+	/**
+	 * The text message of the current user.
+	 */
 	const [message, setMessage] = useState("");
+
+	/**
+	 * indicates if the other participant of the chat is currently typing.
+	 */
 	const [friendIsTyping, setFriendIsTyping] = useState(false);
+
+	/**
+	 * All messages of one chat.
+	 */
 	const [messages, setMessages] = useState([]);
+
+	/**
+	 * Used to reference an input element.
+	 * @type {React.MutableRefObject<null>}
+	 */
 	const inputRef = useRef(null);
+
+	/**
+	 * height of the text input for writing a message.
+	 */
 	const [inputHeight, setInputHeight] = useState(0);
+
+	/**
+	 * Used to reference the scroll view component.
+	 * @type {React.MutableRefObject<null>}
+	 */
 	const scrollViewRef = useRef(null);
+
+	/**
+	 * indicates if a message is deleted by a user.
+	 */
 	const [deletedBy, setDeletedBy] = useState({});
 
+
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * Defining the header of the navigation component.
+		 */
 		navigation.setOptions({
 			headerTitle: () => (
 				<Text
@@ -66,13 +119,31 @@ export default function Chat({ route }) {
 		});
 	}, [friendUsername, navigation, deleteChat]);
 
+
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * The usernames of the chatters in alphabetical order.
+		 * @type {*[]}
+		 */
 		const sortedUsernames = [currentUsername, friendUsername].sort();
+
+		/**
+		 * The firestore reference to the document where the chat data is saved.
+		 * @type {firebase.firestore.DocumentReference<firebase.firestore.DocumentData>}
+		 */
 		const chatRoomRef = firebase
 			.firestore()
 			.collection("chatRooms")
 			.doc(sortedUsernames.join("_"));
 
+		/**
+		 * Responsible for retrieving and monitoring a chat room's data from the Firestore database.
+		 * @returns {Promise<void>}
+		 */
 		const getChatRoom = async () => {
 			let chatRoomSnapshot = await chatRoomRef.get();
 			if (!chatRoomSnapshot.exists) {
@@ -104,12 +175,25 @@ export default function Chat({ route }) {
 		getChatRoom();
 	}, [friendUsername, currentUsername]);
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * Reference to a Firestore document that stores typing indicators for a specific user.
+		 * @type {firebase.firestore.DocumentReference<firebase.firestore.DocumentData>}
+		 */
 		const typingRef = firebase
 			.firestore()
 			.collection("typingIndicators")
 			.doc(currentUsername);
 
+		/**
+		 * Listener that monitors changes to the typingRef document in the Firestore database and updates the friend's
+		 * typing status accordingly.
+		 * @type {() => void}
+		 */
 		const unsubscribe = typingRef.onSnapshot((snapshot) => {
 			const data = snapshot.data();
 			if (data && data.isTyping) {
@@ -122,11 +206,19 @@ export default function Chat({ route }) {
 		return () => unsubscribe();
 	}, [friendUsername]);
 
+	/**
+	 * Responsible for updating the height of an input component based on the content size change event.
+	 * @param event The event object containing information about the content size change.
+	 */
 	const handleContentSizeChange = (event) => {
 		const { contentSize } = event.nativeEvent;
 		setInputHeight(contentSize.height);
 	};
 
+	/**
+	 * Responsible for deleting a chat conversation by marking the messages as deleted for the current user.
+	 * @returns {Promise<void>}
+	 */
 	const deleteChat = async () => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
 		const chatRoomRef = firebase
@@ -155,6 +247,11 @@ export default function Chat({ route }) {
 		}
 	};
 
+	/**
+	 * Responsible for sending a message in a chat conversation by updating the chat room document in the Firestore
+	 * database.
+	 * @returns {Promise<void>}
+	 */
 	const sendMessage = async () => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
 		const chatRoomRef = firebase
@@ -199,6 +296,14 @@ export default function Chat({ route }) {
 		inputRef.current.clear();
 		inputRef.current.blur();
 	};
+
+	/**
+	 * Responsible for marking a message as read in a chat conversation by updating the read status of the message in
+	 * the chat room document.
+	 * @param msg The message object to be marked as read.
+	 * @param index The index of the message in the chat room's messages array.
+	 * @returns {Promise<void>}
+	 */
 	const markMessageAsRead = async (msg, index) => {
 		if (msg.sender !== currentUsername && !msg.readStatus) {
 			const sortedUsernames = [currentUsername, friendUsername].sort();
@@ -234,6 +339,12 @@ export default function Chat({ route }) {
 		}
 	};
 
+	/**
+	 * Responsible for updating the typing status of the current user in a chat room by updating the isTyping field in
+	 * the chat room document.
+	 * @param isTyping Indicates whether the current user is currently typing or not.
+	 * @returns {Promise<void>}
+	 */
 	const handleTyping = async (isTyping) => {
 		const sortedUsernames = [currentUsername, friendUsername].sort();
 		const chatRoomRef = firebase
@@ -250,6 +361,9 @@ export default function Chat({ route }) {
 			});
 	};
 
+	/**
+	 * renders the Chat page.
+	 */
 	return (
 		<View style={styles.container}>
 			<ScrollView
@@ -308,6 +422,11 @@ export default function Chat({ route }) {
 	);
 }
 
+/**
+ * Responsible for formatting a timestamp into a string representation of the time in hours and minutes.
+ * @param timestamp The timestamp value representing a date and time.
+ * @returns {`${number}:${string}${number}`}  The formatted string representation of the time in "hours:minutes" format.
+ */
 const formatTimestamp = (timestamp) => {
 	const date = new Date(timestamp);
 	const hours = date.getHours();
@@ -315,6 +434,9 @@ const formatTimestamp = (timestamp) => {
 	return `${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
 };
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

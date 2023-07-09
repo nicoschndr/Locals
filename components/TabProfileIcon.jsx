@@ -16,15 +16,52 @@ import { auth, firebase, firestore } from "../firebase";
 import { Badge } from "react-native-elements";
 import { useFocusEffect } from "@react-navigation/native";
 
+/**
+ * Renders a TabProfileIcon component with the provided props.
+ * @param navigation The navigation object for navigating between screens.
+ * @returns {JSX.Element} The rendered TabProfileIcon component.
+ * @constructor
+ */
 const TabProfileIcon = (navigation) => {
+
+	/**
+	 * The user that is logged in.
+	 */
 	const [currentUser, setCurrentUser] = useState([]);
+
+	/**
+	 * The amount of friend requests from the current user.
+	 */
 	const [friendRequests, setFriendRequests] = useState(0);
+
+	/**
+	 * The amount of notifications from the current user.
+	 */
 	const [number, setNumber] = useState(0);
+
+	/**
+	 * The difference in the number of followers since the last time the user was on the follower page.
+	 */
 	const [followerDiff, setFollowerDiff] = useState(0);
 
+	/**
+	 * This variable is used to cache all messages the User that is logged in has received or sent.
+	 * @type {*[]}
+	 */
 	let messages = [];
+
+	/**
+	 * This state variable represents all unread messages from the User that is logged in.
+	 */
 	const [unreadMessages, setUnreadMessages] = useState([]);
 
+	/**
+	 * This function  retrieves chat data for the User that is logged in from a Firebase Firestore collection.
+	 * It filters the chats based on the provided username and retrieves the chats where the user is not typing (Which
+	 * is every Chat where the user is part of). It also calculates the unread messages for the user.
+	 * @param username The username of the user for whom chat data is being retrieved
+	 * @returns {Promise<void>}
+	 */
 	const getChats = async (username) => {
 		try {
 			const chatRef = firebase.firestore().collection("chatRooms");
@@ -48,10 +85,17 @@ const TabProfileIcon = (navigation) => {
 		}
 	};
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
 		getCurrentUserData();
 	}, []);
 
+	/**
+	 * This function  retrieves and updates the current user's data from Firestore in real-time. It listens for changes
+	 * to the user's document and performs various operations based on the retrieved data.
+	 */
 	function getCurrentUserData() {
 		firestore
 			.collection("users")
@@ -71,6 +115,11 @@ const TabProfileIcon = (navigation) => {
 			});
 	}
 
+	/**
+	 *  Calculates the difference in the number of followers since the last time the user was on the follower page.
+	 *  Updates the "followerDiff" state with the calculated difference.
+	 * @param userData The user data object containing follower information.
+	 */
 	function checkFollowerDiff(userData) {
 		setFollowerDiff(userData.follower.length - userData.followerWhenClicked);
 	}
@@ -90,6 +139,9 @@ const TabProfileIcon = (navigation) => {
 			});
 	}
 
+	/**
+	 * renders the TabProfileIcon component.
+	 */
 	return (
 		<SafeAreaView>
 			<View style={{ flexDirection: "row" }}>

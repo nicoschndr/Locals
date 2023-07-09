@@ -12,16 +12,35 @@ import { DrawerItemList } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import { auth, firebase, firestore } from "../firebase";
 
+/**
+ * Renders a Sidebar component with the provided props.
+ * @param props The props object for configuring the Sidebar.
+ * @returns {JSX.Element} The rendered Sidebar component.
+ * @constructor
+ */
 const Sidebar = props => {
 
+	/**
+	 * The User that is logged in.
+	 */
     const [currentUser, setCurrentUser] = useState({});
+
+	/**
+	 * The amount of friend requests from the current user.
+	 */
     const [friendRequests, setFriendRequests] = useState([]);
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
     useEffect(() => {
         getCurrentUserData();
         getOpenFriendRequests();
     }, []);
 
+	/**
+	 * This function retrieves the current user's data from Firestore and updates the currentUser state.
+	 */
     function getCurrentUserData() {
         firestore
             .collection("users")
@@ -31,6 +50,10 @@ const Sidebar = props => {
                 setCurrentUser(currentUserData);
             })
     }
+
+	/**
+	 * This function retrieves the open friend requests for a user from Firestore and updates the friendRequests state.
+	 */
     function getOpenFriendRequests() {
         firestore
             .collection("users")
@@ -46,6 +69,9 @@ const Sidebar = props => {
             });
     }
 
+	/**
+	 * Logs out the current user by signing out from the authentication system.
+	 */
 	const logout = () => {
 		auth
 			.signOut()
@@ -57,12 +83,24 @@ const Sidebar = props => {
 			});
 	};
 
+	/**
+	 * The uid of firebase from the user that is logged in.
+	 * @type {string}
+	 */
 	const uid = firebase.auth().currentUser.uid;
+
+	/**
+	 * Specific data of the user.
+	 */
 	const [user, setUser] = useState({
 		firstName: "",
 		imageUrl: "",
 		lastName: "",
 	});
+
+	/**
+	 * Renders the Sidebar component.
+	 */
 	return (
 		<ScrollView>
 			<ImageBackground
@@ -105,6 +143,9 @@ const Sidebar = props => {
 
 export default Sidebar;
 
+/**
+ * Creates a StyleSheet object containing style definitions for the component.
+ */
 const styles = StyleSheet.create({
 	image: {
 		width: 70,
