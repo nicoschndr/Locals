@@ -410,6 +410,7 @@ const HomeScreen = ({ navigation }) => {
 
 	/**
 	 * @property {Function} checkTrafficAvailability - A function that checks the traffic availability.
+	 */
 	const checkTrafficAvailability = async () => {
 		try {
 			// Verwende die Firebase Storage API, um Informationen über den verbleibenden Traffic abzurufen
