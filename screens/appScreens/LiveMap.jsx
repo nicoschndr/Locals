@@ -54,7 +54,6 @@ const Comment = ({
 	likeComment,
 	username,
 }) => {
-
 	/**
 	 * is used to handle liking or unliking a comment.
 	 */
@@ -113,7 +112,6 @@ const Comment = ({
  * @constructor
  */
 const Livemap = ({ navigation }) => {
-
 	/**
 	 * Represents the user's current location. It is updated with the user's location coordinates.
 	 */
@@ -448,7 +446,6 @@ const Livemap = ({ navigation }) => {
 	 * Executes functions once when the component mounts.
 	 */
 	useEffect(() => {
-
 		/**
 		 * asynchronous function that requests permission to access the device's location and sets up a location
 		 * subscription. The subscription updates the location state whenever a new location is received.
@@ -568,7 +565,6 @@ const Livemap = ({ navigation }) => {
 	 * Executes functions once when the component mounts.
 	 */
 	useEffect(() => {
-
 		/**
 		 *  is used to retrieve and display comments for the selected event.
 		 */
@@ -630,7 +626,6 @@ const Livemap = ({ navigation }) => {
 	 * Executes functions once when the component mounts.
 	 */
 	useEffect(() => {
-
 		/**
 		 * responsible for fetching and subscribing to real-time updates of events from the Firestore database
 		 * @returns {Promise<void>}
@@ -916,7 +911,7 @@ const Livemap = ({ navigation }) => {
 					/>
 				</View>
 			</Modal>
-			<View style={styles.filterContainer}>
+			{/* 			<View style={styles.filterContainer}>
 				<TouchableOpacity
 					onPress={() => setIsModalVisible(true)}
 					style={{
@@ -930,7 +925,7 @@ const Livemap = ({ navigation }) => {
 				>
 					<Ionicons name="filter-outline" size={24} color="#f3f3f3" />
 				</TouchableOpacity>
-			</View>
+			</View> */}
 
 			<View style={styles.sliderContainer}>
 				<Slider
