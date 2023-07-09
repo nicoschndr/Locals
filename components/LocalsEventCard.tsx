@@ -66,8 +66,8 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 					alignContent: "center",
 				},
 				props.profile && {
-					width: 240,
-					height: 240,
+					width: 200,
+					height: 200,
 				},
 			]}
 			largeTitleTextStyle={[
@@ -78,8 +78,8 @@ const LocalsEventCard = (props: LocalsEventCardProps) => {
 					// backgroundColor: "red",
 				},
 				props.profile && {
-					width: 220,
-					height: 240,
+					width: 180,
+					height: 180,
 				},
 			]}
 		/>

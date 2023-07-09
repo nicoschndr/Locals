@@ -546,7 +546,6 @@ const EventDetails = ({ route, navigation }) => {
 			await getEventById(route.params.event.id);
 		};
 		fetchUsernameAndEvent();
-		checkTrafficAvailability();
 	}, []);
 
 	const showActionSheet = () => {
@@ -593,6 +592,10 @@ const EventDetails = ({ route, navigation }) => {
 		}
 	};
 
+	useEffect(() => {
+		checkTrafficAvailability();
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			{!showComments && (
@@ -603,7 +606,7 @@ const EventDetails = ({ route, navigation }) => {
 						image={
 							fullStorage
 								? event.imageUrl
-								: "https://source.unsplash.com/random/?portrait"
+								: "https://source.unsplash.com/random/?" + event.category
 						}
 					/>
 					<Ionicons
@@ -687,7 +690,7 @@ const EventDetails = ({ route, navigation }) => {
 									image={
 										fullStorage
 											? user.imageUrl
-											: "https://source.unsplash.com/random/?portrait"
+											: "https://source.unsplash.com/random/?" + event.category
 									}
 								/>
 								<Text style={styles.item}>{selectedEvent.creator}</Text>

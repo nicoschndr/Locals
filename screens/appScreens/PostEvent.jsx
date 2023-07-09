@@ -14,6 +14,7 @@ import {
 	Platform,
 	PermissionsAndroid,
 	FlatList,
+	BackgroundImage,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { CheckBox } from "react-native-elements";

@@ -98,7 +98,7 @@ const TabProfileIcon = (navigation) => {
 					unreadMessages.length > 0 ||
 					followerDiff > 0) && (
 					<Badge
-						containerStyle={{ marginLeft: 5 }}
+						containerStyle={{ marginLeft: 25, marginTop: -45 }}
 						value={friendRequests + unreadMessages.length + followerDiff}
 						status="error"
 					></Badge>

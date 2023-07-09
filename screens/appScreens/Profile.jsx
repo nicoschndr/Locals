@@ -28,6 +28,7 @@ import LocalsEventCard from "../../components/LocalsEventCard";
 import FastImage from "react-native-fast-image";
 
 import FirestoreContext from "../../context/FirestoreContext";
+import { BackgroundImage } from "react-native-elements/dist/config";
 
 const Profile = ({ route, navigation }) => {
 	const goToFriendList = () => {
@@ -481,934 +482,1026 @@ const Profile = ({ route, navigation }) => {
 	};
 
 	return (
-		<SafeAreaView style={styles.container}>
-			<StatusBar barStyle="dark-content" />
-			<ScrollView showsVerticalScrollIndicator={false}>
-				{uid === firebase.auth().currentUser.uid && (
-					<TouchableOpacity
-						style={styles.titleBar}
-						onPress={navigation.openDrawer}
-					>
-						<Ionicons
-							style={{ marginLeft: windowWidth - 50 }}
-							name={"reorder-three-outline"}
-							size={40}
-						>
-							{" "}
-						</Ionicons>
-						{(friendRequests.length > 0 || unreadMessages > 0) && (
-							<Badge
-								value={friendRequests.length + unreadMessages}
-								status="error"
-								containerStyle={{ position: "absolute", top: 5, right: 35 }}
-							></Badge>
-						)}
-					</TouchableOpacity>
-				)}
-
-				{uid !== firebase.auth().currentUser.uid && (
-					<TouchableOpacity
-						style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
-						onPress={() => setModalVisible(true)}
-					>
-						<Ionicons
-							style={{ marginLeft: windowWidth - 50 }}
-							name={"ellipsis-vertical"}
-							size={24}
-						>
-							{" "}
-						</Ionicons>
-						<Ionicons
-							name="chevron-back"
-							size={24}
-							color="black"
-							style={{ position: "absolute", top: 0, left: 20 }}
-							onPress={() => navigation.goBack()}
-						/>
-					</TouchableOpacity>
-				)}
-
-				<Modal animationType="slide" transparent={true} visible={modalVisible}>
-					<TouchableOpacity
-						style={{ width: windowWidth, height: windowHeight }}
-						onPress={() => setModalVisible(false)}
-					></TouchableOpacity>
-					<View style={styles.centeredView}>
-						<View style={styles.modalView}>
+		<View style={styles.container}>
+			<BackgroundImage
+				source={require("../../assets/BackGround(h).png")}
+				style={{ flex: 1, resizeMode: "cover", justifyContent: "center" }}
+			>
+				<View style={{ marginTop: 48, paddingBottom: 80 }}>
+					<StatusBar barStyle="dark-content" />
+					<ScrollView showsVerticalScrollIndicator={false}>
+						{uid === firebase.auth().currentUser.uid && (
 							<TouchableOpacity
-								onPress={() => changeModal()}
-								style={{ marginLeft: 20, marginTop: 20 }}
+								style={styles.titleBar}
+								onPress={navigation.openDrawer}
 							>
-								<Text>melden ...</Text>
+								<Ionicons
+									style={{ marginLeft: windowWidth - 50 }}
+									name={"reorder-three-outline"}
+									size={40}
+								>
+									{" "}
+								</Ionicons>
+								{(friendRequests.length > 0 || unreadMessages > 0) && (
+									<Badge
+										value={friendRequests.length + unreadMessages}
+										status="error"
+										containerStyle={{
+											position: "absolute",
+											top: 5,
+											right: 35,
+										}}
+									></Badge>
+								)}
 							</TouchableOpacity>
-							{currentUser.blockedUsers &&
-								!currentUser.blockedUsers.includes(user.username) && (
-									<TouchableOpacity
-										onPress={() => blockUser()}
-										style={{ marginLeft: 20, marginTop: 20 }}
-									>
-										<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
-											blockieren
-										</Text>
-									</TouchableOpacity>
-								)}
-							{currentUser.blockedUsers &&
-								currentUser.blockedUsers.includes(user.username) && (
-									<TouchableOpacity
-										onPress={() => unblockUser()}
-										style={{ marginLeft: 20, marginTop: 20 }}
-									>
-										<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
-											nicht mehr blockieren
-										</Text>
-									</TouchableOpacity>
-								)}
-						</View>
-					</View>
-				</Modal>
-				<Modal animationType="slide" transparent={true} visible={reportModal}>
-					<KeyboardAvoidingView
-						style={{
-							flex: 1,
-							flexDirection: "column",
-							justifyContent: "center",
-						}}
-						behavior={
-							Platform.OS === "ios"
-								? "padding"
-								: "height" || Platform.OS === "android"
-								? "padding"
-								: "height"
-						}
-						keyboardVerticalOffset={150}
-						enabled
-					>
-						<TouchableOpacity
-							style={{ width: windowWidth, height: windowHeight }}
-							onPress={() => setReportModal(false)}
-						></TouchableOpacity>
-						<View style={styles.centeredView}>
-							<View style={styles.reportModalView}>
-								<Text
-									style={{
-										alignSelf: "center",
-										fontWeight: "bold",
-										fontSize: 20,
-										borderBottomWidth: 1,
-										flexDirection: "row",
-									}}
+						)}
+
+						{uid !== firebase.auth().currentUser.uid && (
+							<TouchableOpacity
+								style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
+								onPress={() => setModalVisible(true)}
+							>
+								<Ionicons
+									style={{ marginLeft: windowWidth - 50 }}
+									name={"ellipsis-vertical"}
+									size={24}
 								>
-									melden
-								</Text>
-
-								{reportCategory.includes("Belästigung") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf("Belästigung"),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>
-											Belästigung <Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Belästigung") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([...reportCategory, "Belästigung"])
-										}
-										style={{
-											marginLeft: 20,
-											marginTop: 15,
-										}}
-									>
-										<Text>Belästigung</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Hassrede") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf("Hassrede"),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>
-											Hassrede <Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Hassrede") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([...reportCategory, "Hassrede"])
-										}
-										style={{
-											marginLeft: 20,
-											marginTop: 15,
-										}}
-									>
-										<Text>Hassrede</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Gewalt") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf("Gewalt"),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>
-											Gewalt <Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Gewalt") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([...reportCategory, "Gewalt"])
-										}
-										style={{
-											marginLeft: 20,
-											marginTop: 15,
-										}}
-									>
-										<Text>Gewalt</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Spam") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(reportCategory.indexOf("Spam"), 1);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>
-											Spam <Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Spam") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([...reportCategory, "Spam"])
-										}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>Spam</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Betrug") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf("Betrug"),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>
-											Betrug <Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Betrug") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([...reportCategory, "Betrug"])
-										}
-										style={{
-											marginLeft: 20,
-											marginTop: 15,
-										}}
-									>
-										<Text>Betrug</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Identitätsdiebstahl") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf("Identitätsdiebstahl"),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{
-											marginLeft: 20,
-											marginTop: 15,
-										}}
-									>
-										<Text>
-											Identitätsdiebstahl <Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Identitätsdiebstahl") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([
-												...reportCategory,
-												"Identitätsdiebstahl",
-											])
-										}
-										style={{
-											marginLeft: 20,
-											marginTop: 15,
-										}}
-									>
-										<Text>Identitätsdiebstahl</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Nacktheit oder sexuelle Inhalte") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf(
-													"Nacktheit oder sexuelle Inhalte"
-												),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>
-											Nacktheit oder sexuelle Inhalte{" "}
-											<Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes(
-									"Nacktheit oder sexuelle Inhalte"
-								) && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([
-												...reportCategory,
-												"Nacktheit oder sexuelle Inhalte",
-											])
-										}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>Nacktheit oder sexuelle Inhalte</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Urheberrechtsverletzung") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf("Urheberrechtsverletzung"),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{
-											marginLeft: 20,
-											marginTop: 15,
-										}}
-									>
-										<Text>
-											Urheberrechtsverletzung{" "}
-											<Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Urheberrechtsverletzung") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([
-												...reportCategory,
-												"Urheberrechtsverletzung",
-											])
-										}
-										style={{
-											marginLeft: 20,
-											marginTop: 15,
-										}}
-									>
-										<Text>Urheberrechtsverletzung</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Falsche Informationen") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf("Falsche Informationen"),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>
-											Falsche Informationen{" "}
-											<Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Falsche Informationen") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([
-												...reportCategory,
-												"Falsche Informationen",
-											])
-										}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>Falsche Informationen</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Verletzung der Privatsphäre") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf("Verletzung der Privatsphäre"),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>
-											Verletzung der Privatsphäre{" "}
-											<Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Verletzung der Privatsphäre") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([
-												...reportCategory,
-												"Verletzung der Privatsphäre",
-											])
-										}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text>Verletzung der Privatsphäre</Text>
-									</TouchableOpacity>
-								)}
-
-								{reportCategory.includes("Nutzer blockieren") && (
-									<TouchableOpacity
-										onPress={() => {
-											reportCategory.splice(
-												reportCategory.indexOf("Nutzer blockieren"),
-												1
-											);
-											setReportCategory([...reportCategory]);
-										}}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
-											Nutzer blockieren <Ionicons name="checkmark"></Ionicons>
-										</Text>
-									</TouchableOpacity>
-								)}
-								{!reportCategory.includes("Nutzer blockieren") && (
-									<TouchableOpacity
-										onPress={() =>
-											setReportCategory([
-												...reportCategory,
-												"Nutzer blockieren",
-											])
-										}
-										style={{ marginLeft: 20, marginTop: 15 }}
-									>
-										<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
-											Nutzer blockieren
-										</Text>
-									</TouchableOpacity>
-								)}
-
-								<TouchableOpacity
-									style={{
-										marginLeft: 20,
-										marginTop: 15,
-									}}
-								>
-									<Text>Sonstiges:</Text>
-								</TouchableOpacity>
-								<TextInput
-									editable
-									multiline
-									onChangeText={onChangeText}
-									value={text}
-									style={styles.input}
-								></TextInput>
-								<LocalsButton
-									style={{ marginTop: 20, alignSelf: "center" }}
-									title={"absenden"}
-									onPress={reportUser}
-								></LocalsButton>
-							</View>
-						</View>
-					</KeyboardAvoidingView>
-				</Modal>
-
-				<View style={{ alignSelf: "center" }}>
-					{currentUser.blockedUsers &&
-						user.blockedUsers &&
-						!currentUser.blockedUsers.includes(user.username) &&
-						!user.blockedUsers.includes(currentUsername) && (
-							<View style={styles.profileImage}>
-								<Image
-									image={
-										fullStorage
-											? user.imageUrl
-											: "https://source.unsplash.com/random/?portrait"
-									}
-									style={styles.image}
-									resizeMode="center"
+									{" "}
+								</Ionicons>
+								<Ionicons
+									name="chevron-back"
+									size={24}
+									color="black"
+									style={{ position: "absolute", top: 0, left: 20 }}
+									onPress={() => navigation.goBack()}
 								/>
-							</View>
+							</TouchableOpacity>
 						)}
-					{currentUser.blockedUsers &&
-						user.blockedUsers &&
-						(currentUser.blockedUsers.includes(user.username) ||
-							user.blockedUsers.includes(currentUsername)) && (
-							<View style={styles.profileImage}>
-								<Image
-									source={require("../../assets/blank_profile.png")}
-									style={styles.image}
-									resizeMode="center"
-								/>
-							</View>
-						)}
-					{uid !== firebase.auth().currentUser.uid &&
-						currentUser.blockedUsers &&
-						user.blockedUsers &&
-						!currentUser.blockedUsers.includes(user.username) &&
-						!user.blockedUsers.includes(currentUsername) && (
-							<>
-								<TouchableOpacity
-									style={styles.chat}
-									onPress={() => handleFriendClick(user.username)}
-								>
-									<MaterialIcons name={"chat"} size={20} color={"#FFFFFF"} />
-								</TouchableOpacity>
-								{!currentFriends[user.username] &&
-									user.username !== currentUsername && (
-										<TouchableOpacity
-											style={styles.add}
-											onPress={() =>
-												sendFriendRequest(currentUsername, user.username)
-											}
-										>
-											{friendRequests.includes(currentUsername) ? (
-												<MaterialIcons
-													name={"schedule"}
-													size={60}
-													color={"#ffffff"}
-												/>
-											) : (
-												<MaterialIcons
-													name={"add"}
-													size={60}
-													color={"#FFFFFF"}
-												/>
-											)}
-										</TouchableOpacity>
-									)}
-							</>
-						)}
-				</View>
 
-				{user.follower &&
-					user.following &&
-					currentUser.follower &&
-					currentUser.following &&
-					user.username &&
-					currentUser.blockedUsers &&
-					user.blockedUsers && (
-						<View
-							style={[styles.infoContainer, { marginTop: windowHeight * 0.01 }]}
+						<Modal
+							animationType="slide"
+							transparent={true}
+							visible={modalVisible}
 						>
-							<Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>
-								{user.firstName} {user.lastName}
-							</Text>
-							<Text style={[styles.text, { fontWeight: "200", fontSize: 14 }]}>
-								@{user.username}
-							</Text>
-							{uid !== firebase.auth().currentUser.uid &&
-								currentUser.following.includes(uid) === false &&
+							<TouchableOpacity
+								style={{ width: windowWidth, height: windowHeight }}
+								onPress={() => setModalVisible(false)}
+							></TouchableOpacity>
+							<View style={styles.centeredView}>
+								<View style={styles.modalView}>
+									<TouchableOpacity
+										onPress={() => changeModal()}
+										style={{ marginLeft: 20, marginTop: 20 }}
+									>
+										<Text>melden ...</Text>
+									</TouchableOpacity>
+									{currentUser.blockedUsers &&
+										!currentUser.blockedUsers.includes(user.username) && (
+											<TouchableOpacity
+												onPress={() => blockUser()}
+												style={{ marginLeft: 20, marginTop: 20 }}
+											>
+												<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
+													blockieren
+												</Text>
+											</TouchableOpacity>
+										)}
+									{currentUser.blockedUsers &&
+										currentUser.blockedUsers.includes(user.username) && (
+											<TouchableOpacity
+												onPress={() => unblockUser()}
+												style={{ marginLeft: 20, marginTop: 20 }}
+											>
+												<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
+													nicht mehr blockieren
+												</Text>
+											</TouchableOpacity>
+										)}
+								</View>
+							</View>
+						</Modal>
+						<Modal
+							animationType="slide"
+							transparent={true}
+							visible={reportModal}
+						>
+							<KeyboardAvoidingView
+								style={{
+									flex: 1,
+									flexDirection: "column",
+									justifyContent: "center",
+								}}
+								behavior={
+									Platform.OS === "ios"
+										? "padding"
+										: "height" || Platform.OS === "android"
+										? "padding"
+										: "height"
+								}
+								keyboardVerticalOffset={150}
+								enabled
+							>
+								<TouchableOpacity
+									style={{ width: windowWidth, height: windowHeight }}
+									onPress={() => setReportModal(false)}
+								></TouchableOpacity>
+								<View style={styles.centeredView}>
+									<View style={styles.reportModalView}>
+										<Text
+											style={{
+												alignSelf: "center",
+												fontWeight: "bold",
+												fontSize: 20,
+												borderBottomWidth: 1,
+												flexDirection: "row",
+											}}
+										>
+											melden
+										</Text>
+
+										{reportCategory.includes("Belästigung") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf("Belästigung"),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>
+													Belästigung <Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes("Belästigung") && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([...reportCategory, "Belästigung"])
+												}
+												style={{
+													marginLeft: 20,
+													marginTop: 15,
+												}}
+											>
+												<Text>Belästigung</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes("Hassrede") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf("Hassrede"),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>
+													Hassrede <Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes("Hassrede") && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([...reportCategory, "Hassrede"])
+												}
+												style={{
+													marginLeft: 20,
+													marginTop: 15,
+												}}
+											>
+												<Text>Hassrede</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes("Gewalt") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf("Gewalt"),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>
+													Gewalt <Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes("Gewalt") && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([...reportCategory, "Gewalt"])
+												}
+												style={{
+													marginLeft: 20,
+													marginTop: 15,
+												}}
+											>
+												<Text>Gewalt</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes("Spam") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf("Spam"),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>
+													Spam <Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes("Spam") && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([...reportCategory, "Spam"])
+												}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>Spam</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes("Betrug") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf("Betrug"),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>
+													Betrug <Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes("Betrug") && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([...reportCategory, "Betrug"])
+												}
+												style={{
+													marginLeft: 20,
+													marginTop: 15,
+												}}
+											>
+												<Text>Betrug</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes("Identitätsdiebstahl") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf("Identitätsdiebstahl"),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{
+													marginLeft: 20,
+													marginTop: 15,
+												}}
+											>
+												<Text>
+													Identitätsdiebstahl{" "}
+													<Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes("Identitätsdiebstahl") && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([
+														...reportCategory,
+														"Identitätsdiebstahl",
+													])
+												}
+												style={{
+													marginLeft: 20,
+													marginTop: 15,
+												}}
+											>
+												<Text>Identitätsdiebstahl</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes(
+											"Nacktheit oder sexuelle Inhalte"
+										) && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf(
+															"Nacktheit oder sexuelle Inhalte"
+														),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>
+													Nacktheit oder sexuelle Inhalte{" "}
+													<Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes(
+											"Nacktheit oder sexuelle Inhalte"
+										) && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([
+														...reportCategory,
+														"Nacktheit oder sexuelle Inhalte",
+													])
+												}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>Nacktheit oder sexuelle Inhalte</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes("Urheberrechtsverletzung") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf("Urheberrechtsverletzung"),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{
+													marginLeft: 20,
+													marginTop: 15,
+												}}
+											>
+												<Text>
+													Urheberrechtsverletzung{" "}
+													<Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes("Urheberrechtsverletzung") && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([
+														...reportCategory,
+														"Urheberrechtsverletzung",
+													])
+												}
+												style={{
+													marginLeft: 20,
+													marginTop: 15,
+												}}
+											>
+												<Text>Urheberrechtsverletzung</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes("Falsche Informationen") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf("Falsche Informationen"),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>
+													Falsche Informationen{" "}
+													<Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes("Falsche Informationen") && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([
+														...reportCategory,
+														"Falsche Informationen",
+													])
+												}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>Falsche Informationen</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes("Verletzung der Privatsphäre") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf(
+															"Verletzung der Privatsphäre"
+														),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>
+													Verletzung der Privatsphäre{" "}
+													<Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes(
+											"Verletzung der Privatsphäre"
+										) && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([
+														...reportCategory,
+														"Verletzung der Privatsphäre",
+													])
+												}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text>Verletzung der Privatsphäre</Text>
+											</TouchableOpacity>
+										)}
+
+										{reportCategory.includes("Nutzer blockieren") && (
+											<TouchableOpacity
+												onPress={() => {
+													reportCategory.splice(
+														reportCategory.indexOf("Nutzer blockieren"),
+														1
+													);
+													setReportCategory([...reportCategory]);
+												}}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
+													Nutzer blockieren{" "}
+													<Ionicons name="checkmark"></Ionicons>
+												</Text>
+											</TouchableOpacity>
+										)}
+										{!reportCategory.includes("Nutzer blockieren") && (
+											<TouchableOpacity
+												onPress={() =>
+													setReportCategory([
+														...reportCategory,
+														"Nutzer blockieren",
+													])
+												}
+												style={{ marginLeft: 20, marginTop: 15 }}
+											>
+												<Text style={{ color: "rgba(255, 0, 0, .87)" }}>
+													Nutzer blockieren
+												</Text>
+											</TouchableOpacity>
+										)}
+
+										<TouchableOpacity
+											style={{
+												marginLeft: 20,
+												marginTop: 15,
+											}}
+										>
+											<Text>Sonstiges:</Text>
+										</TouchableOpacity>
+										<TextInput
+											editable
+											multiline
+											onChangeText={onChangeText}
+											value={text}
+											style={styles.input}
+										></TextInput>
+										<LocalsButton
+											style={{ marginTop: 20, alignSelf: "center" }}
+											title={"absenden"}
+											onPress={reportUser}
+										></LocalsButton>
+									</View>
+								</View>
+							</KeyboardAvoidingView>
+						</Modal>
+
+						<View style={{ alignSelf: "center" }}>
+							{currentUser.blockedUsers &&
+								user.blockedUsers &&
 								!currentUser.blockedUsers.includes(user.username) &&
 								!user.blockedUsers.includes(currentUsername) && (
-									<TouchableOpacity
-										style={{ marginTop: 10 }}
-										onPress={setFollower}
-									>
-										<Text style={styles.followButton}>Folgen</Text>
-									</TouchableOpacity>
-								)}
-							{currentUser.following.includes(uid) === true &&
-								!currentUser.blockedUsers.includes(user.username) && (
-									<TouchableOpacity
-										style={{ marginTop: 10 }}
-										onPress={setUnfollow}
-									>
-										<Text style={styles.followButton}>Nicht mehr Folgen</Text>
-									</TouchableOpacity>
-								)}
-							{currentUser.blockedUsers.includes(user.username) && (
-								<TouchableOpacity
-									style={{ marginTop: 10 }}
-									onPress={unblockUser}
-								>
-									<Text style={styles.followButton}>Nicht mehr blockieren</Text>
-								</TouchableOpacity>
-							)}
-							{user.blockedUsers.includes(currentUsername) && <Text></Text>}
-						</View>
-					)}
-
-				{user.follower &&
-					user.following &&
-					currentUser.follower &&
-					currentUser.following &&
-					currentUser.blockedUsers &&
-					user.blockedUsers && (
-						<View
-							style={[
-								styles.statsContainer,
-								{ marginTop: windowHeight * 0.03 },
-							]}
-						>
-							<View style={styles.statsBox}>
-								<Text>Events</Text>
-								{!currentUser.blockedUsers.includes(user.username) &&
-									!user.blockedUsers.includes(currentUsername) && (
-										<Text>{events.length}</Text>
-									)}
-								{(currentUser.blockedUsers.includes(user.username) ||
-									user.blockedUsers.includes(currentUsername)) && (
-									<Text>0</Text>
-								)}
-							</View>
-							<View
-								style={[
-									styles.statsBox,
-									{
-										borderColor: "DFD8C8",
-										borderLeftWidth: 1,
-										borderRightWidth: 1,
-									},
-								]}
-							>
-								{auth.currentUser.uid === uid && (
-									<TouchableOpacity
-										style={styles.statsBox}
-										onPress={() => {
-											pushFollowerWhenClicked(user.follower.length);
-											navigation.goBack();
-											navigation.navigate("Follower", {
-												uid: uid,
-												follower: currentUser.follower,
-												diff: followerDiff,
-											});
-										}}
-									>
-										<Text>Follower </Text>
-										<Text>{user.follower.length}</Text>
-										{followerDiff > 0 && followerDiff && (
-											<Badge
-												containerStyle={{
-													position: "absolute",
-													top: -5,
-													right: -15,
-												}}
-												status="error"
-												value={followerDiff}
-											></Badge>
-										)}
-									</TouchableOpacity>
-								)}
-								{auth.currentUser.uid !== uid && (
-									<TouchableOpacity
-										style={styles.statsBox}
-										onPress={() => {
-											navigation.goBack();
-											navigation.navigate("Follower", {
-												uid: uid,
-												follower: user.follower,
-											});
-										}}
-									>
-										<Text>Follower</Text>
-										{!currentUser.blockedUsers.includes(user.username) &&
-											!user.blockedUsers.includes(currentUsername) && (
-												<Text>{user.follower.length}</Text>
-											)}
-										{(currentUser.blockedUsers.includes(user.username) ||
-											user.blockedUsers.includes(currentUsername)) && (
-											<Text>0</Text>
-										)}
-									</TouchableOpacity>
-								)}
-							</View>
-							{auth.currentUser.uid === uid && (
-								<TouchableOpacity
-									style={styles.statsBox}
-									onPress={() => {
-										navigation.goBack();
-										navigation.navigate("Following", {
-											uid: uid,
-											following: currentUser.following,
-										});
-									}}
-								>
-									<View style={styles.statsBox}>
-										<Text>Following</Text>
-										<Text>{user.following.length}</Text>
-									</View>
-								</TouchableOpacity>
-							)}
-							{auth.currentUser.uid !== uid && (
-								<TouchableOpacity
-									style={styles.statsBox}
-									onPress={() => {
-										navigation.goBack();
-										navigation.navigate("Following", {
-											uid: uid,
-											following: user.following,
-										});
-									}}
-								>
-									<View style={styles.statsBox}>
-										<Text>Following</Text>
-										{!currentUser.blockedUsers.includes(user.username) &&
-											!user.blockedUsers.includes(currentUsername) && (
-												<Text>{user.following.length}</Text>
-											)}
-										{(currentUser.blockedUsers.includes(user.username) ||
-											user.blockedUsers.includes(currentUsername)) && (
-											<Text>0</Text>
-										)}
-									</View>
-								</TouchableOpacity>
-							)}
-						</View>
-					)}
-				{currentUser.blockedUsers && user.blockedUsers && (
-					<View style={{ marginTop: windowHeight * 0.03 }}>
-						{events.length > 0 &&
-							!currentUser.blockedUsers.includes(user.username) &&
-							!user.blockedUsers.includes(currentUsername) && (
-								<ScrollView
-									horizontal={true}
-									showsVerticalScrollIndicator={false}
-									showsHorizontalScrollIndicator={false}
-									style={{
-										paddingHorizontal: 24,
-										paddingVertical: 24,
-									}}
-								>
-									{currentUserEvents.map((event) => (
-										<LocalsEventCard
-											key={event.id}
-											title={event.title}
-											date={event.date
-												?.toDate()
-												?.toLocaleDateString("de-DE", shortDate)}
-											location={event.address}
-											// image={event.imageUrl}
-											category={event.title}
-											onPress={() =>
-												navigation.navigate("EventDetails", { event })
-											}
+									<View style={styles.profileImage}>
+										<Image
 											image={
 												fullStorage
-													? event.imageUrl
-													: "https://source.unsplash.com/random/?" + event.title
+													? user.imageUrl
+													: "https://source.unsplash.com/random/?portrait"
 											}
-											style={{ marginRight: 24 }}
-											profile
+											style={styles.image}
+											resizeMode="center"
 										/>
-									))}
-								</ScrollView>
-							)}
-						{(currentUser.blockedUsers.includes(user.username) ||
-							user.blockedUsers.includes(currentUsername)) && <View></View>}
-						{user.recentActivities &&
-							currentUser.recentActivities &&
-							user.recentActivities.length > 0 && (
-								<Text
+									</View>
+								)}
+							{currentUser.blockedUsers &&
+								user.blockedUsers &&
+								(currentUser.blockedUsers.includes(user.username) ||
+									user.blockedUsers.includes(currentUsername)) && (
+									<View style={styles.profileImage}>
+										<Image
+											source={require("../../assets/blank_profile.png")}
+											style={styles.image}
+											resizeMode="center"
+										/>
+									</View>
+								)}
+							{uid !== firebase.auth().currentUser.uid &&
+								currentUser.blockedUsers &&
+								user.blockedUsers &&
+								!currentUser.blockedUsers.includes(user.username) &&
+								!user.blockedUsers.includes(currentUsername) && (
+									<>
+										<TouchableOpacity
+											style={styles.chat}
+											onPress={() => handleFriendClick(user.username)}
+										>
+											<MaterialIcons
+												name={"chat"}
+												size={20}
+												color={"#f3f3f3"}
+											/>
+										</TouchableOpacity>
+										{!currentFriends[user.username] &&
+											user.username !== currentUsername && (
+												<TouchableOpacity
+													style={styles.add}
+													onPress={() =>
+														sendFriendRequest(currentUsername, user.username)
+													}
+												>
+													{friendRequests.includes(currentUsername) ? (
+														<MaterialIcons
+															name={"schedule"}
+															size={60}
+															color={"#f3f3f3"}
+														/>
+													) : (
+														<MaterialIcons
+															name={"add"}
+															size={60}
+															color={"#f3f3f3"}
+														/>
+													)}
+												</TouchableOpacity>
+											)}
+									</>
+								)}
+						</View>
+
+						{user.follower &&
+							user.following &&
+							currentUser.follower &&
+							currentUser.following &&
+							user.username &&
+							currentUser.blockedUsers &&
+							user.blockedUsers && (
+								<View
 									style={[
-										styles.text,
-										styles.recent,
+										styles.infoContainer,
+										{ marginTop: windowHeight * 0.01 },
+									]}
+								>
+									<Text
+										style={[styles.text, { fontWeight: "200", fontSize: 36 }]}
+									>
+										{user.firstName} {user.lastName}
+									</Text>
+									<Text
+										style={[styles.text, { fontWeight: "200", fontSize: 14 }]}
+									>
+										@{user.username}
+									</Text>
+									{uid !== firebase.auth().currentUser.uid &&
+										currentUser.following.includes(uid) === false &&
+										!currentUser.blockedUsers.includes(user.username) &&
+										!user.blockedUsers.includes(currentUsername) && (
+											<TouchableOpacity
+												style={{ marginTop: 10 }}
+												onPress={setFollower}
+											>
+												<Text style={styles.followButton}>Folgen</Text>
+											</TouchableOpacity>
+										)}
+									{currentUser.following.includes(uid) === true &&
+										!currentUser.blockedUsers.includes(user.username) && (
+											<TouchableOpacity
+												style={{ marginTop: 10 }}
+												onPress={setUnfollow}
+											>
+												<Text style={styles.followButton}>
+													Nicht mehr Folgen
+												</Text>
+											</TouchableOpacity>
+										)}
+									{currentUser.blockedUsers.includes(user.username) && (
+										<TouchableOpacity
+											style={{ marginTop: 10 }}
+											onPress={unblockUser}
+										>
+											<Text style={styles.followButton}>
+												Nicht mehr blockieren
+											</Text>
+										</TouchableOpacity>
+									)}
+									{user.blockedUsers.includes(currentUsername) && <Text></Text>}
+								</View>
+							)}
+
+						{user.follower &&
+							user.following &&
+							currentUser.follower &&
+							currentUser.following &&
+							currentUser.blockedUsers &&
+							user.blockedUsers && (
+								<View
+									style={[
+										styles.statsContainer,
+										{ marginTop: windowHeight * 0.03 },
+									]}
+								>
+									<View style={styles.statsBox}>
+										<Text style={{ color: "#f3f3f3" }}>Events</Text>
+										{!currentUser.blockedUsers.includes(user.username) &&
+											!user.blockedUsers.includes(currentUsername) && (
+												<Text style={{ color: "#f3f3f3" }}>
+													{events.length}
+												</Text>
+											)}
+										{(currentUser.blockedUsers.includes(user.username) ||
+											user.blockedUsers.includes(currentUsername)) && (
+											<Text style={{ color: "#f3f3f3" }}>0</Text>
+										)}
+									</View>
+									<View
+										style={[
+											styles.statsBox,
+											{
+												borderColor: "#f3f3f3",
+												borderLeftWidth: 1,
+												borderRightWidth: 1,
+											},
+										]}
+									>
+										{auth.currentUser.uid === uid && (
+											<TouchableOpacity
+												style={styles.statsBox}
+												onPress={() => {
+													pushFollowerWhenClicked(user.follower.length);
+													navigation.goBack();
+													navigation.navigate("Follower", {
+														uid: uid,
+														follower: currentUser.follower,
+														diff: followerDiff,
+													});
+												}}
+											>
+												<Text style={{ color: "#f3f3f3" }}>Follower </Text>
+												<Text style={{ color: "#f3f3f3" }}>
+													{user.follower.length}
+												</Text>
+												{followerDiff > 0 && followerDiff && (
+													<Badge
+														containerStyle={{
+															position: "absolute",
+															top: -5,
+															right: -15,
+														}}
+														status="error"
+														value={followerDiff}
+													></Badge>
+												)}
+											</TouchableOpacity>
+										)}
+										{auth.currentUser.uid !== uid && (
+											<TouchableOpacity
+												style={styles.statsBox}
+												onPress={() => {
+													navigation.goBack();
+													navigation.navigate("Follower", {
+														uid: uid,
+														follower: user.follower,
+													});
+												}}
+											>
+												<Text style={{ color: "#f3f3f3" }}>Follower</Text>
+												{!currentUser.blockedUsers.includes(user.username) &&
+													!user.blockedUsers.includes(currentUsername) && (
+														<Text>{user.follower.length}</Text>
+													)}
+												{(currentUser.blockedUsers.includes(user.username) ||
+													user.blockedUsers.includes(currentUsername)) && (
+													<Text style={{ color: "#f3f3f3" }}>0</Text>
+												)}
+											</TouchableOpacity>
+										)}
+									</View>
+									{auth.currentUser.uid === uid && (
+										<TouchableOpacity
+											style={styles.statsBox}
+											onPress={() => {
+												navigation.goBack();
+												navigation.navigate("Following", {
+													uid: uid,
+													following: currentUser.following,
+												});
+											}}
+										>
+											<View style={styles.statsBox}>
+												<Text style={{ color: "#f3f3f3" }}>Following</Text>
+												<Text style={{ color: "#f3f3f3" }}>
+													{user.following.length}
+												</Text>
+											</View>
+										</TouchableOpacity>
+									)}
+									{auth.currentUser.uid !== uid && (
+										<TouchableOpacity
+											style={styles.statsBox}
+											onPress={() => {
+												navigation.goBack();
+												navigation.navigate("Following", {
+													uid: uid,
+													following: user.following,
+												});
+											}}
+										>
+											<View style={styles.statsBox}>
+												<Text style={{ color: "#f3f3f3" }}>Following</Text>
+												{!currentUser.blockedUsers.includes(user.username) &&
+													!user.blockedUsers.includes(currentUsername) && (
+														<Text style={{ color: "#f3f3f3" }}>
+															{user.following.length}
+														</Text>
+													)}
+												{(currentUser.blockedUsers.includes(user.username) ||
+													user.blockedUsers.includes(currentUsername)) && (
+													<Text style={{ color: "#f3f3f3" }}>0</Text>
+												)}
+											</View>
+										</TouchableOpacity>
+									)}
+								</View>
+							)}
+						{currentUser.blockedUsers && user.blockedUsers && (
+							<View style={{ marginTop: windowHeight * 0.03 }}>
+								{events.length > 0 &&
+									!currentUser.blockedUsers.includes(user.username) &&
+									!user.blockedUsers.includes(currentUsername) && (
+										<ScrollView
+											horizontal={true}
+											showsVerticalScrollIndicator={false}
+											showsHorizontalScrollIndicator={false}
+											style={{
+												paddingHorizontal: 24,
+											}}
+										>
+											{currentUserEvents.map((event) => (
+												<LocalsEventCard
+													key={event.id}
+													title={event.title}
+													date={event.date
+														?.toDate()
+														?.toLocaleDateString("de-DE", shortDate)}
+													location={event.address}
+													// image={event.imageUrl}
+													category={event.title}
+													onPress={() =>
+														navigation.navigate("EventDetails", { event })
+													}
+													image={
+														fullStorage
+															? event.imageUrl
+															: "https://source.unsplash.com/random/?" +
+															  event.title
+													}
+													style={{ marginRight: 24 }}
+													profile
+												/>
+											))}
+										</ScrollView>
+									)}
+								{(currentUser.blockedUsers.includes(user.username) ||
+									user.blockedUsers.includes(currentUsername)) && <View></View>}
+								{user.recentActivities &&
+									currentUser.recentActivities &&
+									user.recentActivities.length > 0 && (
+										<Text
+											style={[
+												styles.text,
+												styles.recent,
+
+												{
+													marginLeft: windowWidth * 0.15,
+													marginTop: windowHeight * 0.05,
+													color: "#f3f3f3",
+												},
+											]}
+										>
+											Recent Activity
+										</Text>
+									)}
+								<View
+									style={[
+										styles.recentItem,
 										{
+											marginBottom: windowHeight * 0.02,
 											marginLeft: windowWidth * 0.15,
-											marginTop: windowHeight * 0.05,
 										},
 									]}
 								>
-									Recent Activity
-								</Text>
-							)}
-						<View
-							style={[
-								styles.recentItem,
-								{
-									marginBottom: windowHeight * 0.02,
-									marginLeft: windowWidth * 0.15,
-								},
-							]}
-						>
-							{auth.currentUser.uid === uid &&
-								currentUser.recentActivities &&
-								currentUser.recentActivities.length > 0 && (
-									<View>
-										{currentUser.recentActivities.map((recent) => (
-											<View style={{ flexDirection: "row" }}>
-												<View style={styles.recentItemIndicator}></View>
-												{recent.category === "user" &&
-													recent.action === "follow" && (
-														<View style={{ flexDirection: "row" }}>
-															<Text>folgt jetzt </Text>
-															<TouchableOpacity
-																onPress={() => {
-																	navigation.navigate("Following", {
-																		ruid: recent.uid,
-																	});
-																}}
-															>
-																<Text style={{ fontWeight: "bold" }}>
-																	@{recent.username}
-																</Text>
-															</TouchableOpacity>
-														</View>
-													)}
-												{recent.category === "event" &&
-													recent.action === "create" && (
-														<View style={{ flexDirection: "row" }}>
-															<Text>hat </Text>
-															<TouchableOpacity
-																onPress={() => {
-																	getEventByTitle(recent.title);
-																}}
-															>
-																<Text style={{ fontWeight: "bold" }}>
-																	{recent.title}{" "}
-																</Text>
-															</TouchableOpacity>
-															<Text>erstellt</Text>
-														</View>
-													)}
-												{recent.category === "event" &&
-													recent.action === "participate" && (
-														<View style={{ flexDirection: "row" }}>
-															<Text>nimmt an </Text>
-															<TouchableOpacity
-																onPress={() => {
-																	getEventByTitle(recent.title);
-																}}
-															>
-																<Text style={{ fontWeight: "bold" }}>
-																	{recent.title}{" "}
-																</Text>
-															</TouchableOpacity>
-															<Text>teil</Text>
-														</View>
-													)}
+									{auth.currentUser.uid === uid &&
+										currentUser.recentActivities &&
+										currentUser.recentActivities.length > 0 && (
+											<View>
+												{currentUser.recentActivities.map((recent) => (
+													<View style={{ flexDirection: "row" }}>
+														<View style={styles.recentItemIndicator}></View>
+														{recent.category === "user" &&
+															recent.action === "follow" && (
+																<View style={{ flexDirection: "row" }}>
+																	<Text style={{ color: "#f3f3f3" }}>
+																		folgt jetzt{" "}
+																	</Text>
+																	<TouchableOpacity
+																		onPress={() => {
+																			navigation.navigate("Following", {
+																				ruid: recent.uid,
+																			});
+																		}}
+																	>
+																		<Text
+																			style={{
+																				fontWeight: "bold",
+																				color: "#f3f3f3",
+																			}}
+																		>
+																			@{recent.username}
+																		</Text>
+																	</TouchableOpacity>
+																</View>
+															)}
+														{recent.category === "event" &&
+															recent.action === "create" && (
+																<View style={{ flexDirection: "row" }}>
+																	<Text style={{ color: "#f3f3f3" }}>hat </Text>
+																	<TouchableOpacity
+																		onPress={() => {
+																			getEventByTitle(recent.title);
+																		}}
+																	>
+																		<Text
+																			style={{
+																				fontWeight: "bold",
+																				color: "#f3f3f3",
+																			}}
+																		>
+																			{recent.title}{" "}
+																		</Text>
+																	</TouchableOpacity>
+																	<Text style={{ color: "#f3f3f3" }}>
+																		erstellt
+																	</Text>
+																</View>
+															)}
+														{recent.category === "event" &&
+															recent.action === "participate" && (
+																<View style={{ flexDirection: "row" }}>
+																	<Text style={{ color: "#f3f3f3" }}>
+																		nimmt an{" "}
+																	</Text>
+																	<TouchableOpacity
+																		onPress={() => {
+																			getEventByTitle(recent.title);
+																		}}
+																	>
+																		<Text
+																			style={{
+																				fontWeight: "bold",
+																				color: "#f3f3f3",
+																			}}
+																		>
+																			{recent.title}{" "}
+																		</Text>
+																	</TouchableOpacity>
+																	<Text style={{ color: "#f3f3f3" }}>teil</Text>
+																</View>
+															)}
+													</View>
+												))}
 											</View>
-										))}
-									</View>
-								)}
+										)}
 
-							{auth.currentUser.uid !== uid &&
-								user.recentActivities &&
-								user.recentActivities.length > 0 && (
-									<View>
-										{user.recentActivities.map((recent) => (
-											<View style={{ flexDirection: "row" }}>
-												<View style={styles.recentItemIndicator}></View>
-												{recent.category === "user" &&
-													recent.action === "follow" && (
-														<View style={{ flexDirection: "row" }}>
-															<Text>folgt jetzt </Text>
-															<TouchableOpacity
-																onPress={() => {
-																	navigation.navigate("Following", {
-																		ruid: recent.uid,
-																	});
-																}}
-															>
-																<Text style={{ fontWeight: "bold" }}>
-																	@{recent.username}
-																</Text>
-															</TouchableOpacity>
-														</View>
-													)}
-												{recent.category === "event" &&
-													recent.action === "create" && (
-														<View style={{ flexDirection: "row" }}>
-															<Text>hat </Text>
-															<TouchableOpacity
-																onPress={() => {
-																	getEventByTitle(recent.title);
-																}}
-															>
-																<Text style={{ fontWeight: "bold" }}>
-																	{recent.title}{" "}
-																</Text>
-															</TouchableOpacity>
-															<Text>erstellt</Text>
-														</View>
-													)}
-												{recent.category === "event" &&
-													recent.action === "participate" && (
-														<View style={{ flexDirection: "row" }}>
-															<Text>nimmt an </Text>
-															<TouchableOpacity
-																onPress={() => {
-																	getEventByTitle(recent.title);
-																}}
-															>
-																<Text style={{ fontWeight: "bold" }}>
-																	{recent.title}{" "}
-																</Text>
-															</TouchableOpacity>
-															<Text>teil</Text>
-														</View>
-													)}
+									{auth.currentUser.uid !== uid &&
+										user.recentActivities &&
+										user.recentActivities.length > 0 && (
+											<View>
+												{user.recentActivities.map((recent) => (
+													<View style={{ flexDirection: "row" }}>
+														<View style={styles.recentItemIndicator}></View>
+														{recent.category === "user" &&
+															recent.action === "follow" && (
+																<View style={{ flexDirection: "row" }}>
+																	<Text style={{ color: "#f3f3f3" }}>
+																		folgt jetzt{" "}
+																	</Text>
+																	<TouchableOpacity
+																		onPress={() => {
+																			navigation.navigate("Following", {
+																				ruid: recent.uid,
+																			});
+																		}}
+																	>
+																		<Text
+																			style={{
+																				fontWeight: "bold",
+																				color: "#f3f3f3",
+																			}}
+																		>
+																			@{recent.username}
+																		</Text>
+																	</TouchableOpacity>
+																</View>
+															)}
+														{recent.category === "event" &&
+															recent.action === "create" && (
+																<View style={{ flexDirection: "row" }}>
+																	<Text style={{ color: "#f3f3f3" }}>hat </Text>
+																	<TouchableOpacity
+																		onPress={() => {
+																			getEventByTitle(recent.title);
+																		}}
+																	>
+																		<Text
+																			style={{
+																				fontWeight: "bold",
+																				color: "#f3f3f3",
+																			}}
+																		>
+																			{recent.title}{" "}
+																		</Text>
+																	</TouchableOpacity>
+																	<Text style={{ color: "#f3f3f3" }}>
+																		erstellt
+																	</Text>
+																</View>
+															)}
+														{recent.category === "event" &&
+															recent.action === "participate" && (
+																<View style={{ flexDirection: "row" }}>
+																	<Text style={{ color: "#f3f3f3" }}>
+																		nimmt an{" "}
+																	</Text>
+																	<TouchableOpacity
+																		onPress={() => {
+																			getEventByTitle(recent.title);
+																		}}
+																	>
+																		<Text style={{ fontWeight: "bold" }}>
+																			{recent.title}{" "}
+																		</Text>
+																	</TouchableOpacity>
+																	<Text style={{ color: "#f3f3f3" }}>teil</Text>
+																</View>
+															)}
+													</View>
+												))}
 											</View>
-										))}
+										)}
+									<View>
+										<Text style={{ color: "#f3f3f3" }}>{events.title}</Text>
 									</View>
-								)}
-							<View>
-								<Text>{events.title}</Text>
+								</View>
 							</View>
-						</View>
-					</View>
-				)}
-			</ScrollView>
-		</SafeAreaView>
+						)}
+					</ScrollView>
+				</View>
+			</BackgroundImage>
+		</View>
 	);
 };
 
@@ -1419,10 +1512,10 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
-		marginBottom: 65,
+		color: "white",
 	},
 	text: {
-		color: "#000000",
+		color: "#f3f3f3",
 	},
 	image: {
 		width: 200,
@@ -1431,6 +1524,7 @@ const styles = StyleSheet.create({
 	titleBar: {
 		flexDirection: "row",
 		justifyContent: "flex-end",
+		color: "#f3f3f3",
 	},
 	profileImage: {
 		width: 200,
@@ -1458,14 +1552,17 @@ const styles = StyleSheet.create({
 	infoContainer: {
 		alignSelf: "center",
 		alignItems: "center",
+		color: "#f3f3f3",
 	},
 	statsContainer: {
 		flexDirection: "row",
 		alignSelf: "center",
+		color: "#f3f3f3",
 	},
 	statsBox: {
 		alignItems: "center",
 		flex: 1,
+		color: "#f3f3f3",
 	},
 	mediaImageContainer: {
 		width: 200,
@@ -1477,9 +1574,10 @@ const styles = StyleSheet.create({
 	recentItem: {
 		flexDirection: "row",
 		alignItems: "flex-start",
+		color: "#f3f3f3",
 	},
 	recentItemIndicator: {
-		backgroundColor: "#000000",
+		backgroundColor: "#f3f3f3",
 		padding: 4,
 		height: 12,
 		width: 12,
@@ -1490,6 +1588,7 @@ const styles = StyleSheet.create({
 	recent: {
 		marginBottom: 6,
 		fontSize: 10,
+		color: "#f3f3f3",
 	},
 	Test: {
 		backgroundColor: "#999999",
@@ -1545,7 +1644,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "#2196F3",
 	},
 	textStyle: {
-		color: "white",
+		color: "#f3f3f3",
 		fontWeight: "bold",
 		textAlign: "center",
 	},

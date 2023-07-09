@@ -101,8 +101,8 @@ const Livemap = ({ navigation }) => {
 	const [username, setUsername] = useState(null);
 	const [impressions, setImpressions] = useState({});
 	const [markerOpacity, setMarkerOpacity] = useState(new Animated.Value(0));
-	const [radius, setRadius] = useState(100);
-	const [sliderValue, setSliderValue] = useState(100);
+	const [radius, setRadius] = useState(30);
+	const [sliderValue, setSliderValue] = useState(30);
 	const [showRadius, setShowRadius] = useState(false);
 	const [isSliderActive, setIsSliderActive] = useState(false);
 
@@ -382,6 +382,7 @@ const Livemap = ({ navigation }) => {
 			}
 		}
 	};
+
 	useEffect(() => {
 		if (selectedEvent) {
 			const eventRef = firebase
@@ -498,7 +499,10 @@ const Livemap = ({ navigation }) => {
 	};
 
 	function filterEventsByCategory(events, category) {
-		return events.filter((event) => event.category === category);
+		const uniqueCategories = [
+			...new Set(events.map((event) => event.category)),
+		];
+		return uniqueCategories;
 	}
 
 	const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
@@ -550,8 +554,8 @@ const Livemap = ({ navigation }) => {
 	const filteredEventsByRadius = filterEventsByRadius(events, radius);
 
 	const filteredEvents = category
-		? events.filter((event) => event.category === category)
-		: events;
+		? filteredEventsByRadius.filter((event) => event.category === category)
+		: filteredEventsByRadius;
 
 	return (
 		<View style={styles.container}>
@@ -662,19 +666,27 @@ const Livemap = ({ navigation }) => {
 					/>
 				</View>
 			</Modal>
+			<View style={styles.filterContainer}>
+				<TouchableOpacity
+					onPress={() => setIsModalVisible(true)}
+					style={{
+						width: 40,
+						height: 40,
+						borderRadius: 100,
+						backgroundColor: "#ec404b",
+						justifyContent: "center",
+						alignItems: "center",
+					}}
+				>
+					<Ionicons name="filter-outline" size={24} color="#f3f3f3" />
+				</TouchableOpacity>
+			</View>
 
 			<View style={styles.sliderContainer}>
-				{/* filter events by category modal button */}
-
-				<LocalsButton
-					title={"Filter by " + (category ? category : "category")}
-					onPress={() => setIsModalVisible(true)}
-					style={{ width: 200, height: 50, borderRadius: 10 }}
-				/>
 				<Slider
 					style={styles.slider}
 					minimumValue={1}
-					maximumValue={500}
+					maximumValue={100}
 					step={1}
 					value={sliderValue}
 					onValueChange={(value) => {
@@ -864,10 +876,17 @@ const Livemap = ({ navigation }) => {
 const styles = StyleSheet.create({
 	sliderContainer: {
 		position: "absolute",
-		bottom: 85,
+		bottom: 25,
 		left: 20,
 		right: 20,
 		alignItems: "center",
+	},
+	filterContainer: {
+		position: "absolute",
+		top: 45,
+		left: 20,
+		right: 20,
+		alignItems: "flex-end",
 	},
 	sliderValueText: {
 		fontSize: 18,
