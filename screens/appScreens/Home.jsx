@@ -22,7 +22,30 @@ import { Divider, SocialIcon } from "react-native-elements";
 import FirestoreContext from "../../context/FirestoreContext";
 import { set } from "react-native-reanimated";
 
+/**
+ *
+ * Renders the Profile page with the provided props.
+ * @param An object representing the current route information provided by the React Navigation library or similar
+ * navigation framework.
+ * @returns {JSX.Element} A JSX.Element representing the Profile page.
+ * @constructor
+ */
+
 const HomeScreen = ({ navigation }) => {
+	/**
+	 * @typedef {Object} State - The state object for the HomeScreen component.
+	 * @property {Array} users - An array of users.
+	 * @property {String} search - The search string.
+	 * @property {Boolean} refreshing - A boolean indicating whether the screen is refreshing.
+	 * @property {Boolean} showSearch - A boolean indicating whether the search bar is shown.
+	 * @property {String} username - The username of the current user.
+	 * @property {Array} categories - An array of categories.
+	 * @property {Array} nearbyEvents - An array of nearby events.
+	 * @property {Number} radius - The radius for the nearby events.
+	 * @property {Object} location - The location of the current user.
+	 * @property {Boolean} fullStorage - A boolean indicating whether the storage is full.
+	 */
+
 	const [users, setUsers] = useState([]);
 	const [search, setSearch] = useState("");
 	const [refreshing, setRefreshing] = useState(false);
@@ -34,12 +57,27 @@ const HomeScreen = ({ navigation }) => {
 	const [location, setLocation] = useState(null);
 	const [fullStorage, setFullStorage] = useState(false);
 
+	/**
+	 * @typedef {Object} Effect - The effect object for the HomeScreen component.
+	 * @property {Function} filterEventsByRadius - A function that filters the events by radius.
+	 * @property {Function} getDistanceFromLatLonInKm - A function that calculates the distance between two points.
+	 */
 	useEffect(() => {
 		const filteredEvents = filterEventsByRadius(events, radius);
 		console.log(filteredEvents);
 		setNearbyEvents(filteredEvents);
 	}, [events, radius, location]);
 
+	/**
+	 * Filters the events by radius.
+	 * @param {Array} events - An array of events.
+	 * @param {Number} radius - The radius for the nearby events.
+	 * @returns {Array} An array of events.
+	 * @constructor
+	 * @function
+	 * @name filterEventsByRadius
+	 * @description Filters the events by radius.
+	 */
 	const filterEventsByRadius = (events, radius) => {
 		if (!location) return events;
 
@@ -55,6 +93,23 @@ const HomeScreen = ({ navigation }) => {
 			return eventDistance <= radius;
 		});
 	};
+
+	/**
+	 * Calculates the distance between two points.
+	 * @param {Number} lat1 - The latitude of the first point.
+	 * @param {Number} lon1 - The longitude of the first point.
+	 * @param {Number} lat2 - The latitude of the second point.
+	 * @param {Number} lon2 - The longitude of the second point.
+	 * @returns {Number} The distance between the two points.
+	 * @constructor
+	 * @function
+	 * @name getDistanceFromLatLonInKm
+	 * @description Calculates the distance between two points.
+	 *
+	 * @example
+	 * // returns 0.5
+	 * getDistanceFromLatLonInKm(52.516272, 13.377722, 52.516272, 13.377722)
+	 */
 
 	const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
 		const R = 6371; // Radius der Erde in Kilometern
@@ -73,6 +128,13 @@ const HomeScreen = ({ navigation }) => {
 	const deg2rad = (deg) => {
 		return deg * (Math.PI / 180);
 	};
+
+	/**
+	 * @typedef {Object} Effect - The effect object for the HomeScreen component.
+	 * @property {Function} getLocation - A function that gets the location of the current user.
+	 * @property {Function} getUsers - A function that gets the users.
+	 * @property {Function} checkTrafficAvailability - A function that checks the traffic availability.
+	 */
 
 	useEffect(() => {
 		const getLocation = async () => {
@@ -93,15 +155,42 @@ const HomeScreen = ({ navigation }) => {
 		getLocation();
 	}, []);
 
+	/**
+	 * @typedef {Object} Context - The context object for the HomeScreen component.
+	 * @property {Array} events - An array of events.
+	 */
 	const { events } = useContext(FirestoreContext);
 
-	// create contest for events
+	/**
+	 * @typedef {Object} Context - The context object for the HomeScreen component.
+	 * @property {Function} setEvents - A function that sets the events.
+	 */
 	const { setEvents } = useContext(FirestoreContext);
+
+	/**
+	 * @typedef {Object} Effect - The effect object for the HomeScreen component.
+	 * @property {Function} filterEventsByCategory - A function that filters the events by category.
+	 * @property {Function} getUsers - A function that gets the users.
+	 */
 
 	useEffect(() => {
 		filterEventsByCategory(events);
 		getUsers();
 	}, []);
+
+	/**
+	 * Filters the events by category.
+	 * @param {Array} events - An array of events.
+	 * @returns {Array} An array of events.
+	 * @constructor
+	 * @function
+	 * @name filterEventsByCategory
+	 * @description Filters the events by category.
+	 *
+	 * @example
+	 * // returns [{id: "1", category: "Sport"}, {id: "2", category: "Sport"}]
+	 * filterEventsByCategory([{id: "1", category: "Sport"}, {id: "2", category: "Sport"}, {id: "3", category: "Kultur"}])
+	 */
 
 	const filterEventsByCategory = () => {
 		firestore
@@ -124,6 +213,15 @@ const HomeScreen = ({ navigation }) => {
 			});
 	};
 
+	/**
+	 * Gets the users.
+	 * @returns {Array} An array of users.
+	 * @constructor
+	 * @function
+	 * @name getUsers
+	 * @description Gets the users.
+	 */
+
 	function getUsers() {
 		firestore
 			.collection("users")
@@ -137,6 +235,15 @@ const HomeScreen = ({ navigation }) => {
 			});
 	}
 
+	/**
+	 * updates the events on refresh.
+	 * @returns {Array} An array of events.
+	 * @constructor
+	 * @function
+	 * @name handleRefresh
+	 * @description updates the events on refresh.
+	 */
+
 	const handleRefresh = () => {
 		setRefreshing(true);
 		updateEvents();
@@ -144,6 +251,14 @@ const HomeScreen = ({ navigation }) => {
 			setRefreshing(false);
 		}, 1000);
 	};
+
+	/**
+	 * @typedef {Object} Effect - The effect object for the HomeScreen component.
+	 * @property {Function} filterEvents - A function that filters the events.
+	 * @property {Function} options - A function that sets the options.
+	 * @property {Function} shortDate - A function that sets the shortDate.
+	 * @property {Function} today - A function that sets the today.
+	 */
 
 	const filterEvents = (events, search) => {
 		return events.filter((event) => {
@@ -159,8 +274,15 @@ const HomeScreen = ({ navigation }) => {
 		});
 	};
 
+	/**
+	 * @typedef {Object} Effect - The effect object for the HomeScreen component.
+	 * @property {Function} FilteredEvents - A function that filters the events.
+	 */
 	const FilteredEvents = filterEvents(events, search);
 
+	/**
+	 * @property {Function} options - A function that sets the options.
+	 */
 	const options = {
 		weekday: "long",
 		year: "numeric",
@@ -168,14 +290,31 @@ const HomeScreen = ({ navigation }) => {
 		day: "numeric",
 	};
 
+	/**
+	 * @property {Function} shortDate - A function that sets the shortDate.
+	 */
 	const shortDate = {
 		year: "numeric",
 		month: "numeric",
 		day: "numeric",
 	};
 
+	/**
+	 * @property {Function} today - A function that sets the today.
+	 * @description Gets the current date.
+	 */
 	const today = new Date().toLocaleDateString("de-DE", options);
 
+	/**
+	 * @typedef {Object} Effect - The effect object for the HomeScreen component.
+	 * @property {Function} useEffect - A function that sets the useEffect.
+	 * @property {Function} unsubscribe - A function that sets the unsubscribe.
+	 * @property {Function} auth - A function that sets the auth.
+	 * @property {Function} firestore - A function that sets the firestore.
+	 * @property {Function} doc - A function that sets the doc.
+	 * @property {Function} setUsername - A function that sets the setUsername.
+	 * @property {Function} userData - A function that sets the userData.
+	 */
 	useEffect(() => {
 		const unsubscribe = auth.onAuthStateChanged((user) => {
 			if (user) {
@@ -200,10 +339,16 @@ const HomeScreen = ({ navigation }) => {
 		return () => unsubscribe();
 	}, []);
 
+	/**
+	 * @typedef {Object} Effect - The effect object for the HomeScreen component.
+	 */
 	const topEvents = FilteredEvents.sort(
 		(a, b) => b.impressions - a.impressions
 	).slice(0, 5);
 
+	/**
+	 * @property {Function} userFriendsEvents - A function that sets the userFriendsEvents.
+	 */
 	const userFriendsEvents = FilteredEvents.filter((event) =>
 		users.find(
 			(user) =>
@@ -213,6 +358,10 @@ const HomeScreen = ({ navigation }) => {
 		)
 	);
 
+	/**
+	 * @property {Function} userFriendsEvents - A function that sets the userFriendsEvents.
+	 * @description Gets the userFriendsEvents.
+	 */
 	userFriendsEvents.slice(0, 5);
 
 	const combinedEvents = [...topEvents, ...userFriendsEvents];
@@ -236,6 +385,14 @@ const HomeScreen = ({ navigation }) => {
 		];
 	}
 
+	/**
+	 * @property {Function} updateEvents - A function that updates the events.
+	 * @description Updates the events.
+	 * @returns {Array} An array of events.
+	 * @constructor
+	 * @function
+	 * @name updateEvents
+	 */
 	const updateEvents = () => {
 		firestore
 			.collection("events")
@@ -251,6 +408,8 @@ const HomeScreen = ({ navigation }) => {
 			});
 	};
 
+	/**
+	 * @property {Function} checkTrafficAvailability - A function that checks the traffic availability.
 	const checkTrafficAvailability = async () => {
 		try {
 			// Verwende die Firebase Storage API, um Informationen über den verbleibenden Traffic abzurufen
