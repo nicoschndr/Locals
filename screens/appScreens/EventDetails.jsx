@@ -92,6 +92,7 @@ const EventDetails = ({ route, navigation }) => {
 	const [isEventLiked, setIsEventLiked] = useState(false);
 	const [username, setUsername] = useState(null);
 	const [currentUser, setCurrentUser] = useState({});
+	const [fullStorage, setFullStorage] = useState(false);
 	let rA = [];
 
 	const getEventById = async (id) => {
@@ -545,6 +546,7 @@ const EventDetails = ({ route, navigation }) => {
 			await getEventById(route.params.event.id);
 		};
 		fetchUsernameAndEvent();
+		checkTrafficAvailability();
 	}, []);
 
 	const showActionSheet = () => {
@@ -568,6 +570,29 @@ const EventDetails = ({ route, navigation }) => {
 		);
 	};
 
+	const checkTrafficAvailability = async () => {
+		try {
+			// Verwende die Firebase Storage API, um Informationen über den verbleibenden Traffic abzurufen
+			const storageRef = firebase.storage().ref();
+
+			// Rufe die Nutzungsinformationen des Storage ab
+			const { usage } = await storageRef.child("/").getMetadata();
+
+			// Überprüfe, ob noch ausreichend Traffic vorhanden ist
+			const remainingTraffic = usage.limit - usage.size;
+			const threshold = 100000; // Schwellenwert für verbleibenden Traffic
+
+			if (remainingTraffic < threshold) {
+				setFullStorage(true);
+			}
+
+			return remainingTraffic > threshold;
+		} catch (error) {
+			console.error("Error checking traffic availability:", error);
+			return false;
+		}
+	};
+
 	return (
 		<View style={styles.container}>
 			{!showComments && (
@@ -575,9 +600,11 @@ const EventDetails = ({ route, navigation }) => {
 					<Image
 						style={{ width: "100%", height: 400 }}
 						// source={{ uri: event.imageUrl }}
-						source={{
-							uri: "https://source.unsplash.com/random/?" + selectedEvent.title,
-						}}
+						image={
+							fullStorage
+								? event.imageUrl
+								: "https://source.unsplash.com/random/?portrait"
+						}
 					/>
 					<Ionicons
 						name="chevron-down"
@@ -657,7 +684,11 @@ const EventDetails = ({ route, navigation }) => {
 							>
 								<Image
 									style={{ width: 32, height: 32, borderRadius: 16 }}
-									source={{ uri: user.imageUrl }}
+									image={
+										fullStorage
+											? user.imageUrl
+											: "https://source.unsplash.com/random/?portrait"
+									}
 								/>
 								<Text style={styles.item}>{selectedEvent.creator}</Text>
 							</TouchableOpacity>

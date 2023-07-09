@@ -29,6 +29,7 @@ const Categories = ({ navigation, route }) => {
 	const [activeEvents, setActiveEvents] = useState([]);
 	const [categories, setCategories] = useState([]);
 	const [events, setEvents] = useState([]);
+	const [fullStorage, setFullStorage] = useState(false);
 
 	const { category } = route.params;
 
@@ -49,6 +50,7 @@ const Categories = ({ navigation, route }) => {
 
 	useEffect(() => {
 		getEvents();
+		checkTrafficAvailability();
 	}, []); //
 
 	const handleRefresh = () => {
@@ -70,6 +72,29 @@ const Categories = ({ navigation, route }) => {
 		day: "numeric",
 	};
 	const today = new Date().toLocaleDateString("de-DE", options);
+
+	const checkTrafficAvailability = async () => {
+		try {
+			// Verwende die Firebase Storage API, um Informationen über den verbleibenden Traffic abzurufen
+			const storageRef = firebase.storage().ref();
+
+			// Rufe die Nutzungsinformationen des Storage ab
+			const { usage } = await storageRef.child("/").getMetadata();
+
+			// Überprüfe, ob noch ausreichend Traffic vorhanden ist
+			const remainingTraffic = usage.limit - usage.size;
+			const threshold = 100000; // Schwellenwert für verbleibenden Traffic
+
+			if (remainingTraffic < threshold) {
+				setFullStorage(true);
+			}
+
+			return remainingTraffic > threshold;
+		} catch (error) {
+			console.error("Error checking traffic availability:", error);
+			return false;
+		}
+	};
 
 	return (
 		<View style={styles.container}>
@@ -140,7 +165,11 @@ const Categories = ({ navigation, route }) => {
 								?.toDate()
 								?.toLocaleDateString("de-DE", shortDate)}
 							location={event.address}
-							image={event.imageUrl}
+							image={
+								fullStorage
+									? event.imageUrl
+									: "https://source.unsplash.com/random/?" + event.category
+							}
 							category={event.title}
 							onPress={() => navigation.navigate("EventDetails", { event })}
 							style={{ marginRight: 24, marginBottom: 24 }}

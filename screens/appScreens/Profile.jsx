@@ -63,6 +63,7 @@ const Profile = ({ route, navigation }) => {
 	const [shouldHide, setShouldHide] = React.useState(false);
 	const [followerDiff, setFollowerDiff] = useState(0);
 	const [unreadMessages, setUnreadMessages] = useState(null);
+	const [fullStorage, setFullStorage] = useState(false);
 	// const [events, setEvents] = useState([]);
 
 	const { events } = useContext(FirestoreContext);
@@ -91,9 +92,31 @@ const Profile = ({ route, navigation }) => {
 			currentUsername: currentUsername,
 		});
 	};
+	const checkTrafficAvailability = async () => {
+		try {
+			// Verwende die Firebase Storage API, um Informationen über den verbleibenden Traffic abzurufen
+			const storageRef = firebase.storage().ref();
+
+			// Rufe die Nutzungsinformationen des Storage ab
+			const { usage } = await storageRef.child("/").getMetadata();
+
+			// Überprüfe, ob noch ausreichend Traffic vorhanden ist
+			const remainingTraffic = usage.limit - usage.size;
+			const threshold = 100000; // Schwellenwert für verbleibenden Traffic
+
+			if (remainingTraffic < threshold) {
+				setFullStorage(true);
+			}
+
+			return remainingTraffic > threshold;
+		} catch (error) {
+			console.error("Error checking traffic availability:", error);
+			return false;
+		}
+	};
 
 	useEffect(() => {
-		// getUserPosts();
+		checkTrafficAvailability();
 		getUserData();
 		getCurrentUserData();
 	}, []);
@@ -956,7 +979,11 @@ const Profile = ({ route, navigation }) => {
 						!user.blockedUsers.includes(currentUsername) && (
 							<View style={styles.profileImage}>
 								<Image
-									source={{ uri: user.imageUrl }}
+									image={
+										fullStorage
+											? user.imageUrl
+											: "https://source.unsplash.com/random/?portrait"
+									}
 									style={styles.image}
 									resizeMode="center"
 								/>
@@ -1215,7 +1242,11 @@ const Profile = ({ route, navigation }) => {
 											onPress={() =>
 												navigation.navigate("EventDetails", { event })
 											}
-											image={event.imageUrl}
+											image={
+												fullStorage
+													? event.imageUrl
+													: "https://source.unsplash.com/random/?" + event.title
+											}
 											style={{ marginRight: 24 }}
 											profile
 										/>
