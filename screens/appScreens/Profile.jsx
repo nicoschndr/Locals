@@ -498,6 +498,7 @@ const Profile = ({ route, navigation }) => {
 								<Ionicons
 									style={{ marginLeft: windowWidth - 50 }}
 									name={"reorder-three-outline"}
+									color={"#f3f3f3"}
 									size={40}
 								>
 									{" "}
@@ -508,8 +509,8 @@ const Profile = ({ route, navigation }) => {
 										status="error"
 										containerStyle={{
 											position: "absolute",
-											top: 5,
-											right: 35,
+											top: 0,
+											right: 5,
 										}}
 									></Badge>
 								)}

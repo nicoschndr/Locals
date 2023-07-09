@@ -271,6 +271,7 @@ function AppNavigation() {
 							unmountOnBlur: true,
 							tabBarLabel: () => <TabProfileIcon />,
 							tabBarInactiveTintColor: "#f3f3f3",
+							tabBarActiveTintColor: "#f3f3f3",
 							// transparent tabBarLabel
 							tabBarStyle: {
 								backgroundColor: "transparent",

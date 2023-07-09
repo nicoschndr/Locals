@@ -670,8 +670,8 @@ const Livemap = ({ navigation }) => {
 				<TouchableOpacity
 					onPress={() => setIsModalVisible(true)}
 					style={{
-						width: 40,
-						height: 40,
+						width: 30,
+						height: 30,
 						borderRadius: 100,
 						backgroundColor: "#ec404b",
 						justifyContent: "center",
