@@ -43,6 +43,15 @@ You can also run the app on your own device using the Expo Go app. To do this, f
 2. Open the Expo Go app and sign up for an account.
 3. Scan the QR code in the Expo DevTools to open the app on your device.
 
+```
+You can also access the app by opening the published version in Expo Go. To do this, follow these steps:
+``````
+1. Open the Expo Go app on your device.
+2. Sign in to your Expo account.
+3. Tap on the "Projects" tab.
+4. Find the Locals-IP2 project in the list and tap on it.
+5. Tap on the "Open project" button to launch the app.
+
 ## Using the App
 
 Once you have the app running, you can use it to find events and activities in your area. The app will display a list of categories, such as "Concert", "Culture", and "Sports". You can select a category to see a list of events in that category.
@@ -57,15 +66,13 @@ In addition to browsing events by category, you can also search for events by ke
 
 The app also includes several other screens that you can use to explore events and activities in your area. These include:
 
-- **Map**: This screen displays a map of your current location, with pins indicating nearby events and activities. You can tap on a pin to view more details about the event, or use the search bar to filter the results.
+- **Map**: This screen displays a real-time map of events and activities happening in your area. You can use this feature to discover new events and activities as they happen and get directions to them using your device's maps app. The markers indicate nearby events and activities. You can tap on a pin to view more details about the event.
 
 - **Chatbot**: This screen allows you to chat with a virtual assistant that can help you find events and activities in your area. Simply type in your question or request, and the chatbot will provide you with a response.
 
 - **Yell**: This screen allows you to post messages to a public message board. You can use this feature to ask for recommendations, share your thoughts on events and activities, or connect with other users.
 
 - **Profile**: This screen displays your user profile, where you can view your created events, your activity history, and access your friends list to message other users within the Locals community. You can also edit your profile information and settings.
-
-- **Post**: This screen allows you to create a post to share with other users and with the whole Locals community. After creating a post, you can view it on the Yell screen.
 
 - **Create Event**: This screen allows you to create an event to share with other users and with the whole Locals community. You can include text, images, and a location to your event, and choose whether to make it public or visible only to your friends. After creating an event, other users can find in on the map and the explore screen.
 
@@ -79,7 +86,7 @@ We hope you enjoy using the app to discover new events and activities in your ar
 
 ## Publishing the App
 
-To publish the app to Expo Go, you can use the `expo-cli publish`` command. This will create a new release of the app and make it available to users who have the Expo Go app installed.
+To publish the app to Expo Go, you can use the `expo-cli publish` command. This will create a new release of the app and make it available to users who have the Expo Go app installed.
 
 To access the published app, follow these steps:
 
