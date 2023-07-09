@@ -43,139 +43,139 @@ const Profile = ({ route, navigation }) => {
 		navigation.navigate("FriendList");
 	};
 
-    /**
-     * Used to cache the users the current user is following.
-     * @type {*[]}
-     */
-    let flwng = [];
+	/**
+	 * Used to cache the users the current user is following.
+	 * @type {*[]}
+	 */
+	let flwng = [];
 
-    /**
-     * Used to cache the users that are following the current user.
-     * @type {*[]}
-     */
-    let flw = [];
+	/**
+	 * Used to cache the users that are following the current user.
+	 * @type {*[]}
+	 */
+	let flw = [];
 
-    /**
-     * Used to cache the users the current user has blocked.
-     * @type {*[]}
-     */
-    let blockedUsers = [];
-    let friends = [];
+	/**
+	 * Used to cache the users the current user has blocked.
+	 * @type {*[]}
+	 */
+	let blockedUsers = [];
+	let friends = [];
 
-    /**
-     * Used to cache all messages from all chats where the current user is part of.
-     * @type {*[]}
-     */
-    let messages = [];
+	/**
+	 * Used to cache all messages from all chats where the current user is part of.
+	 * @type {*[]}
+	 */
+	let messages = [];
 
-    /**
-     * Used to cache the recent Activities of the user.
-     * @type {*[]}
-     */
-    let rA = [];
+	/**
+	 * Used to cache the recent Activities of the user.
+	 * @type {*[]}
+	 */
+	let rA = [];
 
-    /**
-     * The width of the current device in px.
-     * @type {number}
-     */
-    const windowWidth = Dimensions.get("window").width;
+	/**
+	 * The width of the current device in px.
+	 * @type {number}
+	 */
+	const windowWidth = Dimensions.get("window").width;
 
-    /**
-     * The height of the current device in px.
-     * @type {number}
-     */
+	/**
+	 * The height of the current device in px.
+	 * @type {number}
+	 */
 	const platform = Platform.OS;
 
-    /**
-     * Either the uid of a user that is not the current user if you navigate to another profile, or the uid of the
-     * current user if you navigate to your own profile.
-     * @type {*|string}
-     */
-    const uid = route.params?.uid || auth.currentUser.uid;
+	/**
+	 * Either the uid of a user that is not the current user if you navigate to another profile, or the uid of the
+	 * current user if you navigate to your own profile.
+	 * @type {*|string}
+	 */
+	const uid = route.params?.uid || auth.currentUser.uid;
 
-    /**
-     * The user that belongs to the profile that is shown.
-     */
-    const [user, setUser] = useState({});
+	/**
+	 * The user that belongs to the profile that is shown.
+	 */
+	const [user, setUser] = useState({});
 
-    /**
-     * The user that is currently logged in.
-     */
-    const [currentUser, setCurrentUser] = useState({});
-    //const [events, setEvents] = useState([]);
+	/**
+	 * The user that is currently logged in.
+	 */
+	const [currentUser, setCurrentUser] = useState({});
+	//const [events, setEvents] = useState([]);
 
-    /**
-     * The username of the user that is currently logged in.
-     */
-    const [currentUsername, setCurrentUsername] = useState("");
+	/**
+	 * The username of the user that is currently logged in.
+	 */
+	const [currentUsername, setCurrentUsername] = useState("");
 
-    /**
-     * The friends of the current user.
-     */
-    const [currentFriends, setCurrentFriends] = useState({});
+	/**
+	 * The friends of the current user.
+	 */
+	const [currentFriends, setCurrentFriends] = useState({});
 
-    /**
-     * The friend requests of the current user.
-     */
-    const [friendRequests, setFriendRequests] = useState([]);
-    const [chats, setChats] = useState([]);
+	/**
+	 * The friend requests of the current user.
+	 */
+	const [friendRequests, setFriendRequests] = useState([]);
+	const [chats, setChats] = useState([]);
 
-    /**
-     * If true the block user modal is shown, if false it is not shown.
-     */
-    const [modalVisible, setModalVisible] = useState(false);
+	/**
+	 * If true the block user modal is shown, if false it is not shown.
+	 */
+	const [modalVisible, setModalVisible] = useState(false);
 
-    /**
-     * If true the report user modal is shown, if false it is not shown.
-     */
-    const [reportModal, setReportModal] = useState(false);
-    const [followerSize, setFollowerSize] = useState("");
-    const [followingSize, setFollowingSize] = useState("");
+	/**
+	 * If true the report user modal is shown, if false it is not shown.
+	 */
+	const [reportModal, setReportModal] = useState(false);
+	const [followerSize, setFollowerSize] = useState("");
+	const [followingSize, setFollowingSize] = useState("");
 
-    /**
-     * The message the user wants to add to his report of another user.
-     */
-    const [text, onChangeText] = React.useState("");
+	/**
+	 * The message the user wants to add to his report of another user.
+	 */
+	const [text, onChangeText] = React.useState("");
 
-    /**
-     * The amount of notifications from the current user.
-     */
-    const [number, onChangeNumber] = React.useState("");
+	/**
+	 * The amount of notifications from the current user.
+	 */
+	const [number, onChangeNumber] = React.useState("");
 
-    /**
-     * The category for which the current user wants to report another user for.
-     */
-    const [reportCategory, setReportCategory] = useState([]);
-    const [shouldHide, setShouldHide] = React.useState(false);
+	/**
+	 * The category for which the current user wants to report another user for.
+	 */
+	const [reportCategory, setReportCategory] = useState([]);
+	const [shouldHide, setShouldHide] = React.useState(false);
 
-    /**
-     * The difference in the number of followers since the last time the user was on the follower page.
-     */
-    const [followerDiff, setFollowerDiff] = useState(0);
+	/**
+	 * The difference in the number of followers since the last time the user was on the follower page.
+	 */
+	const [followerDiff, setFollowerDiff] = useState(0);
 
-    /**
-     * This state variable represents all unread messages from the User that is logged in.
-     */
-    const [unreadMessages, setUnreadMessages] = useState(null);
-    // const [events, setEvents] = useState([]);
+	/**
+	 * This state variable represents all unread messages from the User that is logged in.
+	 */
+	const [unreadMessages, setUnreadMessages] = useState(null);
+	// const [events, setEvents] = useState([]);
 	const [fullStorage, setFullStorage] = useState(false);
 	// const [events, setEvents] = useState([]);
 
-    /**
-     * Context of all events to lower firebase traffic.
-     */
+	/**
+	 * Context of all events to lower firebase traffic.
+	 */
 	const { events } = useContext(FirestoreContext);
 
-    /**
-     * Only the events that the current user created, which are displayed on the profile.
-     */
+	/**
+	 * Only the events that the current user created, which are displayed on the profile.
+	 */
 	const currentUserEvents = events.filter(
 		(event) => event.creator === user.username
 	);
 
-    /**
-     * Used to perform side effects after the component has been rendered and the layout has been updated.
-     */
+	/**
+	 * Used to perform side effects after the component has been rendered and the layout has been updated.
+	 */
 	React.useLayoutEffect(() => {
 		if (uid === firebase.auth().currentUser.uid) {
 			navigation.setOptions({
@@ -220,19 +220,19 @@ const Profile = ({ route, navigation }) => {
 		}
 	};
 
-    /**
-     * Executes functions once when the component mounts.
-     */
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
 		checkTrafficAvailability();
 		getUserData();
 		getCurrentUserData();
 	}, []);
 
-    /**
-     * This function retrieves and updates the user's data from Firestore in real-time. It listens for changes
-     * to the user's document and performs various operations based on the retrieved data.
-     */
+	/**
+	 * This function retrieves and updates the user's data from Firestore in real-time. It listens for changes
+	 * to the user's document and performs various operations based on the retrieved data.
+	 */
 	function getUserData() {
 		setUser([]);
 		firestore
@@ -245,10 +245,10 @@ const Profile = ({ route, navigation }) => {
 			});
 	}
 
-    /**
-     * This function  retrieves and updates the current user's data from Firestore in real-time. It listens for changes
-     * to the user's document and performs various operations based on the retrieved data.
-     */
+	/**
+	 * This function  retrieves and updates the current user's data from Firestore in real-time. It listens for changes
+	 * to the user's document and performs various operations based on the retrieved data.
+	 */
 	function getCurrentUserData() {
 		firestore
 			.collection("users")
@@ -263,13 +263,13 @@ const Profile = ({ route, navigation }) => {
 			});
 	}
 
-    /**
-     * This function  retrieves chat data for the User that is logged in from a Firebase Firestore collection.
-     * It filters the chats based on the provided username and retrieves the chats where the user is not typing (Which
-     * is every Chat where the user is part of). It also calculates the unread messages for the user.
-     * @param username The username of the user for whom chat data is being retrieved
-     * @returns {Promise<void>}
-     */
+	/**
+	 * This function  retrieves chat data for the User that is logged in from a Firebase Firestore collection.
+	 * It filters the chats based on the provided username and retrieves the chats where the user is not typing (Which
+	 * is every Chat where the user is part of). It also calculates the unread messages for the user.
+	 * @param username The username of the user for whom chat data is being retrieved
+	 * @returns {Promise<void>}
+	 */
 	const getChats = async (username) => {
 		try {
 			const chatRef = firebase.firestore().collection("chatRooms");
@@ -305,9 +305,9 @@ const Profile = ({ route, navigation }) => {
 			});
 	}
 
-    /**
-     * Retrieves data about how much friend requests the user has.
-     */
+	/**
+	 * Retrieves data about how much friend requests the user has.
+	 */
 	function getOpenFriendRequests() {
 		firestore
 			.collection("users")
@@ -319,11 +319,11 @@ const Profile = ({ route, navigation }) => {
 			});
 	}
 
-    /**
-     * Checks if the current user and the one that belongs to the profile that is shown, are friends.
-     * @param username the username of the user that belongs to the profile
-     * @param friends all friends of the current user
-     */
+	/**
+	 * Checks if the current user and the one that belongs to the profile that is shown, are friends.
+	 * @param username the username of the user that belongs to the profile
+	 * @param friends all friends of the current user
+	 */
 	function checkFriendship(username, friends) {
 		if (friends && friends[username]) {
 			// Der Benutzer ist ein Freund
@@ -334,9 +334,9 @@ const Profile = ({ route, navigation }) => {
 		}
 	}
 
-    /**
-     * Executes functions once when the component mounts.
-     */
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
 		const user = firebase.auth().currentUser;
 
@@ -345,12 +345,12 @@ const Profile = ({ route, navigation }) => {
 		}
 	}, [friendRequests]);
 
-    /**
-     * Responsible for sending a friend request from the sender to the receiver.
-     * @param senderUsername The username of the sender.
-     * @param receiverUsername The username of the receiver.
-     * @returns {Promise<void>}
-     */
+	/**
+	 * Responsible for sending a friend request from the sender to the receiver.
+	 * @param senderUsername The username of the sender.
+	 * @param receiverUsername The username of the receiver.
+	 * @returns {Promise<void>}
+	 */
 	async function sendFriendRequest(senderUsername, receiverUsername) {
 		const usersRef = firebase.firestore().collection("users");
 
@@ -393,9 +393,9 @@ const Profile = ({ route, navigation }) => {
 			});
 	}
 
-    /**
-     * Executes functions once when the component mounts.
-     */
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
 		const user = firebase.auth().currentUser;
 		if (user) {
@@ -410,9 +410,9 @@ const Profile = ({ route, navigation }) => {
 		}
 	}, [friendRequests]);
 
-    /**
-     * Responsible for adding the current user to the follower list of a user.
-     */
+	/**
+	 * Responsible for adding the current user to the follower list of a user.
+	 */
 	function setFollower() {
 		user.follower.forEach((r) => flw.push(r));
 		flw.push(auth.currentUser.uid.toString());
@@ -426,9 +426,9 @@ const Profile = ({ route, navigation }) => {
 		flw = [];
 	}
 
-    /**
-     * Responsible for adding a user to the current user's following list.
-     */
+	/**
+	 * Responsible for adding a user to the current user's following list.
+	 */
 	function setFollowing() {
 		currentUser.following.forEach((r) => flwng.push(r));
 		flwng.push(uid.toString());
@@ -439,9 +439,9 @@ const Profile = ({ route, navigation }) => {
 		flwng = [];
 	}
 
-    /**
-     * Responsible for removing the current user from the follower list of a user.
-     */
+	/**
+	 * Responsible for removing the current user from the follower list of a user.
+	 */
 	function setUnfollow() {
 		user.follower.forEach((r) => flw.push(r));
 		const index = flw.indexOf(auth.currentUser.uid.toString());
@@ -456,9 +456,9 @@ const Profile = ({ route, navigation }) => {
 		flw = [];
 	}
 
-    /**
-     * Responsible for removing a user from the current user's following list.
-     */
+	/**
+	 * Responsible for removing a user from the current user's following list.
+	 */
 	function setUnfollowing() {
 		currentUser.following.forEach((r) => flwng.push(r));
 		const index = flwng.indexOf(uid.toString());
@@ -469,13 +469,13 @@ const Profile = ({ route, navigation }) => {
 		flwng = [];
 	}
 
-    /**
-     * responsible for adding a recent activity of the user. If there would be more than three, the oldest is removed
-     * from the list.
-     * @param category The category of the activity (event or user)
-     * @param action The action the user took (in case of the profile page it is follow)
-     * @param uid The firebase uid of the user that is followed.
-     */
+	/**
+	 * responsible for adding a recent activity of the user. If there would be more than three, the oldest is removed
+	 * from the list.
+	 * @param category The category of the activity (event or user)
+	 * @param action The action the user took (in case of the profile page it is follow)
+	 * @param uid The firebase uid of the user that is followed.
+	 */
 	function recentActivity(category, action, uid) {
 		currentUser.recentActivities.forEach((a) => rA.push(a));
 		if (rA.length === 3) {
@@ -502,11 +502,11 @@ const Profile = ({ route, navigation }) => {
 		}
 	}
 
-    /**
-     * Retrieves a specific event from firebase by its title and then navigates to its details page.
-     * @param title the title of the event.
-     * @returns {Promise<void>}
-     */
+	/**
+	 * Retrieves a specific event from firebase by its title and then navigates to its details page.
+	 * @param title the title of the event.
+	 * @returns {Promise<void>}
+	 */
 	async function getEventByTitle(title) {
 		await firestore
 			.collection("events")
@@ -527,9 +527,9 @@ const Profile = ({ route, navigation }) => {
 		setReportModal(true);
 	}
 
-    /**
-     * Adds a report of a user with the selected report data to firebase.
-     */
+	/**
+	 * Adds a report of a user with the selected report data to firebase.
+	 */
 	function reportUser() {
 		if (reportCategory.includes("Nutzer blockieren")) {
 			blockUser();
@@ -550,9 +550,9 @@ const Profile = ({ route, navigation }) => {
 		onChangeText("");
 	}
 
-    /**
-     * Responsible for adding a user to the list of blocked users from the current user.
-     */
+	/**
+	 * Responsible for adding a user to the list of blocked users from the current user.
+	 */
 	function blockUser() {
 		setUnfollow();
 		unFriendCurrentUser().then();
@@ -572,9 +572,9 @@ const Profile = ({ route, navigation }) => {
 		blockedUsers = [];
 	}
 
-    /**
-     * Responsible for removing a user from the list of blocked users from the current user.
-     */
+	/**
+	 * Responsible for removing a user from the list of blocked users from the current user.
+	 */
 	function unblockUser() {
 		currentUser.blockedUsers.forEach((e) => blockedUsers.push(e));
 		const index = blockedUsers.indexOf(user.username);
@@ -587,10 +587,10 @@ const Profile = ({ route, navigation }) => {
 		blockedUsers = [];
 	}
 
-    /**
-     * Responsible for removing the current user from the friend list of another user.
-     * @returns {Promise<void>}
-     */
+	/**
+	 * Responsible for removing the current user from the friend list of another user.
+	 * @returns {Promise<void>}
+	 */
 	async function unFriendCurrentUser() {
 		const usersRef = firebase.firestore().collection("users");
 
@@ -618,10 +618,10 @@ const Profile = ({ route, navigation }) => {
 		await unFriendUser();
 	}
 
-    /**
-     * Responsible for removing a user from the friend list of the current user.
-     * @returns {Promise<void>}
-     */
+	/**
+	 * Responsible for removing a user from the friend list of the current user.
+	 * @returns {Promise<void>}
+	 */
 	async function unFriendUser() {
 		const usersRef = firebase.firestore().collection("users");
 
@@ -648,39 +648,39 @@ const Profile = ({ route, navigation }) => {
 		}
 	}
 
-    /**
-     * Calculates the difference in the number of followers since the last time the user was on the follower page.
-     * Updates the "followerDiff" state with the calculated difference.
-     * @param userData The user data object containing follower information.
-     */
+	/**
+	 * Calculates the difference in the number of followers since the last time the user was on the follower page.
+	 * Updates the "followerDiff" state with the calculated difference.
+	 * @param userData The user data object containing follower information.
+	 */
 	function checkFollowerDiff(userData) {
 		setFollowerDiff(userData.follower.length - userData.followerWhenClicked);
 	}
 
-    /**
-     * updates the amount of followers the current user has when he navigates to the follower page to later calculate
-     * the follower diff.
-     * @param fwc
-     */
+	/**
+	 * updates the amount of followers the current user has when he navigates to the follower page to later calculate
+	 * the follower diff.
+	 * @param fwc
+	 */
 	function pushFollowerWhenClicked(fwc) {
 		firestore.collection("users").doc(auth.currentUser.uid).update({
 			followerWhenClicked: fwc,
 		});
 	}
 
-    /**
-     * Used to specify the date format for displaying short dates.
-     * @type {{month: string, year: string, day: string}}
-     */
+	/**
+	 * Used to specify the date format for displaying short dates.
+	 * @type {{month: string, year: string, day: string}}
+	 */
 	const shortDate = {
 		year: "numeric",
 		month: "numeric",
 		day: "numeric",
 	};
 
-    /**
-     * renders the Profile page.
-     */
+	/**
+	 * renders the Profile page.
+	 */
 	return (
 		<View style={styles.container}>
 			<BackgroundImage
@@ -719,7 +719,7 @@ const Profile = ({ route, navigation }) => {
 
 						{uid !== firebase.auth().currentUser.uid && (
 							<TouchableOpacity
-								style={[styles.titleBar, { marginTop: windowHeight * 0.05 }]}
+								style={[styles.titleBar, { marginTop: 40 }]}
 								onPress={() => setModalVisible(true)}
 							>
 								<Ionicons
@@ -745,7 +745,7 @@ const Profile = ({ route, navigation }) => {
 							visible={modalVisible}
 						>
 							<TouchableOpacity
-								style={{ width: windowWidth, height: windowHeight }}
+								style={{ width: windowWidth, height: 40 }}
 								onPress={() => setModalVisible(false)}
 							></TouchableOpacity>
 							<View style={styles.centeredView}>
@@ -803,7 +803,7 @@ const Profile = ({ route, navigation }) => {
 								enabled
 							>
 								<TouchableOpacity
-									style={{ width: windowWidth, height: windowHeight }}
+									style={{ width: windowWidth, height: 40 }}
 									onPress={() => setReportModal(false)}
 								></TouchableOpacity>
 								<View style={styles.centeredView}>
@@ -1281,12 +1281,7 @@ const Profile = ({ route, navigation }) => {
 							user.username &&
 							currentUser.blockedUsers &&
 							user.blockedUsers && (
-								<View
-									style={[
-										styles.infoContainer,
-										{ marginTop: windowHeight * 0.01 },
-									]}
-								>
+								<View style={[styles.infoContainer, { marginTop: 40 }]}>
 									<Text
 										style={[styles.text, { fontWeight: "200", fontSize: 36 }]}
 									>
@@ -1339,12 +1334,7 @@ const Profile = ({ route, navigation }) => {
 							currentUser.following &&
 							currentUser.blockedUsers &&
 							user.blockedUsers && (
-								<View
-									style={[
-										styles.statsContainer,
-										{ marginTop: windowHeight * 0.03 },
-									]}
-								>
+								<View style={[styles.statsContainer, { marginTop: 40 }]}>
 									<View style={styles.statsBox}>
 										<Text style={{ color: "#f3f3f3" }}>Events</Text>
 										{!currentUser.blockedUsers.includes(user.username) &&
@@ -1469,7 +1459,7 @@ const Profile = ({ route, navigation }) => {
 								</View>
 							)}
 						{currentUser.blockedUsers && user.blockedUsers && (
-							<View style={{ marginTop: windowHeight * 0.03 }}>
+							<View style={{ marginTop: 40 }}>
 								{events.length > 0 &&
 									!currentUser.blockedUsers.includes(user.username) &&
 									!user.blockedUsers.includes(currentUsername) && (
@@ -1518,7 +1508,7 @@ const Profile = ({ route, navigation }) => {
 
 												{
 													marginLeft: windowWidth * 0.15,
-													marginTop: windowHeight * 0.05,
+													marginTop: 40,
 													color: "#f3f3f3",
 												},
 											]}
@@ -1530,7 +1520,7 @@ const Profile = ({ route, navigation }) => {
 									style={[
 										styles.recentItem,
 										{
-											marginBottom: windowHeight * 0.02,
+											marginBottom: 40,
 											marginLeft: windowWidth * 0.15,
 										},
 									]}
