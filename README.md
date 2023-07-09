@@ -43,6 +43,15 @@ You can also run the app on your own device using the Expo Go app. To do this, f
 2. Open the Expo Go app and sign up for an account.
 3. Scan the QR code in the Expo DevTools to open the app on your device.
 
+```
+You can also access the app by opening the published version in Expo Go. To do this, follow these steps:
+``````
+1. Open the Expo Go app on your device.
+2. Sign in to your Expo account.
+3. Tap on the "Projects" tab.
+4. Find the Locals-IP2 project in the list and tap on it.
+5. Tap on the "Open project" button to launch the app.
+
 ## Using the App
 
 Once you have the app running, you can use it to find events and activities in your area. The app will display a list of categories, such as "Concert", "Culture", and "Sports". You can select a category to see a list of events in that category.
