@@ -20,19 +20,66 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons"; // Importieren Sie
 import LocalsEventCard from "../../components/LocalsEventCard";
 import AppleHeader from "react-native-apple-header";
 
+/**
+ * Renders the Chatbot page with the provided props.
+ * @param route An object representing the current route information provided by the React Navigation library or similar
+ * navigation framework.
+ * @returns {JSX.Element} The rendered Chatbot page.
+ * @constructor
+ */
 export default function Chatbot({ route }) {
+
+	/**
+	 * used to reference the scroll view.
+	 * @type {React.MutableRefObject<undefined>}
+	 */
 	const scrollViewRef = useRef();
+
+	/**
+	 * The location of the current user.
+	 */
 	const [location, setLocation] = useState(null);
+
+	/**
+	 * The input that the user wrote in the text input.
+	 */
 	const [userInput, setUserInput] = useState("");
 	const [aiResponse, setAiResponse] = useState("");
+
+	/**
+	 * Used to access the navigation object within a component.
+	 * @type {NavigationProp<ReactNavigation.RootParamList>}
+	 */
 	const navigation = useNavigation();
+
+	/**
+	 * The radius where events for the user are searched.
+	 */
 	const [radius, setRadius] = useState(37);
+
+	/**
+	 * all events
+	 */
 	const [events, setEvents] = useState([]);
+
+	/**
+	 * AI message.
+	 */
 	const [messages, setMessages] = useState([]);
+
+	/**
+	 * Gif that is displayed when the chatbot is "thinking".
+	 */
 	const [gifUrl, setGifUrl] = useState(null);
+
+	/**
+	 * indicates if the radius picker is visible or not.
+	 */
 	const [isRadiusPickerVisible, setIsRadiusPickerVisible] = useState(false); // Neuer Status für die Sichtbarkeit des Sliders
 
-	// Diese Funktion wird aufgerufen, wenn der Benutzer auf das Symbol klickt, um den Radius einzustellen
+	/**
+	 * This function is called when the user clicks the icon to set the radius. It opens th radius picker.
+	 */
 	const openRadiusPicker = () => {
 		try {
 			setIsRadiusPickerVisible(true);
@@ -41,10 +88,18 @@ export default function Chatbot({ route }) {
 		}
 	};
 
-	// Diese Funktion wird aufgerufen, wenn der Benutzer den "Set" Button drückt, um den neuen Radius zu bestätigen
+	/**
+	 * This function is called when the user presses the "Set" button to confirm the new radius. It closes the radius
+	 * picker.
+	 */
 	const closeRadiusPicker = () => {
 		setIsRadiusPickerVisible(false);
 	};
+
+	/**
+	 * responsible for fetching a random GIF URL from the GIPHY API.
+	 * @returns {Promise<void>}
+	 */
 	const fetchGifUrl = async () => {
 		try {
 			const response = await fetch(
@@ -57,6 +112,10 @@ export default function Chatbot({ route }) {
 		}
 	};
 
+	/**
+	 * responsible for processing user input and generating AI responses.
+	 * @returns {Promise<void>}
+	 */
 	const handleUserInput = async () => {
 		const userMessage = {
 			text: userInput,
@@ -96,6 +155,12 @@ export default function Chatbot({ route }) {
 		fetchGifUrl();
 	};
 
+	/**
+	 * Responsible for generating an AI response based on the user's input and events data.
+	 * @param input The user's input or message.
+	 * @param events An array of events data.
+	 * @returns {Promise<*|string>}
+	 */
 	const fetchAIResponse = async (input, events) => {
 		console.log(events);
 		if (events.length !== 0) {
@@ -173,10 +238,18 @@ export default function Chatbot({ route }) {
 		}
 	};
 
+	/**
+	 * navigate to the details of the suggested event.
+	 * @param event
+	 */
 	const openEventDetails = (event) => {
 		navigation.navigate("EventDetails", { event });
 	};
 
+	/**
+	 * provides translations for specific keywords.
+	 * @type {{generell: string, kultur: string, konzert: string, sport: string, party: string}}
+	 */
 	const keywordsTranslations = {
 		sport: "sport",
 		kultur: "culture",
@@ -186,6 +259,11 @@ export default function Chatbot({ route }) {
 		// Fügen Sie weitere Übersetzungen hinzu
 	};
 
+	/**
+	 * extracts keywords from the provided text using AI-powered language processing.
+	 * @param text The text from which keywords are to be extracted.
+	 * @returns {Promise<*|*[]>}
+	 */
 	const aiKeywords = async (text) => {
 		try {
 			const message = `Das ist der Text: ${text}\n Suche innerhalb des Textes, nach was der user sucht. 
@@ -224,6 +302,11 @@ export default function Chatbot({ route }) {
 		}
 	};
 
+	/**
+	 * extracts keywords from the provided text and translates them using a predefined set of translations
+	 * @param text The text from which keywords are to be extracted.
+	 * @returns {Promise<*|*[]>}
+	 */
 	const extractKeywords = async (text) => {
 		const matches = await aiKeywords(text);
 		const keywords = Object.keys(keywordsTranslations); // Die deutschen Schlüsselwörter
@@ -254,7 +337,15 @@ export default function Chatbot({ route }) {
 		return events;
 	};
 
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * retrieves the data of all events
+		 * @returns {Promise<void>}
+		 */
 		const fetchEvents = async () => {
 			const eventsRef = firebase.firestore().collection("events");
 
@@ -275,6 +366,12 @@ export default function Chatbot({ route }) {
 		fetchEvents();
 	}, [radius]);
 
+	/**
+	 * filters events based on the specified radius from the user's location.
+	 * @param events An array of event objects to be filtered.
+	 * @param radius The radius within which events should be considered, specified in kilometers.
+	 * @returns {*}
+	 */
 	const filterEventsByRadius = (events, radius) => {
 		if (!location) return events;
 
@@ -295,7 +392,16 @@ export default function Chatbot({ route }) {
 			return eventDistance <= numericRadius;
 		});
 	};
+
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
+
+		/**
+		 * retrieves and updates the location of the current user.
+		 * @returns {Promise<void>}
+		 */
 		const getLocation = async () => {
 			try {
 				const { status } = await Location.requestForegroundPermissionsAsync();
@@ -314,6 +420,13 @@ export default function Chatbot({ route }) {
 		getLocation();
 	}, []);
 
+	/**
+	 * filters events based on the specified radius from the user's location and matching keywords.
+	 * @param events An array of event objects to be filtered.
+	 * @param radius The radius within which events should be considered, specified in kilometers.
+	 * @param keywords An array of keywords to match against event categories.
+	 * @returns {*}
+	 */
 	const filterEventsByRadiusAndKeywords = (events, radius, keywords) => {
 		if (!location) return events;
 
@@ -336,9 +449,22 @@ export default function Chatbot({ route }) {
 			);
 		});
 	};
+
+	/**
+	 * Executes functions once when the component mounts.
+	 */
 	useEffect(() => {
 		fetchGifUrl();
 	}, []);
+
+	/**
+	 * calculates the distance between two sets of latitude and longitude coordinates using the Haversine formula.
+	 * @param lat1 Latitude of the first point.
+	 * @param lon1 Longitude of the first point.
+	 * @param lat2 Latitude of the second point.
+	 * @param lon2 Longitude of the second point.
+	 * @returns {number} The distance between the two points in kilometers.
+	 */
 	const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
 		const R = 6371; // Radius der Erde in Kilometern
 		const dLat = deg2rad(lat2 - lat1); // deg2rad unten
@@ -354,16 +480,28 @@ export default function Chatbot({ route }) {
 		return d;
 	};
 
+	/**
+	 * converts an angle in degrees to radians.
+	 * @param deg The angle in degrees.
+	 * @returns {number} The angle converted to radians.
+	 */
 	const deg2rad = (deg) => {
 		return deg * (Math.PI / 180);
 	};
 
+	/**
+	 * represents a date format configuration for displaying a short date representation.
+	 * @type {{month: string, year: string, day: string}}
+	 */
 	const shortDate = {
 		year: "numeric",
 		month: "numeric",
 		day: "numeric",
 	};
 
+	/**
+	 * renders the Chatbot page.
+	 */
 	return (
 		<KeyboardAvoidingView style={styles.container} behavior="padding">
 			{/* <AppleHeader
@@ -516,6 +654,9 @@ export default function Chatbot({ route }) {
 	);
 }
 
+/**
+ * Creates a StyleSheet object containing style definitions for the page.
+ */
 const styles = StyleSheet.create({
 	closeIcon: {
 		position: "absolute",
