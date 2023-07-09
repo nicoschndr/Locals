@@ -66,7 +66,7 @@ In addition to browsing events by category, you can also search for events by ke
 
 The app also includes several other screens that you can use to explore events and activities in your area. These include:
 
-- **Map**: This screen displays a map of your current location, with pins indicating nearby events and activities. You can tap on a pin to view more details about the event, or use the search bar to filter the results.
+- **Map**: This screen displays a real-time map of events and activities happening in your area. You can use this feature to discover new events and activities as they happen and get directions to them using your device's maps app. The markers indicate nearby events and activities. You can tap on a pin to view more details about the event.
 
 - **Chatbot**: This screen allows you to chat with a virtual assistant that can help you find events and activities in your area. Simply type in your question or request, and the chatbot will provide you with a response.
 
