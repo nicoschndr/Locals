@@ -1209,14 +1209,12 @@ const Profile = ({ route, navigation }) => {
 								!user.blockedUsers.includes(currentUsername) && (
 									<View style={styles.profileImage}>
 										<Image
-											image={
-												fullStorage
-													? user.imageUrl
-													: "https://source.unsplash.com/random/?portrait"
+											source={
+												{uri: user.imageUrl}
 											}
 											style={styles.image}
 											resizeMode="center"
-										/>
+										 />
 									</View>
 								)}
 							{currentUser.blockedUsers &&
@@ -1485,10 +1483,7 @@ const Profile = ({ route, navigation }) => {
 														navigation.navigate("EventDetails", { event })
 													}
 													image={
-														fullStorage
-															? event.imageUrl
-															: "https://source.unsplash.com/random/?" +
-															  event.title
+															event.imageUrl
 													}
 													style={{ marginRight: 24 }}
 													profile

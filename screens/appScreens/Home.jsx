@@ -543,9 +543,7 @@ const HomeScreen = ({ navigation }) => {
 									position: "relative",
 								}}
 								image={
-									fullStorage
-										? event.imageUrl
-										: "https://source.unsplash.com/random/?" + event.category
+									event.imageUrl
 								}
 								slim
 							/>
@@ -612,9 +610,7 @@ const HomeScreen = ({ navigation }) => {
 								}
 								style={{ marginRight: 24 }}
 								image={
-									fullStorage
-										? event.imageUrl
-										: "https://source.unsplash.com/random/?" + event.category
+										event.imageUrl
 								}
 								small
 							/>
@@ -643,9 +639,7 @@ const HomeScreen = ({ navigation }) => {
 									?.toLocaleDateString("de-DE", shortDate)}
 								location={event.address}
 								image={
-									fullStorage
-										? event.imageUrl
-										: "https://source.unsplash.com/random/?" + event.category
+										event.imageUrl
 								}
 								category={event.title}
 								onPress={() => navigation.navigate("EventDetails", { event })}

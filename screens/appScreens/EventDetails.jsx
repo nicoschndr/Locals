@@ -762,12 +762,7 @@ const EventDetails = ({ route, navigation }) => {
 				<ScrollView style={{ height: "100%" }}>
 					<Image
 						style={{ width: "100%", height: 400 }}
-						// source={{ uri: event.imageUrl }}
-						image={
-							fullStorage
-								? event.imageUrl
-								: "https://source.unsplash.com/random/?" + event.category
-						}
+						source={{ uri: event.imageUrl }}
 					/>
 					<Ionicons
 						name="chevron-down"
@@ -847,10 +842,8 @@ const EventDetails = ({ route, navigation }) => {
 							>
 								<Image
 									style={{ width: 32, height: 32, borderRadius: 16 }}
-									image={
-										fullStorage
-											? user.imageUrl
-											: "https://source.unsplash.com/random/?" + event.category
+									source={
+										{uri: user.imageUrl}
 									}
 								/>
 								<Text style={styles.item}>{selectedEvent.creator}</Text>
