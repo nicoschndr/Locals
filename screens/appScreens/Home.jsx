@@ -610,7 +610,7 @@ const HomeScreen = ({ navigation }) => {
 								}
 								style={{ marginRight: 24 }}
 								image={
-										event.imageUrl
+									"https://source.unsplash.com/random/?" + event.category
 								}
 								small
 							/>
@@ -639,7 +639,7 @@ const HomeScreen = ({ navigation }) => {
 									?.toLocaleDateString("de-DE", shortDate)}
 								location={event.address}
 								image={
-										event.imageUrl
+									event.imageUrl
 								}
 								category={event.title}
 								onPress={() => navigation.navigate("EventDetails", { event })}

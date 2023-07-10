@@ -201,9 +201,7 @@ const Categories = ({ navigation, route }) => {
 								?.toLocaleDateString("de-DE", shortDate)}
 							location={event.address}
 							image={
-								fullStorage
-									? event.imageUrl
-									: "https://source.unsplash.com/random/?" + event.category
+								event.imageUrl
 							}
 							category={event.title}
 							onPress={() => navigation.navigate("EventDetails", { event })}
