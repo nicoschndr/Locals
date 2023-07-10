@@ -682,7 +682,7 @@ const Profile = ({ route, navigation }) => {
 	 * renders the Profile page.
 	 */
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, {marginTop: Platform.OS === "android" ? -40 : null}]}>
 			<BackgroundImage
 				source={require("../../assets/BackGround(h).png")}
 				style={{ flex: 1, resizeMode: "cover", justifyContent: "center" }}
@@ -1400,7 +1400,7 @@ const Profile = ({ route, navigation }) => {
 												<Text style={{ color: "#f3f3f3" }}>Follower</Text>
 												{!currentUser.blockedUsers.includes(user.username) &&
 													!user.blockedUsers.includes(currentUsername) && (
-														<Text>{user.follower.length}</Text>
+														<Text style={{ color: "#f3f3f3" }}>{user.follower.length}</Text>
 													)}
 												{(currentUser.blockedUsers.includes(user.username) ||
 													user.blockedUsers.includes(currentUsername)) && (
